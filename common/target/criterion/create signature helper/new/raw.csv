@@ -1,0 +1,11 @@
+group,function,value,sample_time_nanos,iteration_count
+create signature helper,,,95328363.0,2011
+create signature helper,,,192883669.0,4022
+create signature helper,,,274405850.0,6033
+create signature helper,,,375279045.0,8044
+create signature helper,,,460088349.0,10055
+create signature helper,,,544118984.0,12066
+create signature helper,,,640555342.0,14077
+create signature helper,,,724393333.0,16088
+create signature helper,,,815114623.0,18099
+create signature helper,,,909817521.0,20110

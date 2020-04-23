@@ -1,0 +1,11 @@
+group,function,value,sample_time_nanos,iteration_count
+create secp256k1 signature helper,,,94292915.0,1815
+create secp256k1 signature helper,,,185038961.0,3630
+create secp256k1 signature helper,,,280852961.0,5445
+create secp256k1 signature helper,,,389659223.0,7260
+create secp256k1 signature helper,,,450206954.0,9075
+create secp256k1 signature helper,,,557592452.0,10890
+create secp256k1 signature helper,,,645322339.0,12705
+create secp256k1 signature helper,,,733805603.0,14520
+create secp256k1 signature helper,,,830154546.0,16335
+create secp256k1 signature helper,,,894300645.0,18150

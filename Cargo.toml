@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+"common",
+"ffi/ffi_common",
+"ffi/ffi_macros",
+"ffi/ffi_ecies",
+"macros",
+]

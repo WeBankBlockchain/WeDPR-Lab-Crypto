@@ -1,0 +1,15 @@
+[package]
+name = "common"
+version = "0.2.0"
+authors = ["HaoXuan40404 <444649358@qq.com>"]
+edition = "2018"
+
+[dependencies]
+base64 = "0.10.1"
+bincode = "1"
+failure = "0.1"
+lazy_static = "0.2"
+serde = "1"
+serde_derive = "1"
+subtle = "2"
+wedpr_macros = { path = "../macros/"}
