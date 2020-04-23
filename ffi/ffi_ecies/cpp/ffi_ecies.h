@@ -30,8 +30,8 @@ int __rbt_backtrace_syminfo(backtrace_state *_state,
                             backtrace_error_callback _error,
                             void *_data);
 
-char *ecies_secp256k1_decrypt_c(char *hex_private_key, char *hex_encrypt_data);
+char *ecies_secp256k1_decrypt_c(char *hex_private_key, char *hex_ciphertext);
 
-char *ecies_secp256k1_encrypt_c(char *hex_public_key, char *hex_message);
+char *ecies_secp256k1_encrypt_c(char *hex_public_key, char *hex_plaintext);
 
 } // extern "C"

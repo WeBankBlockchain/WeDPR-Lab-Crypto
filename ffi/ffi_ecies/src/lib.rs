@@ -232,7 +232,7 @@ pub extern "system" fn Java_com_webank_wedpr_ecies_NativeInterface_eciesDecrypt(
 
 #[no_mangle]
 pub extern "C" fn ecies_secp256k1_encrypt_c(hex_public_key: *mut c_char,
-                                            hex_message: *mut c_char,) -> *mut c_char {
+                                            hex_plaintext: *mut c_char,) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let pk = match utils::c_char_to_string(hex_public_key) {
             Ok(v) => v,
@@ -241,7 +241,7 @@ pub extern "C" fn ecies_secp256k1_encrypt_c(hex_public_key: *mut c_char,
                 return ptr::null_mut();
             },
         };
-        let message = match utils::c_char_to_string(hex_message) {
+        let message = match utils::c_char_to_string(hex_plaintext) {
             Ok(v) => v,
             Err(_) => {
                 wedpr_println!("message c_char_to_string failed!");
@@ -271,7 +271,7 @@ pub extern "C" fn ecies_secp256k1_encrypt_c(hex_public_key: *mut c_char,
 
 #[no_mangle]
 pub extern "C" fn ecies_secp256k1_decrypt_c(hex_private_key: *mut c_char,
-                                            hex_encrypt_data: *mut c_char,) -> *mut c_char {
+                                            hex_ciphertext: *mut c_char,) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let sk = match utils::c_char_to_string(hex_private_key) {
             Ok(v) => v,
@@ -280,7 +280,7 @@ pub extern "C" fn ecies_secp256k1_decrypt_c(hex_private_key: *mut c_char,
                 return ptr::null_mut();
             },
         };
-        let encrypt_data = match utils::c_char_to_string(hex_encrypt_data) {
+        let encrypt_data = match utils::c_char_to_string(hex_ciphertext) {
             Ok(v) => v,
             Err(_) => {
                 wedpr_println!("encrypt_data c_char_to_string failed!");

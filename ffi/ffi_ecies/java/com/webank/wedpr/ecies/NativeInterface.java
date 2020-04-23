@@ -37,7 +37,7 @@ public class NativeInterface {
      * @param message Hex Format String
      * @return Object EciesResult
      */
-    public static native EciesResult eciesEncrypt(String pubKey, String message);
+    public static native EciesResult eciesEncrypt(String pubKeyHex, String plaintextHex);
 
     /**
      *
@@ -45,5 +45,5 @@ public class NativeInterface {
      * @param encryptMessage Hex Format String
      * @return Object EciesResult
      */
-    public static native EciesResult eciesDecrypt(String priKey, String encryptMessage);
+    public static native EciesResult eciesDecrypt(String priKeyHex, String ciphertextHex);
 }
