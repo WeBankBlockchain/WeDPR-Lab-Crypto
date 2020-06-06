@@ -1,0 +1,18 @@
+[package]
+name = "ffi_java_sdk"
+version = "0.1.0"
+authors = ["HaoXuan40404 <444649358@qq.com>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "ffi_java_sdk"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+jni = "0.13.0"
+ffi_macros = { path = "../ffi_macros/"}
+wedpr_macros = { path = "../../macros/"}
+hex = "0.3"
+crypto = {path = "../../crypto/"}
+ffi_common = { path = "../ffi_common/"}

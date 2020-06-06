@@ -1,4 +1,4 @@
-package com.webank.wedpr.ecies;
+package com.webank.wedpr.crypto;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -10,7 +10,7 @@ import java.nio.file.StandardCopyOption;
 public class NativeInterface {
 
     // COMPONENT VERSION STRING
-    public static String WEDPR_ECIES_LIB_PATH;
+    public static String WEDPR_JAVA_SDK_CRYPTO_LIB_PATH;
     /**
      * The minimum length a prefix for a file has to have according to {@link
      * File#createTempFile(String, String)}}.
@@ -19,36 +19,29 @@ public class NativeInterface {
         try {
             String osName = System.getProperty("os.name").toLowerCase();
             if (osName.contains("windows")) {
-                WEDPR_ECIES_LIB_PATH = "/WeDPR_dynamic_lib/ffi_ecies.dll";
+                WEDPR_JAVA_SDK_CRYPTO_LIB_PATH = "/WeDPR_dynamic_lib/ffi_java_sdk.dll";
             } else if (osName.contains("linux")) {
-                WEDPR_ECIES_LIB_PATH = "/WeDPR_dynamic_lib/libffi_ecies.so";
+                WEDPR_JAVA_SDK_CRYPTO_LIB_PATH = "/WeDPR_dynamic_lib/libffi_java_sdk.so";
             } else if (osName.contains("mac")) {
-                WEDPR_ECIES_LIB_PATH =
-                        "/WeDPR_dynamic_lib/libffi_ecies.dylib";
+                WEDPR_JAVA_SDK_CRYPTO_LIB_PATH =
+                        "/WeDPR_dynamic_lib/libffi_java_sdk.dylib";
             } else {
                 throw new IOException("Unsupported the operating system " + osName + ".");
             }
-            NativeUtils.loadLibraryFromJar(WEDPR_ECIES_LIB_PATH);
+            NativeUtils.loadLibraryFromJar(WEDPR_JAVA_SDK_CRYPTO_LIB_PATH);
         } catch (IOException  e) {
             throw new RuntimeException(e);
         }
     }
 
-    /**
-     *
-     * @param pubKeyHex Hex Format String
-     * @param plaintextHex Hex Format String
-     * @return Object EciesResult
-     */
-    public static native EciesResult eciesEncrypt(String pubKeyHex, String plaintextHex);
-
-    /**
-     *
-     * @param priKeyHex Hex Format String
-     * @param ciphertextHex Hex Format String
-     * @return Object EciesResult
-     */
-    public static native EciesResult eciesDecrypt(String priKeyHex, String ciphertextHex);
+    public static native CryptoResult secp256k1Sign(String priKeyHex, String message);
+    public static native CryptoResult secp256k1verify(String pubKeyHex, String message, String signature);
+    public static native CryptoResult secp256k1keyPair();
+    public static native CryptoResult sm2Sign(String priKeyHex, String message);
+    public static native CryptoResult sm2verify(String pubKeyHex, String message, String signature);
+    public static native CryptoResult sm2keyPair();
+    public static native CryptoResult keccak256(String messageHex);
+    public static native CryptoResult sm3(String messageHex);
 }
 
 

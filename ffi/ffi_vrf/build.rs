@@ -12,5 +12,5 @@ fn main() {
         Ok(v) => v,
         Err(_) => return (),
     };
-    write_to_file.write_to_file("cpp/ffi_ecies.h");
+    write_to_file.write_to_file("cpp/ffi_vrf.h");
 }

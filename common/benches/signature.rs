@@ -19,8 +19,7 @@ fn create_secp256k1_signature_helper(c: &mut Criterion) {
     c.bench_function(&label, move |b| {
         b.iter(|| {
             // storage verify argument
-            let verify_valid =
-                utils::verify_signature(&pk_valid, message_hash, &sign_valid);
+            let verify_valid = utils::verify_signature(&pk_valid, message_hash, &sign_valid);
             assert_eq!(verify_valid, true);
         });
     });

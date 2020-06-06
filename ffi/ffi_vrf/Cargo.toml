@@ -1,0 +1,21 @@
+[package]
+name = "ffi_vrf"
+version = "0.1.0"
+authors = ["HaoXuan40404 <444649358@qq.com>"]
+edition = "2018"
+build = "build.rs"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "ffi_vrf"
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+libc = "0.2.60"
+wedpr_macros = { path = "../../macros/"}
+ffi_macros = { path = "../ffi_macros/"}
+crypto = {path = "../../crypto/"}
+ffi_common = { path = "../ffi_common/"}
+
+[build-dependencies]
+cbindgen = "0.9.0"

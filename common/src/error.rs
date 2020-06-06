@@ -9,10 +9,3 @@ pub enum WedprError {
     #[fail(display = "data could not be decoded.")]
     DecodeError,
 }
-
-// impl From<indy_crypto::errors::IndyCryptoError> for WedprError {
-//    fn from(e: indy_crypto::errors::IndyCryptoError) -> WedprError {
-//        wedpr_println!("{}", e);
-//        WedprError::IndyCryptoError
-//    }
-//}

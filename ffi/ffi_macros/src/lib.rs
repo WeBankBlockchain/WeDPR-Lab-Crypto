@@ -6,20 +6,14 @@ macro_rules! c_char_to_pb {
                 Ok(v) => match protobuf::parse_from_bytes::<$type>(&v) {
                     Ok(v) => v,
                     Err(_) => {
-                        wedpr_println!(
-                            "rstr to bytes error, rstr name: {}",
-                            stringify!(v)
-                        );
+                        wedpr_println!("rstr to bytes error, rstr name: {}", stringify!(v));
                         return FAILURE;
-                    },
+                    }
                 },
                 Err(_) => {
-                    wedpr_println!(
-                        "rstr to bytes error, rstr name: {}",
-                        stringify!(v)
-                    );
+                    wedpr_println!("rstr to bytes error, rstr name: {}", stringify!(v));
                     return FAILURE;
-                },
+                }
             },
             Err(_) => {
                 wedpr_println!(
@@ -29,7 +23,7 @@ macro_rules! c_char_to_pb {
                     stringify!($type)
                 );
                 return FAILURE;
-            },
+            }
         }
     };
 }
@@ -42,20 +36,14 @@ macro_rules! c_char_to_pb_with_err {
                 Ok(v) => match protobuf::parse_from_bytes::<$type>(&v) {
                     Ok(v) => v,
                     Err(_) => {
-                        wedpr_println!(
-                            "rstr to bytes error, rstr name: {}",
-                            stringify!(v)
-                        );
+                        wedpr_println!("rstr to bytes error, rstr name: {}", stringify!(v));
                         return $failure;
-                    },
+                    }
                 },
                 Err(_) => {
-                    wedpr_println!(
-                        "rstr to bytes error, rstr name: {}",
-                        stringify!(v)
-                    );
+                    wedpr_println!("rstr to bytes error, rstr name: {}", stringify!(v));
                     return $failure;
-                },
+                }
             },
             Err(_) => {
                 wedpr_println!(
@@ -65,7 +53,7 @@ macro_rules! c_char_to_pb_with_err {
                     stringify!($type)
                 );
                 return $failure;
-            },
+            }
         }
     };
 }
@@ -105,12 +93,25 @@ macro_rules! set_long_field_to_jobject {
                 return utils::set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "i64 to JValue error, field name: {}",
-                        stringify!($field)
-                    ),
+                    &format!("i64 to JValue error, field name: {}", stringify!($field)),
                 )
-            },
+            }
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! set_bool_field_to_jobject {
+    ($_env:expr, $jobject_result:expr, $n:expr, $field:expr) => {
+        match $_env.set_field($jobject_result, $field, "Z", JValue::from($n)) {
+            Ok(v) => v,
+            Err(_) => {
+                return utils::set_error_jobject(
+                    &$_env,
+                    &$jobject_result,
+                    &format!("u8 to jboolean error, field name: {}", stringify!($field)),
+                )
+            }
         }
     };
 }
@@ -124,12 +125,9 @@ macro_rules! set_int_field_to_jobject {
                 return utils::set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "i32 to JValue error, field name: {}",
-                        stringify!($field)
-                    ),
+                    &format!("i32 to JValue error, field name: {}", stringify!($field)),
                 )
-            },
+            }
         }
     };
 }
@@ -143,12 +141,9 @@ macro_rules! set_byte_field_to_jobject {
                 return set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "i8 to JValue error, field name: {}",
-                        stringify!($field)
-                    ),
+                    &format!("i8 to JValue error, field name: {}", stringify!($field)),
                 )
-            },
+            }
         }
     };
 }
@@ -162,12 +157,9 @@ macro_rules! jString_to_bytes {
                 return utils::set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "JString to bytes error, string name: {}",
-                        stringify!($str)
-                    ),
+                    &format!("JString to bytes error, string name: {}", stringify!($str)),
                 )
-            },
+            }
         }
     };
 }
@@ -181,12 +173,9 @@ macro_rules! jBytes_to_bytes {
                 return utils::set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "JBytes to bytes error, bytes name: {}",
-                        stringify!($str)
-                    ),
+                    &format!("JBytes to bytes error, bytes name: {}", stringify!($str)),
                 )
-            },
+            }
         }
     };
 }
@@ -200,12 +189,9 @@ macro_rules! jString_to_string {
                 return utils::set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "JString to string error, string name: {}",
-                        stringify!($str)
-                    ),
+                    &format!("JString to string error, string name: {}", stringify!($str)),
                 )
-            },
+            }
         }
     };
 }
@@ -219,12 +205,9 @@ macro_rules! jString_to_string_in_utils {
                 return set_error_jobject(
                     &$_env,
                     &$jobject_result,
-                    &format!(
-                        "JString to string error, string name: {}",
-                        stringify!($str)
-                    ),
+                    &format!("JString to string error, string name: {}", stringify!($str)),
                 )
-            },
+            }
         }
     };
 }
@@ -245,7 +228,7 @@ macro_rules! bytes_to_pb {
                         stringify!($type),
                     ),
                 )
-            },
+            }
         }
     };
 }
@@ -264,7 +247,7 @@ macro_rules! pb_to_bytes {
                         stringify!($proto)
                     ),
                 )
-            },
+            }
         }
     };
 }
@@ -281,12 +264,9 @@ macro_rules! add_string_to_jobject {
                     return utils::set_error_jobject(
                         &$_env,
                         &$jobject_result,
-                        &format!(
-                            "string to JString error, bytes name: {}",
-                            stringify!($str)
-                        ),
+                        &format!("string to JString error, bytes name: {}", stringify!($str)),
                     )
-                },
+                }
             })),
         ) {
             Ok(v) => v,
@@ -299,7 +279,7 @@ macro_rules! add_string_to_jobject {
                         stringify!($field)
                     ),
                 )
-            },
+            }
         }
     };
 }
@@ -318,12 +298,9 @@ macro_rules! add_bytes_to_jobject {
                         return utils::set_error_jobject(
                             &$_env,
                             &$jobject_result,
-                            &format!(
-                                "Bytes to JString error, bytes name: {}",
-                                stringify!($bytes)
-                            ),
+                            &format!("Bytes to JString error, bytes name: {}", stringify!($bytes)),
                         )
-                    },
+                    }
                 },
             )),
         ) {
@@ -337,7 +314,7 @@ macro_rules! add_bytes_to_jobject {
                         stringify!($field)
                     ),
                 )
-            },
+            }
         }
     };
 }
@@ -356,7 +333,7 @@ macro_rules! parsed_owner_state {
                         stringify!($owner_state)
                     ),
                 )
-            },
+            }
         }
     };
 }

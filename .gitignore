@@ -1,2 +1,8 @@
 /target
 **/*.rs.bk
+*.a
+*.dylib
+*.svg
+*.d
+*.bak
+*/target

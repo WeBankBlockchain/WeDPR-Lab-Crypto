@@ -2,6 +2,7 @@
 extern crate jni;
 // for C++
 extern crate libc;
+use self::jni::objects::JByteBuffer;
 use common::{error::WedprError, utils};
 use jni::{
     objects::{JClass, JObject, JString, JValue},
@@ -11,14 +12,12 @@ use jni::{
 use libc::c_char;
 use regex::RegexSet;
 use std::ffi::{CStr, CString};
-use self::jni::objects::JByteBuffer;
 
 const FORMAT_ERROR: &str = "#";
 pub const SUCCESS: i8 = 0;
 pub const FAILURE: i8 = -1;
 
-pub const COMPATIBLE_RESULT_JAVA_PATH: &str =
-    "Lcom/webank/wedpr/common/CompatibleResult;";
+pub const COMPATIBLE_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/common/CompatibleResult;";
 
 pub fn java_ffi_is_compatible(
     _env: &JNIEnv,
@@ -26,8 +25,7 @@ pub fn java_ffi_is_compatible(
     target_version: &JString,
     regex_whitelist: &[&str],
     regex_blacklist: &[&str],
-) -> jobject
-{
+) -> jobject {
     let jobject_result = new_jobject(&_env, COMPATIBLE_RESULT_JAVA_PATH);
     let r_target_version: String =
         jString_to_string_in_utils!(_env, jobject_result, *target_version);
@@ -35,22 +33,14 @@ pub fn java_ffi_is_compatible(
     let whitelist = match RegexSet::new(regex_whitelist) {
         Ok(v) => v,
         Err(_) => {
-            return set_error_jobject(
-                &_env,
-                &jobject_result,
-                "Init whitelist regexSet error.",
-            );
-        },
+            return set_error_jobject(&_env, &jobject_result, "Init whitelist regexSet error.");
+        }
     };
     let blacklist = match RegexSet::new(regex_blacklist) {
         Ok(v) => v,
         Err(_) => {
-            return set_error_jobject(
-                &_env,
-                &jobject_result,
-                "Init blacklist regexSet error.",
-            );
-        },
+            return set_error_jobject(&_env, &jobject_result, "Init blacklist regexSet error.");
+        }
     };
     let mut result = FAILURE;
     if is_compatible(&r_target_version, &whitelist, &blacklist) {
@@ -65,28 +55,27 @@ pub fn cpp_ffi_is_compatible(
     target_version: *const c_char,
     regex_whitelist: &[&str],
     regex_blacklist: &[&str],
-) -> i8
-{
+) -> i8 {
     let r_target_version = match c_char_to_string(target_version) {
         Ok(v) => v,
         Err(_) => {
             wedpr_println!("Convert target version error.");
             return FAILURE;
-        },
+        }
     };
     let whitelist = match RegexSet::new(regex_whitelist) {
         Ok(v) => v,
         Err(_) => {
             wedpr_println!("Init whitelist regexSet error.");
             return FAILURE;
-        },
+        }
     };
     let blacklist = match RegexSet::new(regex_blacklist) {
         Ok(v) => v,
         Err(_) => {
             wedpr_println!("Init blacklist regexSet error.");
             return FAILURE;
-        },
+        }
     };
     let mut result = FAILURE;
     if is_compatible(&r_target_version, &whitelist, &blacklist) {
@@ -95,27 +84,15 @@ pub fn cpp_ffi_is_compatible(
     result
 }
 
-fn is_compatible(
-    target_version: &String,
-    whitelist: &RegexSet,
-    blacklist: &RegexSet,
-) -> bool
-{
-    if whitelist.is_match(target_version.as_str())
-        && !blacklist.is_match(target_version.as_str())
-    {
+fn is_compatible(target_version: &String, whitelist: &RegexSet, blacklist: &RegexSet) -> bool {
+    if whitelist.is_match(target_version.as_str()) && !blacklist.is_match(target_version.as_str()) {
         return true;
     } else {
         return false;
     }
 }
 
-pub fn java_ffi_get_version(
-    _env: &JNIEnv,
-    _class: &JClass,
-    version: &str,
-) -> jstring
-{
+pub fn java_ffi_get_version(_env: &JNIEnv, _class: &JClass, version: &str) -> jstring {
     let j_version = _env.new_string(version).unwrap();
     j_version.into_inner()
 }
@@ -125,13 +102,7 @@ pub fn cpp_ffi_get_version(version: &str) -> *mut c_char {
     c_version.into_raw()
 }
 
-pub fn set_string_field(
-    _env: &JNIEnv,
-    jobject: JObject,
-    field: &str,
-    value: JString,
-)
-{
+pub fn set_string_field(_env: &JNIEnv, jobject: JObject, field: &str, value: JString) {
     _env.set_field(
         jobject,
         field,
@@ -141,22 +112,12 @@ pub fn set_string_field(
     .expect(&format!("Could not set {} field", field));
 }
 
-pub fn set_int_field(
-    _env: &JNIEnv,
-    jobject: JObject,
-    field: &str,
-    value: jint,
-)
-{
+pub fn set_int_field(_env: &JNIEnv, jobject: JObject, field: &str, value: jint) {
     _env.set_field(jobject, field, "I", JValue::from(value))
         .expect(&format!("Could not set {} field", field));
 }
 
-pub fn new_jobject<'a>(
-    _env: &'a JNIEnv,
-    result_java_path: &'a str,
-) -> JObject<'a>
-{
+pub fn new_jobject<'a>(_env: &'a JNIEnv, result_java_path: &'a str) -> JObject<'a> {
     let jclass_transfer_result = _env
         .find_class(result_java_path)
         .expect(&format!("could not find {} class", result_java_path));
@@ -171,8 +132,7 @@ pub fn set_jobject_string_field(
     jobject_result: &JObject,
     field: &str,
     bytes_pb: &Vec<u8>,
-) -> Result<(), WedprError>
-{
+) -> Result<(), WedprError> {
     let str_pb = utils::bytes_to_string(&bytes_pb);
     let java_str_pb = match _env.new_string(str_pb) {
         Ok(v) => v,
@@ -192,12 +152,7 @@ pub fn set_jobject_string_field(
 }
 
 // TODO unwrap
-pub fn set_error_jobject(
-    _env: &JNIEnv,
-    jobject_result: &JObject,
-    message: &str,
-) -> jobject
-{
+pub fn set_error_jobject(_env: &JNIEnv, jobject_result: &JObject, message: &str) -> jobject {
     let java_str_pb = _env.new_string(message).unwrap();
 
     _env.set_field(
@@ -211,11 +166,7 @@ pub fn set_error_jobject(
     jobject_result.into_inner()
 }
 
-pub fn jstring_to_bytes(
-    _env: &JNIEnv,
-    param: JString,
-) -> Result<Vec<u8>, WedprError>
-{
+pub fn jstring_to_bytes(_env: &JNIEnv, param: JString) -> Result<Vec<u8>, WedprError> {
     let param_str = jstring_to_string(&_env, param)?;
     let param_str_bytes = match utils::string_to_bytes(&param_str) {
         Ok(v) => v,
@@ -224,11 +175,7 @@ pub fn jstring_to_bytes(
     Ok(param_str_bytes)
 }
 
-pub fn jstring_to_string(
-    _env: &JNIEnv,
-    param: JString,
-) -> Result<String, WedprError>
-{
+pub fn jstring_to_string(_env: &JNIEnv, param: JString) -> Result<String, WedprError> {
     let param_str: String = match _env.get_string(param) {
         Ok(v) => v.into(),
         Err(_) => return Err(WedprError::FormatError),
@@ -236,11 +183,7 @@ pub fn jstring_to_string(
     Ok(param_str)
 }
 
-pub fn jbytes_to_bytes(
-    _env: &JNIEnv,
-    param: JByteBuffer,
-) -> Result<Vec<u8>, WedprError>
-{
+pub fn jbytes_to_bytes(_env: &JNIEnv, param: JByteBuffer) -> Result<Vec<u8>, WedprError> {
     let param_Bytes = match _env.get_direct_buffer_address(param) {
         Ok(v) => v.to_vec(),
         Err(_) => return Err(WedprError::FormatError),
