@@ -5,7 +5,6 @@ use criterion::{criterion_group, criterion_main, Criterion};
 extern crate crypto;
 use crypto::curve_25519_vrf;
 
-
 fn create_vrf_gen_key_helper(c: &mut Criterion) {
     let label = format!("create_vrf_gen_key_helper helper");
     let x = "random message";
@@ -56,7 +55,6 @@ fn create_vrf_verify_helper(c: &mut Criterion) {
     });
 }
 
-
 fn create_vrf_hash_helper(c: &mut Criterion) {
     let label = format!("create_vrf_hash_helper helper");
     let x = "random message";
@@ -74,9 +72,6 @@ fn create_vrf_hash_helper(c: &mut Criterion) {
         });
     });
 }
-
-
-
 
 criterion_group! {
     name = create_vrf;
