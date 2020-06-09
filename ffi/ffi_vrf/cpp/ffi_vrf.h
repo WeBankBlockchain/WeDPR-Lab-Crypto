@@ -34,14 +34,14 @@ int __rbt_backtrace_syminfo(backtrace_state *_state,
                             backtrace_error_callback _error,
                             void *_data);
 
-char *curve25519_vrf_generate_key_pair(char *private_key);
+char *curve25519_vrf_generate_key_pair(const char *private_key);
 
-int8_t curve25519_vrf_is_valid_pubkey(char *public_key);
+int8_t curve25519_vrf_is_valid_pubkey(const char *public_key);
 
-char *curve25519_vrf_proof(char *private_key, char *alpha);
+char *curve25519_vrf_proof(const char *private_key, const char *alpha);
 
-char *curve25519_vrf_proof_to_hash(char *proof);
+char *curve25519_vrf_proof_to_hash(const char *proof);
 
-int8_t curve25519_vrf_verify(char *public_key, char *alpha, char *proof);
+int8_t curve25519_vrf_verify(const char *public_key, const char *alpha, const char *proof);
 
 } // extern "C"

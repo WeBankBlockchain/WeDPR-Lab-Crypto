@@ -74,7 +74,7 @@ pub mod backtrace_hack {
 }
 
 #[no_mangle]
-pub extern "C" fn curve25519_vrf_generate_key_pair(private_key: *mut c_char) -> *mut c_char {
+pub extern "C" fn curve25519_vrf_generate_key_pair(private_key: *const c_char) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let sk = match utils::c_char_to_string(private_key) {
             Ok(v) => v,
@@ -100,8 +100,8 @@ pub extern "C" fn curve25519_vrf_generate_key_pair(private_key: *mut c_char) -> 
 
 #[no_mangle]
 pub extern "C" fn curve25519_vrf_proof(
-    private_key: *mut c_char,
-    alpha: *mut c_char,
+    private_key: *const c_char,
+    alpha: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let sk = match utils::c_char_to_string(private_key) {
@@ -142,9 +142,9 @@ pub extern "C" fn curve25519_vrf_proof(
 
 #[no_mangle]
 pub extern "C" fn curve25519_vrf_verify(
-    public_key: *mut c_char,
-    alpha: *mut c_char,
-    proof: *mut c_char,
+    public_key: *const c_char,
+    alpha: *const c_char,
+    proof: *const c_char,
 ) -> i8 {
     let result = panic::catch_unwind(|| {
         let pk = match utils::c_char_to_string(public_key) {
@@ -191,7 +191,7 @@ pub extern "C" fn curve25519_vrf_verify(
 }
 
 #[no_mangle]
-pub extern "C" fn curve25519_vrf_is_valid_pubkey(public_key: *mut c_char) -> i8 {
+pub extern "C" fn curve25519_vrf_is_valid_pubkey(public_key: *const c_char) -> i8 {
     let result = panic::catch_unwind(|| {
         let pk = match utils::c_char_to_string(public_key) {
             Ok(v) => v,
@@ -214,7 +214,7 @@ pub extern "C" fn curve25519_vrf_is_valid_pubkey(public_key: *mut c_char) -> i8 
 }
 
 #[no_mangle]
-pub extern "C" fn curve25519_vrf_proof_to_hash(proof: *mut c_char) -> *mut c_char {
+pub extern "C" fn curve25519_vrf_proof_to_hash(proof: *const c_char) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let vrf_proof = match utils::c_char_to_string(proof) {
             Ok(v) => v,
