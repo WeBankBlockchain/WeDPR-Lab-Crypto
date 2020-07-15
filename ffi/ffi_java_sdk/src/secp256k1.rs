@@ -11,10 +11,12 @@ use jni::{
     JNIEnv,
 };
 
-const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
+// const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
+const CRYPTO_RESULT_JAVA_PATH: &str = "Lorg/fisco/bcos/sdk/crypto/CryptoNativeResult;";
+
 
 #[no_mangle]
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sign(
+pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_secp256k1Sign(
     _env: JNIEnv,
     _class: JClass,
     private_key_jstring: JString,
@@ -39,7 +41,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sig
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1verify(
+pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_secp256k1verify(
     _env: JNIEnv,
     _class: JClass,
     public_key_jstring: JString,
@@ -54,13 +56,13 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1ver
     let signature = jString_to_string!(_env, jobject_result, signature_jstring);
     let sign_obj = crypto::signature::WeDPRSecp256k1Recover::default();
     let result = sign_obj.verify(&public_key, &message, &signature);
-    set_bool_field_to_jobject!(_env, jobject_result, result, "result");
+    set_bool_field_to_jobject!(_env, jobject_result, result, "verifyResult");
 
     jobject_result.into_inner()
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1keyPair(
+pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_secp256k1keyPair(
     _env: JNIEnv,
     _class: JClass,
 ) -> jobject {

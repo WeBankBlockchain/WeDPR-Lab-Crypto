@@ -154,7 +154,6 @@ pub fn set_jobject_string_field(
 // TODO unwrap
 pub fn set_error_jobject(_env: &JNIEnv, jobject_result: &JObject, message: &str) -> jobject {
     let java_str_pb = _env.new_string(message).unwrap();
-
     _env.set_field(
         *jobject_result,
         "wedprErrorMessage",

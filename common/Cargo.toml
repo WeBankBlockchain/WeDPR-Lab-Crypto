@@ -8,7 +8,8 @@ edition = "2018"
 lazy_static = "1.4"
 curve25519-dalek = { version = "1", features = ["serde"] }
 secp256k1 = { version = "0.17.2", features = ["recovery"] }
-libsm = "0.3.0"
+#libsm = "0.3.0"
+libsm = { path = "../libsm/" }
 failure = "0.1"
 wedpr_macros = { path = "../macros/"}
 #base64 = "0.12.1"

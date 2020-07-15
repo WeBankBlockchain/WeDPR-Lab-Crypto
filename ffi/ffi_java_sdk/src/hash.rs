@@ -11,10 +11,13 @@ use jni::{
     JNIEnv,
 };
 
-const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
+// const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
+const CRYPTO_RESULT_JAVA_PATH: &str = "Lorg/fisco/bcos/sdk/crypto/CryptoNativeResult;";
+// org.fisco.bcos.sdk.crypto.CryptoNativeResult
 
 #[no_mangle]
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256(
+pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_keccak256(
+// pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256(
     _env: JNIEnv,
     _class: JClass,
     message_jstring: JString,
@@ -35,7 +38,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3(
+// pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3(
+pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm3(
     _env: JNIEnv,
     _class: JClass,
     message_jstring: JString,

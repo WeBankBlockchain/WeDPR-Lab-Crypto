@@ -9,4 +9,5 @@ members = [
 "ffi/ffi_ecies",
 "ffi/ffi_vrf",
 "macros",
+"libsm",
 ]

@@ -20,9 +20,9 @@ impl Signature for WeDPRSm2p256v1 {
             }
         };
         let pk = SM2_CTX.pk_from_sk(&new_sk);
-        let signature = SM2_CTX.sign(msg.as_bytes(), &new_sk, &pk);
-        let der = signature.der_encode();
-        Ok(utils::bytes_to_string(&der))
+        let signature:sm2Signature = SM2_CTX.sign(msg.as_bytes(), &new_sk, &pk);
+        let (r,s) = signature.hex_encode();
+        Ok(r+&s)
     }
 
     fn verify(&self, public_key: &str, msg: &str, signature: &str) -> bool {
@@ -40,23 +40,37 @@ impl Signature for WeDPRSm2p256v1 {
                 return false;
             }
         };
-        let bytes_sign = match utils::string_to_bytes(signature) {
+        if signature.len() != 128 {
+            wedpr_println!("signature check failed, signature = {:?}", signature);
+            return false;
+        }
+        let signature_str = signature.clone().to_string();
+        let r = signature_str[0..64].to_string().clone();
+        let s = signature_str[64..128].to_string().clone();
+        let parsed_sig = match sm2Signature::hex_decode(r, s) {
             Ok(v) => v,
-            Err(_) => {
-                wedpr_println!("string_to_bytes failed, signature = {:?}", signature);
-                return false;
-            }
+                 Err(_) => {
+                     wedpr_println!("string_to_bytes failed, signature = {:?}", signature_str);
+                     return false;
+                 }
         };
-        let parsed_sig = match sm2Signature::der_decode(&bytes_sign[..]) {
-            Ok(v) => v,
-            Err(_) => {
-                wedpr_println!(
-                    "Signature::der_decode failed, bytes_sign = {:?}",
-                    bytes_sign
-                );
-                return false;
-            }
-        };
+        // let bytes_sign = match utils::string_to_bytes(signature) {
+        //     Ok(v) => v,
+        //     Err(_) => {
+        //         wedpr_println!("string_to_bytes failed, signature = {:?}", signature);
+        //         return false;
+        //     }
+        // };
+        // let parsed_sig = match sm2Signature::der_decode(&bytes_sign[..]) {
+        //     Ok(v) => v,
+        //     Err(_) => {
+        //         wedpr_println!(
+        //             "Signature::der_decode failed, bytes_sign = {:?}",
+        //             bytes_sign
+        //         );
+        //         return false;
+        //     }
+        // };
         SM2_CTX.verify(msg.as_bytes(), &new_pk, &parsed_sig)
     }
 
@@ -79,11 +93,14 @@ mod tests {
 
     #[test]
     fn test_sm2p256v1() {
-        let pk_str = SM2P256V1_TEST_PUBLIC_KEY;
-        let sk_str = SM2P256V1_TEST_SECRET_KEY;
+        // let pk_str = SM2P256V1_TEST_PUBLIC_KEY;
+        // let sk_str = SM2P256V1_TEST_SECRET_KEY;
+
         let message = "sm2 test".to_string();
         let signature = WeDPRSm2p256v1::default();
+        let (pk_str, sk_str) = signature.generate_keypair();
         let sign = signature.sign(&sk_str, &message).unwrap();
+        println!("sign = {}", sign);
         let result = signature.verify(&pk_str, &message, &sign);
         assert_eq!(result, true);
     }
