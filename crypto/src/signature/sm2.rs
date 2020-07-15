@@ -96,12 +96,15 @@ mod tests {
         // let pk_str = SM2P256V1_TEST_PUBLIC_KEY;
         // let sk_str = SM2P256V1_TEST_SECRET_KEY;
 
-        let message = "sm2 test".to_string();
-        let signature = WeDPRSm2p256v1::default();
-        let (pk_str, sk_str) = signature.generate_keypair();
-        let sign = signature.sign(&sk_str, &message).unwrap();
-        println!("sign = {}", sign);
-        let result = signature.verify(&pk_str, &message, &sign);
-        assert_eq!(result, true);
+        for _ in 0..1000 {
+            let message = "sm2 test".to_string();
+            let signature = WeDPRSm2p256v1::default();
+            let (pk_str, sk_str) = signature.generate_keypair();
+            let sign = signature.sign(&sk_str, &message).unwrap();
+            println!("sign = {}", sign);
+            let result = signature.verify(&pk_str, &message, &sign);
+            assert_eq!(result, true);
+        }
+
     }
 }

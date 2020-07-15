@@ -39,14 +39,26 @@ impl Signature {
     }
 
     pub fn hex_encode(self) -> (String, String) {
-        let r = hex::encode(self.r.to_bytes_be());
-        let s = hex::encode(self.s.to_bytes_be());
+        let mut r = hex::encode(self.r.to_bytes_be());
+        if r.len() != 64 {
+            if r.len() == 62 {
+                r = "00".to_string() + &r;
+            }
+        }
+        let mut s = hex::encode(self.s.to_bytes_be());
+        if s.len() != 64 {
+            if s.len() == 62 {
+                s = "00".to_string() + &s;
+            }
+        }
         (r, s)
     }
 
     pub fn hex_decode(r: String, s: String) -> Result<Signature, hex::FromHexError> {
         let r = BigUint::from_bytes_be(&hex::decode(r)?);
+        // println!("r.length = {}", r.length());
         let s = BigUint::from_bytes_be(&hex::decode(s)?);
+        // println!("s.length = {}", s.length());
         Ok(Signature {r, s})
     }
 
@@ -407,6 +419,7 @@ mod tests {
         let curve = EccCtx::new();
         let ctx = SigCtx::new();
 
+
         let pk = curve.bytes_to_point(&pk).unwrap();
 
         let sig = Signature::der_decode(&sig).unwrap();
@@ -415,7 +428,7 @@ mod tests {
 
         let (r, s) = sig.hex_encode();
         println!("sig_hex r = {}, s = {}", r, s);
-        let sig_decode = Signature::hex_decode(r, s);
+        let sig_decode = Signature::hex_decode(r, s).unwrap();
         println!("sig_decode = {:?}", sig_decode);
         println!("{}", ctx.verify_raw(msg, &pk, &sig_decode));
 
