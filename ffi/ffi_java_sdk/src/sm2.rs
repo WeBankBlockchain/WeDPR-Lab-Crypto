@@ -11,12 +11,12 @@ use jni::{
     JNIEnv,
 };
 
-// const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
-const CRYPTO_RESULT_JAVA_PATH: &str = "Lorg/fisco/bcos/sdk/crypto/CryptoNativeResult;";
+const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
+// const CRYPTO_RESULT_JAVA_PATH: &str = "Lorg/fisco/bcos/sdk/crypto/CryptoNativeResult;";
 
 
 #[no_mangle]
-pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm2Sign(
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
     _env: JNIEnv,
     _class: JClass,
     private_key_jstring: JString,
@@ -45,7 +45,7 @@ pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm2S
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm2verify(
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2verify(
     _env: JNIEnv,
     _class: JClass,
     public_key_jstring: JString,
@@ -60,13 +60,13 @@ pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm2v
     let signature = jString_to_string!(_env, jobject_result, signature_jstring);
     let sign_obj = crypto::signature::WeDPRSm2p256v1::default();
     let result = sign_obj.verify(&public_key, &message, &signature);
-    set_bool_field_to_jobject!(_env, jobject_result, result, "verifyResult");
+    set_bool_field_to_jobject!(_env, jobject_result, result, "result");
 
     jobject_result.into_inner()
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm2keyPair(
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2keyPair(
     _env: JNIEnv,
     _class: JClass,
 ) -> jobject {
