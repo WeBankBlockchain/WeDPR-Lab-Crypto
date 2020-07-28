@@ -10,6 +10,12 @@ build = "build.rs"
 name = "ffi_vrf"
 crate-type = ["cdylib", "staticlib"]
 
+[profile.release]
+lto = false
+
+[profile.dev]
+lto = false
+
 [dependencies]
 libc = "0.2.71"
 wedpr_macros = { path = "../../macros/"}
