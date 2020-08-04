@@ -51,7 +51,8 @@ macro_rules! crate_string_to_bytes {
 
 impl Signature for WeDPRSecp256k1Recover {
     fn sign(&self, private_key: &str, msg: &str) -> Result<String, WedprError> {
-        let msg_hash = keccak256(msg.as_bytes());
+        // let msg_hash = keccak256(msg.as_bytes());
+        let msg_hash = utils::string_to_bytes(msg).unwrap();
         let sk_str_bytes = utils::string_to_bytes(private_key)?;
         let secret_key = match SecretKey::from_slice(&sk_str_bytes) {
             Ok(v) => v,
@@ -63,14 +64,15 @@ impl Signature for WeDPRSecp256k1Recover {
         let message_send = Message::from_slice(&msg_hash).expect("32 bytes");
         let sig = SECP256K1_OBJ.sign_recoverable(&message_send, &secret_key);
         let (recid, signature_bytes) = &sig.serialize_compact();
-        //        let siganture_result = signature_bytes.as_mut_slice();
+        wedpr_println!("recid = {:?}", recid);
         let mut vec_sig = signature_bytes.to_vec();
         vec_sig.push(recid.to_i32() as u8);
         Ok(utils::bytes_to_string(&vec_sig))
     }
 
     fn verify(&self, public_key: &str, msg: &str, signature: &str) -> bool {
-        let msg_hash = keccak256(msg.as_bytes());
+        let msg_hash = utils::string_to_bytes(msg).unwrap();
+        // let msg_hash = keccak256(msg.as_bytes());
         let message_receive = Message::from_slice(&msg_hash).expect("32 bytes");
         let pk_str_bytes = crate_string_to_bytes!(&public_key);
         let pub_str_get = match PublicKey::from_slice(&pk_str_bytes) {
@@ -138,28 +140,30 @@ mod tests {
     #[test]
     fn test_WeDPRSecp256k1_keypair() {
         let signature = WeDPRSecp256k1Recover::default();
-        let message = "To Rust";
-        for _ in 0..100 {
+        let message = "44DB476208775A0E5DBD7C00D08833A7083E232DFA95788E2EC7CC231772C23A";
+        // for _ in 0..100 {
             let (pk, sk) = signature.generate_keypair();
             println!("pk = {}", pk);
             println!("sk = {}", sk);
 
-        }
-//
-//        let sign = signature.sign(&sk, message).unwrap();
-//
-//        let result = signature.verify(&pk, message, &sign);
-//        assert_eq!(result, true);
+        // }
+
+       let sign = signature.sign(&sk, message).unwrap();
+        println!("sign = {}", sign);
+
+
+       let result = signature.verify(&pk, message, &sign);
+       assert_eq!(result, true);
     }
 
     #[test]
     fn test_WeDPRSecp256k1Recover() {
         let signature = WeDPRSecp256k1Recover::default();
-        let message = "847adcf9b24cf0041ddff02ffe324e30b1271c5170086f8ee799dd1123dacb2e";
+        let message = "44db476208775a0e5dbd7c00d08833a7083e232dfa95788e2ec7cc231772c23a";
 
         //        let sk = "9f523428ae7527d8d279d859eff4d63764e0073bf981e7e06005f0962634242d";
-        let pk = "04c7d3781f5708f11d1f4c26499ca909262fde9bfe10959e4f294d51d3de141fce4cb29cb52ae07753488dd7a1460eff2e223d68cb6bf2ffc4b07f6013aa8a06f5";
-        let sign = "98e56e60d738e4c848b0384022a4191e1c89075c08a63216659573d4f47d16aa432d57e5cb2c434fa12be13243d8ac8e14d4bc716557f74af69ccc097a0c95f401";
+        let pk = "04a402d163b2a4606a4ac321bd3ccdd51cb3b8f688948c46115d38bf93f03336578bdb6eb238109d3f1ac68bd59c98e6b9439672f3facb8fa18bb8de70fb357fa9";
+        let sign = "9fc3a2361155faa0e0ae91245d15e48b6caed95d3cf3ffd11bf87a54c9e85ff34405ff8fe205a561a7a1fe1c0ca8de3949ceb3bfe9347aae0da6d7c4ce05a9e000";
         let result = signature.verify(pk, message, sign);
         assert_eq!(result, true);
     }
