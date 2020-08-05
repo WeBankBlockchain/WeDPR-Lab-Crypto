@@ -14,7 +14,6 @@ use jni::{
 const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/crypto/CryptoResult;";
 // const CRYPTO_RESULT_JAVA_PATH: &str = "Lorg/fisco/bcos/sdk/crypto/CryptoNativeResult;";
 
-
 #[no_mangle]
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
     _env: JNIEnv,

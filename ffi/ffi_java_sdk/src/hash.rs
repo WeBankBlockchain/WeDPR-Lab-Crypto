@@ -39,7 +39,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256(
 
 #[no_mangle]
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3(
-// pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm3(
+    // pub extern "system" fn Java_org_fisco_bcos_sdk_crypto_CryptoNativeInterface_sm3(
     _env: JNIEnv,
     _class: JClass,
     message_jstring: JString,

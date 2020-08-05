@@ -52,7 +52,7 @@ macro_rules! crate_string_to_bytes {
 impl Signature for WeDPRSecp256k1Recover {
     fn sign(&self, private_key: &str, msg: &str) -> Result<String, WedprError> {
         // let msg_hash = keccak256(msg.as_bytes());
-        let msg_hash = utils::string_to_bytes(msg).unwrap();
+        let msg_hash = utils::string_to_bytes(msg)?;
         let sk_str_bytes = utils::string_to_bytes(private_key)?;
         let secret_key = match SecretKey::from_slice(&sk_str_bytes) {
             Ok(v) => v,
@@ -64,14 +64,19 @@ impl Signature for WeDPRSecp256k1Recover {
         let message_send = Message::from_slice(&msg_hash).expect("32 bytes");
         let sig = SECP256K1_OBJ.sign_recoverable(&message_send, &secret_key);
         let (recid, signature_bytes) = &sig.serialize_compact();
-        wedpr_println!("recid = {:?}", recid);
         let mut vec_sig = signature_bytes.to_vec();
         vec_sig.push(recid.to_i32() as u8);
         Ok(utils::bytes_to_string(&vec_sig))
     }
 
     fn verify(&self, public_key: &str, msg: &str, signature: &str) -> bool {
-        let msg_hash = utils::string_to_bytes(msg).unwrap();
+        let msg_hash = match utils::string_to_bytes(msg) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("msg_hash parser failed");
+                return false;
+            }
+        };
         // let msg_hash = keccak256(msg.as_bytes());
         let message_receive = Message::from_slice(&msg_hash).expect("32 bytes");
         let pk_str_bytes = crate_string_to_bytes!(&public_key);
@@ -120,14 +125,13 @@ impl Signature for WeDPRSecp256k1Recover {
     fn generate_keypair(&self) -> (String, String) {
         let mut rng = rand::thread_rng();
         let secp = secp256k1::Secp256k1::new();
-        //        let (secret_key, public_key) = secp.generate_keypair(&mut rng);
-//        let mut secret_key: SecretKey = SecretKey::new();
-//        let mut public_key: PublicKey = PublicKey::;
         loop {
             let (secret_key, public_key) = SECP256K1_OBJ.generate_keypair(&mut rng);
             if secret_key[0] > 15 {
-                return (utils::bytes_to_string(&public_key.serialize_uncompressed().to_vec()),
-                secret_key.to_string());
+                return (
+                    utils::bytes_to_string(&public_key.serialize_uncompressed().to_vec()),
+                    secret_key.to_string(),
+                );
             }
         }
     }
@@ -142,18 +146,17 @@ mod tests {
         let signature = WeDPRSecp256k1Recover::default();
         let message = "44DB476208775A0E5DBD7C00D08833A7083E232DFA95788E2EC7CC231772C23A";
         // for _ in 0..100 {
-            let (pk, sk) = signature.generate_keypair();
-            println!("pk = {}", pk);
-            println!("sk = {}", sk);
+        let (pk, sk) = signature.generate_keypair();
+        println!("pk = {}", pk);
+        println!("sk = {}", sk);
 
         // }
 
-       let sign = signature.sign(&sk, message).unwrap();
+        let sign = signature.sign(&sk, message).unwrap();
         println!("sign = {}", sign);
 
-
-       let result = signature.verify(&pk, message, &sign);
-       assert_eq!(result, true);
+        let result = signature.verify(&pk, message, &sign);
+        assert_eq!(result, true);
     }
 
     #[test]
