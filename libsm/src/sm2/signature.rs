@@ -40,16 +40,15 @@ impl Signature {
 
     pub fn hex_encode(self) -> (String, String) {
         let mut r = hex::encode(self.r.to_bytes_be());
+        while r.len() < 64 {
+            r = "00".to_string() + &r;
+        }
         if r.len() != 64 {
-            if r.len() == 62 {
-                r = "00".to_string() + &r;
-            }
+            return("".to_string(), "".to_string())
         }
         let mut s = hex::encode(self.s.to_bytes_be());
-        if s.len() != 64 {
-            if s.len() == 62 {
-                s = "00".to_string() + &s;
-            }
+        while s.len() < 64 {
+            s = "00".to_string() + &s;
         }
         (r, s)
     }

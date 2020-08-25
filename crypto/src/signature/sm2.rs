@@ -23,6 +23,9 @@ impl Signature for WeDPRSm2p256v1 {
         // let signature:sm2Signature = SM2_CTX.sign(msg.as_bytes(), &new_sk, &pk);
         let signature: sm2Signature = SM2_CTX.sign(&utils::string_to_bytes(msg)?, &new_sk, &pk);
         let (r, s) = signature.hex_encode();
+        if r.len() == 0 {
+            return Err(WedprError::FormatError);
+        }
         Ok(r + &s)
     }
 
