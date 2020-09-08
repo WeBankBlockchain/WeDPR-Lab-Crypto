@@ -191,7 +191,8 @@ pub fn jbytes_to_bytes(_env: &JNIEnv, param: JByteBuffer) -> Result<Vec<u8>, Wed
 }
 
 pub fn cstr_to_bytes(argument_pb: *mut i8) -> Result<Vec<u8>, WedprError> {
-    let argument_cstr = unsafe { CStr::from_ptr(argument_pb) };
+    let argument_cstr = unsafe { CStr::from_ptr(argument_pb as *const u8) };
+    // let argument_cstr = unsafe { CStr::from_ptr(argument_pb as) };
     let argument_rstr = match argument_cstr.to_str() {
         Ok(v) => v,
         Err(_) => return Err(WedprError::FormatError),

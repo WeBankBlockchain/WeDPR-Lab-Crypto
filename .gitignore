@@ -6,3 +6,7 @@
 *.d
 *.bak
 */target
+*/*/.DS_Store
+Cargo.lock
+.DS_Store
+.idea/

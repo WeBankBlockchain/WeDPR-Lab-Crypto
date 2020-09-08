@@ -7,6 +7,8 @@ members = [
 "ffi/ffi_common",
 "ffi/ffi_macros",
 "ffi/ffi_ecies",
+"ffi/ffi_ios",
+"ffi/ffi_android",
 "ffi/ffi_vrf",
 "macros",
 "libsm",

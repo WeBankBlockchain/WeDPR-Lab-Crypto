@@ -44,7 +44,7 @@ impl Signature {
             r = "00".to_string() + &r;
         }
         if r.len() != 64 {
-            return("".to_string(), "".to_string())
+            return ("".to_string(), "".to_string());
         }
         let mut s = hex::encode(self.s.to_bytes_be());
         while s.len() < 64 {
