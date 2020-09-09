@@ -7,6 +7,7 @@ extern crate wedpr_macros;
 extern crate ffi_macros;
 extern crate common;
 extern crate ecies;
+use crypto::hash;
 use crypto::signature::Signature;
 use ffi_common::utils;
 
@@ -133,7 +134,7 @@ fn ecies_secp256k1_decrypt(private_key: &str, encrypt_data: &str) -> Result<Stri
     Ok(hex::encode(&mes))
 }
 
-const CRYPTO_RESULT_JAVA_PATH: &str = "Lcom/webank/wedpr/android/CryptoResult;";
+const CRYPTO_RESULT_JAVA_PATH: &str = "com/webank/wedpr/android/CryptoResult";
 
 #[no_mangle]
 pub extern "system" fn Java_com_webank_wedpr_android_NativeInterface_eciesEncrypt(
@@ -256,6 +257,27 @@ pub extern "system" fn Java_com_webank_wedpr_android_NativeInterface_secp256k1ve
     jobject_result.into_inner()
 }
 
+#[no_mangle]
+pub extern "system" fn Java_com_webank_wedpr_android_NativeInterface_keccak256(
+    _env: JNIEnv,
+    _class: JClass,
+    message_jstring: JString,
+) -> jobject {
+    let jobject_result = utils::new_jobject(&_env, CRYPTO_RESULT_JAVA_PATH);
+
+    let message = jString_to_string!(_env, jobject_result, message_jstring);
+    let hash_data = match hash::keccak256_hex(&message) {
+        Ok(v) => v,
+        Err(_) => {
+            return utils::set_error_jobject(&_env, &jobject_result, "jni keccak256_hex failed")
+        }
+    };
+
+    add_string_to_jobject!(_env, jobject_result, hash_data, "hash");
+
+    jobject_result.into_inner()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -275,6 +297,24 @@ mod tests {
         wedpr_println!("decrypt_data = {}", decrypt_data);
         assert_eq!(&decrypt_data, msg)
     }
+
+    // #[test]
+    // fn test_sign() {
+    //     let messageHex = "48656c6c6f20576f726c64";
+    //     let sk = "62657b923754d4a8f42b861e52c2dab6ef22e00b68da95a3c5cc994c02ccb88d";
+    //     let pk = "04dfd1e5a5922cc0bd335cac7f39450c4177bbb9c60226e212516495f711a96783704c457aa49a31b88b7d41d0950e9da228c0f09dc084e3619aae2cc08f8b1195";
+    //     let sign_obj = crypto::signature::WeDPRSecp256k1Recover::default();
+    //     println!("test sign!");
+    //     let signature = match sign_obj.sign(&sk, &messageHex) {
+    //         Ok(v) => v,
+    //         Err(_) => {
+    //             println!("signature failed!");
+    //             return;
+    //         }
+    //     };
+    //     println!("signature = {:?}!", signature);
+
+    // }
 
     #[test]
     fn test_ecies_weid() {

@@ -43,6 +43,7 @@ public class NativeInterface {
     public static native CryptoResult eciesEncrypt(String pubKeyHex, String plaintextHex);
     public static native CryptoResult eciesDecrypt(String priKeyHex, String ciphertextHex);
     public static native CryptoResult secp256k1keyPair();
+    public static native CryptoResult keccak256(String messageHex);
     public static native CryptoResult secp256k1Sign(String priKeyHex, String messageHex);
     public static native CryptoResult secp256k1verify(String pubKeyHex, String messageHex, String signatureHex);
 

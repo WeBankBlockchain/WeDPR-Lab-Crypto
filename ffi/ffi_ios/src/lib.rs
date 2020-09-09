@@ -7,6 +7,7 @@ extern crate wedpr_macros;
 extern crate ffi_macros;
 extern crate common;
 extern crate ecies;
+use crypto::hash;
 use crypto::signature::Signature;
 use ffi_common::utils;
 
@@ -317,6 +318,36 @@ pub extern "C" fn wedpr_secp256k1verify(
     match result {
         Ok(res) => res,
         Err(_) => FAILURE,
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn wedpr_keccak256(message_string: *mut c_char) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let message = match utils::c_char_to_string(message_string) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("message_string c_char_to_string failed!");
+                return ptr::null_mut();
+            }
+        };
+
+        let hash_data = match hash::keccak256_hex(&message) {
+            Ok(v) => v,
+            Err(_) => {
+                return ptr::null_mut();
+            }
+        };
+        let return_string = match CString::new(hash_data) {
+            Ok(v) => v,
+            Err(_) => return ptr::null_mut(),
+        };
+        return_string.into_raw()
+    });
+
+    match result {
+        Ok(res) => res,
+        Err(_) => ptr::null_mut(),
     }
 }
 

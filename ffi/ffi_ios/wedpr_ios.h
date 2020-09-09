@@ -38,6 +38,8 @@ char *ecies_secp256k1_encrypt_c(char *hex_public_key, char *hex_plaintext);
 
 char *wedpr_crypto_secp256k1Sign(char *hex_private_key, char *message_string);
 
+char *wedpr_keccak256(char *message_string);
+
 char *wedpr_secp256k1keyPair(void);
 
 int8_t wedpr_secp256k1verify(char *hex_public_key, char *message_string, char *signature_string);
