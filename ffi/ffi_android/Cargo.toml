@@ -26,11 +26,11 @@ crypto = {path = "../../crypto/"}
 [target.'cfg(target_os = "android")'.dependencies]
 jni = { version = "0.13.1", default-features = false }
 
-[target.arm-linux-androideabi.openssl]
-rustc-flags = "-L /path/to/libraries -l ssl -lcrypto"
+# [target.arm-linux-androideabi.openssl]
+# rustc-flags = "-L /path/to/libraries -l ssl -lcrypto"
 
-[target.aarch64-linux-android.openssl]
-rustc-flags = "-L /path/to/libraries -l ssl -lcrypto"
+# [target.aarch64-linux-android.openssl]
+# rustc-flags = "-L /path/to/libraries -l ssl -lcrypto"
 
 [target.'cfg(android)'.dependencies]
 openssl-sys = { version = "0.9.55", features = ["vendored"]}
