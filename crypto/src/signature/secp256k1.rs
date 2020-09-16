@@ -69,6 +69,15 @@ impl Signature for WeDPRSecp256k1Recover {
         Ok(utils::bytes_to_string(&vec_sig))
     }
 
+    fn sign_with_pub(
+        &self,
+        private_key: &str,
+        public_key: &str,
+        msg: &str,
+    ) -> Result<String, WedprError> {
+        Err(WedprError::VerificationError)
+    }
+
     fn verify(&self, public_key: &str, msg: &str, signature: &str) -> bool {
         let msg_hash = match utils::string_to_bytes(msg) {
             Ok(v) => v,

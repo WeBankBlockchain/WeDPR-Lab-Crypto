@@ -44,6 +44,37 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
 }
 
 #[no_mangle]
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignWithPub(
+    _env: JNIEnv,
+    _class: JClass,
+    private_key_jstring: JString,
+    public_key_jstring: JString,
+    message_jstring: JString,
+) -> jobject {
+    let jobject_result = utils::new_jobject(&_env, CRYPTO_RESULT_JAVA_PATH);
+
+    let private_key = jString_to_string!(_env, jobject_result, private_key_jstring);
+    let public_key = jString_to_string!(_env, jobject_result, public_key_jstring);
+
+    let message = jString_to_string!(_env, jobject_result, message_jstring);
+    let sign_obj = crypto::signature::WeDPRSm2p256v1::default();
+    let encrypt_data = match sign_obj.sign_with_pub(&private_key, &public_key, &message) {
+        Ok(v) => v,
+        Err(_) => {
+            return utils::set_error_jobject(
+                &_env,
+                &jobject_result,
+                "jni WeDPRSm2p256v1 sign failed",
+            )
+        }
+    };
+
+    add_string_to_jobject!(_env, jobject_result, encrypt_data, "signature");
+
+    jobject_result.into_inner()
+}
+
+#[no_mangle]
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2verify(
     _env: JNIEnv,
     _class: JClass,

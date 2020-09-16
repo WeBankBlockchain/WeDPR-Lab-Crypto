@@ -29,6 +29,47 @@ impl Signature for WeDPRSm2p256v1 {
         Ok(r + &s)
     }
 
+    fn sign_with_pub(
+        &self,
+        private_key: &str,
+        public_key: &str,
+        msg: &str,
+    ) -> Result<String, WedprError> {
+        let private_key_vec = utils::string_to_bytes(private_key)?;
+        let new_sk = match SM2_CTX.load_seckey(&private_key_vec[..]) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!(
+                    "load_seckey failed, private_key_vec = {:?}",
+                    private_key_vec
+                );
+                return Err(WedprError::FormatError);
+            }
+        };
+        // let pk = SM2_CTX.pk_from_sk(&new_sk);
+        let pk_bytes = match common::utils::string_to_bytes(&public_key) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("string_to_bytes failed, public_key = {:?}", private_key_vec);
+                return Err(WedprError::FormatError);
+            }
+        };
+        let pk = match SM2_CTX.load_pubkey(&pk_bytes) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("load_pubkey failed, pk_bytes = {:?}", private_key_vec);
+                return Err(WedprError::FormatError);
+            }
+        };
+        // let signature:sm2Signature = SM2_CTX.sign(msg.as_bytes(), &new_sk, &pk);
+        let signature: sm2Signature = SM2_CTX.sign(&utils::string_to_bytes(msg)?, &new_sk, &pk);
+        let (r, s) = signature.hex_encode();
+        if r.len() == 0 {
+            return Err(WedprError::FormatError);
+        }
+        Ok(r + &s)
+    }
+
     fn verify(&self, public_key: &str, msg: &str, signature: &str) -> bool {
         let pk_raw = match utils::string_to_bytes(public_key) {
             Ok(v) => v,
