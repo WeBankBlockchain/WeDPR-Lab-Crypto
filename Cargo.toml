@@ -1,0 +1,23 @@
+[workspace]
+
+members = [
+    "common/coder/base64",
+    "common/coder/hex",
+    "common/macros",
+    "common/utils",
+    "crypto/ecies/secp256k1",
+    "crypto/hash/keccak256",
+    "crypto/hash/sm3",
+    "crypto/signature/secp256k1",
+    "crypto/signature/sm2",
+    "crypto/vrf/curve25519",
+    "crypto/zkp/discrete_logarithm_proof",
+    "crypto/zkp/range_proof",
+    "crypto/zkp/utils",
+    "ffi/ffi_common",
+    "ffi/ffi_c/ffi_c_common",
+    "ffi/ffi_c/ffi_c_crypto",
+    "ffi/ffi_java/ffi_java_crypto",
+    "ffi/ffi_macros",
+    "protos",
+]

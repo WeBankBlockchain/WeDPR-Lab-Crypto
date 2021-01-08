@@ -1,0 +1,19 @@
+// Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
+
+syntax = "proto3";
+
+package com.webank.blockchain.crypto.proto;
+option java_package = "com.webank.blockchain.crypto.proto";
+option java_multiple_files = true;
+
+// ZKP data to verify the balance relationship among value commitments.
+// For example, given C(x), C(y), C(z), this proof data can be used to
+// verify whether x * y =? z.
+message BalanceProof {
+    bytes c = 1;
+    bytes m1 = 2;
+    bytes m2 = 3;
+    bytes m3 = 4;
+    bytes m4 = 5;
+    bytes m5 = 6;
+}
