@@ -29,8 +29,7 @@ pub fn prove_sum_relationship(
     c3_blinding: &Scalar,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> BalanceProof
-{
+) -> BalanceProof {
     let blinding_a = get_random_scalar();
     let blinding_b = get_random_scalar();
     let blinding_c = get_random_scalar();
@@ -99,8 +98,7 @@ pub fn verify_sum_relationship(
     proof: &BalanceProof,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     let check = bytes_to_scalar(proof.get_c())?;
     let m1 = bytes_to_scalar(proof.get_m1())?;
     let m2 = bytes_to_scalar(proof.get_m2())?;
@@ -152,8 +150,7 @@ pub fn prove_product_relationship(
     c3_blinding: &Scalar,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> BalanceProof
-{
+) -> BalanceProof {
     let blinding_a = get_random_scalar();
     let blinding_b = get_random_scalar();
     let blinding_c = get_random_scalar();
@@ -229,8 +226,7 @@ pub fn verify_product_relationship(
     proof: &BalanceProof,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     let check = bytes_to_scalar(proof.get_c())?;
     let m1 = bytes_to_scalar(proof.get_m1())?;
     let m2 = bytes_to_scalar(proof.get_m2())?;
