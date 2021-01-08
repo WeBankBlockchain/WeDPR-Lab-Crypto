@@ -61,8 +61,7 @@ impl Vrf for WedprCurve25519Vrf {
     fn prove<T: ?Sized + AsRef<[u8]>>(
         private_key: &T,
         message: &T,
-    ) -> Result<Self, WedprError>
-    {
+    ) -> Result<Self, WedprError> {
         let public_key_bytes = Self::derive_public_key(private_key);
         // TODO: Merge the following logic with prove_fast.
         let private_key_hash =
@@ -98,8 +97,7 @@ impl Vrf for WedprCurve25519Vrf {
         private_key: &T,
         public_key: &T,
         message: &T,
-    ) -> Result<Self, WedprError>
-    {
+    ) -> Result<Self, WedprError> {
         let public_key_bytes = public_key.as_ref().to_vec();
         let private_key_hash =
             Scalar::hash_from_bytes::<Sha3_512>(private_key.as_ref());
@@ -134,8 +132,7 @@ impl Vrf for WedprCurve25519Vrf {
         &self,
         public_key: &T,
         message: &T,
-    ) -> bool
-    {
+    ) -> bool {
         let gamma_point = bytes_to_point!(self.gamma_param.as_ref());
         let public_key_point = bytes_to_point!(public_key.as_ref());
         let c_scalar = bytes_to_scalar!(&self.c_param);
