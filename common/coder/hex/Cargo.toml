@@ -1,0 +1,12 @@
+[package]
+name = "wedpr_l_common_coder_hex"
+version = "1.0.0"
+authors = [ "WeDPR <wedpr@webank.com>" ]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+hex = "0.4.2"
+wedpr_l_macros = { path = "../../macros", version = "1.0.0" }
+wedpr_l_utils = { path = "../../utils", version = "1.0.0" }
