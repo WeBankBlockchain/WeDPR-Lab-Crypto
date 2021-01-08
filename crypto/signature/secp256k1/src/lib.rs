@@ -34,8 +34,7 @@ impl Signature for WedprSecp256k1Recover {
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -68,8 +67,7 @@ impl Signature for WedprSecp256k1Recover {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool
-    {
+    ) -> bool {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let msg_hash_obj = match Message::from_slice(&msg_hash.as_ref()) {
             Ok(v) => v,
@@ -148,26 +146,23 @@ impl Signature for WedprSecp256k1Recover {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wedpr_l_utils::constant::tests::{
-        BASE64_ENCODED_TEST_MESSAGE, SECP256K1_TEST_PUBLIC_KEY,
-        SECP256K1_TEST_SECRET_KEY,
-    };
+    use wedpr_l_utils::constant::tests::BASE64_ENCODED_TEST_MESSAGE;
 
     #[test]
     fn test_secp256k1_recover() {
-        let secp256k1_recover = WedprSecp256k1Recover::default();
+        let secp256k1 = WedprSecp256k1Recover::default();
+        let (public_key, secret_key) = secp256k1.generate_keypair();
 
         // The message hash (NOT the original message) is required for
         // generating a valid signature.
         let msg_hash = BASE64_ENCODED_TEST_MESSAGE;
 
-        let signature = secp256k1_recover
-            .sign(&SECP256K1_TEST_SECRET_KEY.to_vec(), &msg_hash.to_vec())
-            .unwrap();
+        let signature =
+            secp256k1.sign(&secret_key, &msg_hash.to_vec()).unwrap();
         assert_eq!(
             true,
-            secp256k1_recover.verify(
-                &SECP256K1_TEST_PUBLIC_KEY.to_vec(),
+            secp256k1.verify(
+                &public_key.to_vec(),
                 &msg_hash.to_vec(),
                 &signature
             )

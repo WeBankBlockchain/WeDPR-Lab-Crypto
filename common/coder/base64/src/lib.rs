@@ -35,8 +35,10 @@ mod tests {
     fn test_base64() {
         let base64 = WedprBase64::default();
         let str = "g6sLGLyLvnkmE6V0Ico=";
+        let wrong_str = "g6sLGLyLvnkmE6V0Ice=";
         let bytes = base64.decode(&str).unwrap();
         let recovered_str = base64.encode(&bytes);
         assert_eq!(str, recovered_str);
+        assert!(wrong_str != recovered_str);
     }
 }

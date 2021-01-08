@@ -54,7 +54,9 @@ pub trait Signature {
         signature: &T,
     ) -> bool;
 
-    /// Generates a new key pair for signature algorithm.
+    /// Generates a new key pair for signature algorithm,
+    /// where the first part is public key,
+    /// the second part is private key.
     // TODO: Replace output list with a struct or protobuf.
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>);
 }
