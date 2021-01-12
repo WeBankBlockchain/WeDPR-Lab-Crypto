@@ -125,7 +125,7 @@ macro_rules! java_safe_jstring_to_pb {
 #[macro_export]
 macro_rules! java_safe_bytes_to_pb {
     ($_env:expr, $result_jobject:expr, $rust_bytes:expr, $pb_type:ty) => {
-        match protobuf::parse_from_bytes::<$pb_type>(&$rust_bytes) {
+        match <$pb_type>::parse_from_bytes(&$rust_bytes) {
             Ok(v) => v,
             Err(_) => {
                 return java_set_error_field_and_extract_jobject(
@@ -387,7 +387,7 @@ macro_rules! c_safe_c_char_pointer_to_bytes {
 #[macro_export]
 macro_rules! c_safe_c_char_pointer_to_proto_with_error_value {
     ($c_char_pointer:expr, $pb_type:ty, $error_value:expr) => {
-        match protobuf::parse_from_bytes::<$pb_type>(
+        match <$pb_type>::parse_from_bytes(
             &c_safe_c_char_pointer_to_bytes_with_error_value!(
                 $c_char_pointer,
                 $error_value

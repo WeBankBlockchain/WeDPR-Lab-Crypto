@@ -23,7 +23,7 @@ crate-type = [ "cdylib", "staticlib" ]
 [dependencies]
 lazy_static = "1.4.0"
 libc = "0.2.60"
-protobuf = "2.10.1"
+protobuf = "2.20.0"
 wedpr_ffi_c_common = { path = "../ffi_c_common/" }
 wedpr_ffi_common_base64 = { package = "wedpr_ffi_common" ,path = "../../ffi_common/", features = [ "wedpr_f_base64" ], optional = true }
 wedpr_ffi_common_hex = { package = "wedpr_ffi_common", path = "../../ffi_common/", features = [ "wedpr_f_hex" ], optional = true }
