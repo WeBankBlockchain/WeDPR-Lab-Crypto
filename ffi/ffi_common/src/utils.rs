@@ -4,11 +4,11 @@
 
 #[cfg(all(feature = "wedpr_f_base64", feature = "wedpr_f_hex"))]
 compile_error!(
-    "Feature wedpr_base64 and wedpr_hex can not be enabled at same time!"
+    "Feature wedpr_f_base64 and wedpr_f_hex can not be enabled at same time!"
 );
 
 #[cfg(all(not(feature = "wedpr_f_base64"), not(feature = "wedpr_f_hex")))]
-compile_error!("Must use feature wedpr_base64 or wedpr_hex!");
+compile_error!("Must use feature wedpr_f_base64 or wedpr_f_hex!");
 
 // From Rust to Java.
 extern crate jni;
