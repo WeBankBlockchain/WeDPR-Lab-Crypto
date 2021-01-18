@@ -1,10 +1,13 @@
 [package]
 name = "wedpr_ffi_common"
-version = "1.0.0"
+version = "0.0.1"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
+license = "Apache-2.0"
+description = "Library of WeDPR ffi shared common utils."
 
 [features]
+default = [ "wedpr_f_base64" ]
 wedpr_f_base64 = [ "wedpr_l_common_coder_base64" ]
 wedpr_f_hex = [ "wedpr_l_common_coder_hex" ]
 
@@ -15,8 +18,8 @@ jni = "0.13.0"
 lazy_static = "1.4.0"
 
 libc = "0.2.60"
-wedpr_ffi_macros = { path = "../ffi_macros/" }
-wedpr_l_common_coder_base64 = { path = "../../common/coder/base64", optional = true }
-wedpr_l_common_coder_hex = { path = "../../common/coder/hex", optional = true }
-wedpr_l_macros = { path = "../../common/macros/" }
-wedpr_l_utils = { path = "../../common/utils" }
+wedpr_ffi_macros = "0.0.1"
+wedpr_l_common_coder_base64 = { version = "0.0.1", optional = true }
+wedpr_l_common_coder_hex = { version = "0.0.1", optional = true }
+wedpr_l_macros = "0.0.1"
+wedpr_l_utils = "0.0.1"

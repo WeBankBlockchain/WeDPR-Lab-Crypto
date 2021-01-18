@@ -1,8 +1,10 @@
 [package]
 name = "wedpr_l_crypto_zkp_utils"
-version = "1.0.0"
+version = "0.0.1"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
+license = "Apache-2.0"
+description = "Library of WeDPR shared zkp function utils."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -11,6 +13,6 @@ curve25519-dalek = { version = "1", features = [ "serde" ] }
 lazy_static = "1.4.0"
 rand = "0.6"
 sha3 = "0.8.0"
-wedpr_l_crypto_hash_keccak256 = { path = "../../hash/keccak256", version = "1.0.0" }
-wedpr_l_macros = { path = "../../../common/macros", version = "1.0.0" }
-wedpr_l_utils = { path = "../../../common/utils", version = "1.0.0" }
+wedpr_l_crypto_hash_keccak256 = "0.0.1"
+wedpr_l_macros = "0.0.1"
+wedpr_l_utils = "0.0.1"

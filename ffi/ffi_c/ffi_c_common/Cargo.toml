@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_ffi_c_common"
-version = "1.0.0"
+version = "0.0.1"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 

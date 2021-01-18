@@ -1,8 +1,10 @@
 [package]
 name = "wedpr_l_crypto_zkp_range_proof"
-version = "1.0.0"
+version = "0.0.1"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
+license = "Apache-2.0"
+description = "Library of WeDPR shared zkp Function implement range proof."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
@@ -10,6 +12,6 @@ edition = "2018"
 bulletproofs = "1.0.4"
 curve25519-dalek = { version = "1", features = [ "serde" ] }
 merlin = "1"
-wedpr_l_crypto_zkp_utils = { path = "../utils", version = "1.0.0" }
-wedpr_l_macros = { path = "../../../common/macros", version = "1.0.0" }
-wedpr_l_utils = { path = "../../../common/utils", version = "1.0.0" }
+wedpr_l_crypto_zkp_utils = "0.0.1"
+wedpr_l_macros = "0.0.1"
+wedpr_l_utils = "0.0.1"

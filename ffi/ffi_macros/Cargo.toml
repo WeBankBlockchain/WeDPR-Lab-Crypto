@@ -1,7 +1,9 @@
 [package]
 name = "wedpr_ffi_macros"
-version = "1.0.0"
+version = "0.0.1"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
+license = "Apache-2.0"
+description = "Library of WeDPR ffi shared macros."
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
