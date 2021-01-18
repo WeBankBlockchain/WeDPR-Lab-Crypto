@@ -68,7 +68,7 @@ pub fn java_new_jobject<'a>(
         .find_class(java_class_name)
         .expect(&format!("Could not find Java class {}", java_class_name));
     let java_object = _env.alloc_object(java_class).expect(&format!(
-        "Could not allocate Java object for class {}",
+        "Could not allocate Java object Ffor class {}",
         java_class_name
     ));
     java_object

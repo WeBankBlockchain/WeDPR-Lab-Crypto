@@ -90,7 +90,7 @@ pub fn point_to_slice(point: &RistrettoPoint) -> [u8; 32] {
 /// Converts a vector to RistrettoPoint.
 pub fn bytes_to_point(point: &[u8]) -> Result<RistrettoPoint, WedprError> {
     if point.len() != RISTRETTO_POINT_SIZE_IN_BYTES {
-        wedpr_println!("string_to_point decode failed");
+        wedpr_println!("bytes_to_point decode failed");
         return Err(WedprError::FormatError);
     }
     let point_value = match CompressedRistretto::from_slice(&point).decompress()
@@ -98,7 +98,7 @@ pub fn bytes_to_point(point: &[u8]) -> Result<RistrettoPoint, WedprError> {
         Some(v) => v,
         None => {
             wedpr_println!(
-                "string_to_point decompress CompressedRistretto failed"
+                "bytes_to_point decompress CompressedRistretto failed"
             );
             return Err(WedprError::FormatError);
         },
