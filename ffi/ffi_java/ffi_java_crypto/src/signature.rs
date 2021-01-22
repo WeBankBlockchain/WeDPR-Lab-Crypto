@@ -131,6 +131,41 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Ver
     result_jobject.into_inner()
 }
 
+#[cfg(feature = "wedpr_f_signature_secp256k1")]
+#[no_mangle]
+/// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->secp256k1Recover'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Recover(
+    _env: JNIEnv,
+    _class: JClass,
+    msg_hash_jstring: JString,
+    signature_jstring: JString,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+    let msg_hash =
+        java_safe_jstring_to_bytes!(_env, result_jobject, msg_hash_jstring);
+    let signature =
+        java_safe_jstring_to_bytes!(_env, result_jobject, signature_jstring);
+
+    let result = match SIGNATURE_SECP256K1.recover(&msg_hash, &signature) {
+        Ok(v) => v,
+        Err(_) => {
+            return java_set_error_field_and_extract_jobject(
+                &_env,
+                &result_jobject,
+                &format!(
+                    "secp256k1 recover failed, msg_hash={}",
+                    bytes_to_string(&msg_hash)
+                ),
+            )
+        },
+    };
+
+    java_safe_set_bytes_field!(_env, result_jobject, result, "publicKey");
+    result_jobject.into_inner()
+}
+
 // SM2 implementation.
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
