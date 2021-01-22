@@ -33,11 +33,11 @@ lazy_static! {
 // SM section.
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
-use wedpr_l_crypto_signature_sm2::WeDPRSm2p256v1;
+use wedpr_l_crypto_signature_sm2::WedprSm2p256v1;
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
 lazy_static! {
-    pub static ref SIGNATURE_SM2: WeDPRSm2p256v1 = WeDPRSm2p256v1::default();
+    pub static ref SIGNATURE_SM2: WedprSm2p256v1 = WedprSm2p256v1::default();
 }
 
 #[cfg(feature = "wedpr_f_hash_sm3")]

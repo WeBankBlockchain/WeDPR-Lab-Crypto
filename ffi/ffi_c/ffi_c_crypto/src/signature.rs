@@ -109,6 +109,28 @@ pub extern "C" fn wedpr_secp256k1_verify(
     c_safe_return_with_error_value!(result, FAILURE)
 }
 
+#[cfg(feature = "wedpr_f_signature_secp256k1")]
+#[no_mangle]
+/// C interface for 'wedpr_secp256k1_recover_public_key'.
+pub extern "C" fn wedpr_secp256k1_recover_public_key(
+    encoded_message_hash: *mut c_char,
+    encoded_signature: *mut c_char,
+) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let message_hash =
+            c_safe_c_char_pointer_to_bytes!(encoded_message_hash);
+        let signature = c_safe_c_char_pointer_to_bytes!(encoded_signature);
+
+        let result =
+            match SIGNATURE_SECP256K1.recover_public_key(&message_hash, &signature) {
+                Ok(v) => v,
+                Err(_) => return ptr::null_mut(),
+            };
+        c_safe_bytes_to_c_char_pointer!(&result)
+    });
+    c_safe_return!(result)
+}
+
 // SM2 implementation.
 
 #[cfg(feature = "wedpr_f_signature_sm2")]

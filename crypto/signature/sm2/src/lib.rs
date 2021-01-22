@@ -19,9 +19,9 @@ lazy_static! {
 
 /// Implements FISCO-BCOS-compatible SM2 as a Signature instance.
 #[derive(Default, Debug, Clone)]
-pub struct WeDPRSm2p256v1 {}
+pub struct WedprSm2p256v1 {}
 
-impl Signature for WeDPRSm2p256v1 {
+impl Signature for WedprSm2p256v1 {
     fn sign<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
@@ -70,7 +70,7 @@ impl Signature for WeDPRSm2p256v1 {
     }
 }
 
-impl WeDPRSm2p256v1 {
+impl WedprSm2p256v1 {
     /// Signes a message hash faster with both the private and public keys.
     pub fn sign_fast<T: ?Sized + AsRef<[u8]>>(
         &self,
@@ -103,7 +103,7 @@ mod tests {
 
     #[test]
     fn test_sm2() {
-        let sm2_sign = WeDPRSm2p256v1::default();
+        let sm2_sign = WedprSm2p256v1::default();
 
         // The message hash (NOT the original message) is required for
         // generating a valid signature.

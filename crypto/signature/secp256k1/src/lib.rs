@@ -10,7 +10,7 @@ extern crate lazy_static;
 extern crate secp256k1;
 use secp256k1::{
     recovery::{RecoverableSignature, RecoveryId},
-    All, Message, PublicKey, Secp256k1, SecretKey, VerifyOnly,
+    All, Message, Secp256k1, SecretKey, VerifyOnly,
 };
 use wedpr_l_utils::{error::WedprError, traits::Signature};
 
@@ -22,7 +22,7 @@ lazy_static! {
 }
 
 /// Implements FISCO-BCOS-compatible Secp256k1 as a Signature instance.
-#[derive(Default, Debug, Clone)]
+#[derive(Default, Debug, Clone, Copy)]
 pub struct WedprSecp256k1Recover {}
 
 const FISCO_BCOS_SIGNATURE_DATA_LENGTH: usize = 65;
@@ -69,57 +69,11 @@ impl Signature for WedprSecp256k1Recover {
         signature: &T,
     ) -> bool {
         // Message hash length for Secp256k1 signature should be 32 bytes.
-        let msg_hash_obj = match Message::from_slice(&msg_hash.as_ref()) {
+        let recover_public_key = match self.recover_public_key(msg_hash, signature) {
             Ok(v) => v,
-            Err(_) => {
-                wedpr_println!("Parsing message hash failed");
-                return false;
-            },
+            Err(_) => return false,
         };
-        let inputted_pub_key = match PublicKey::from_slice(&public_key.as_ref())
-        {
-            Ok(v) => v,
-            Err(_) => {
-                wedpr_println!("Parsing public key failed");
-                return false;
-            },
-        };
-        if signature.as_ref().len() != FISCO_BCOS_SIGNATURE_DATA_LENGTH {
-            wedpr_println!("Signature length is not 65");
-            return false;
-        };
-        let recid = match RecoveryId::from_i32(
-            signature.as_ref()[FISCO_BCOS_SIGNATURE_END_INDEX] as i32,
-        ) {
-            Ok(v) => v,
-            Err(_) => {
-                wedpr_println!("Parsing RecoveryId failed");
-                return false;
-            },
-        };
-
-        // The last byte is recovery id, we only need to get the first 64 bytes
-        // for signature data.
-        let signature_byte =
-            &signature.as_ref()[0..FISCO_BCOS_SIGNATURE_END_INDEX];
-
-        let get_sign_final =
-            match RecoverableSignature::from_compact(signature_byte, recid) {
-                Ok(v) => v,
-                Err(_) => {
-                    wedpr_println!("Signature from_compact failed");
-                    return false;
-                },
-            };
-        let recovered_public_key =
-            match SECP256K1_VERIFY.recover(&msg_hash_obj, &get_sign_final) {
-                Ok(v) => v,
-                Err(_) => {
-                    wedpr_println!("Signature recover failed");
-                    return false;
-                },
-            };
-        if inputted_pub_key != recovered_public_key {
+        if recover_public_key.ne(&public_key.as_ref().to_vec()) {
             wedpr_println!("Matching signature public key failed");
             return false;
         }
@@ -140,6 +94,59 @@ impl Signature for WedprSecp256k1Recover {
                 );
             }
         }
+    }
+}
+
+impl WedprSecp256k1Recover {
+    pub fn recover_public_key<T: ?Sized + AsRef<[u8]>>(
+        self,
+        msg_hash: &T,
+        signature: &T,
+    ) -> Result<Vec<u8>, WedprError> {
+        // Message hash length for Secp256k1 signature should be 32 bytes.
+        let msg_hash_obj = match Message::from_slice(&msg_hash.as_ref()) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("Parsing message hash failed");
+                return Err(WedprError::DecodeError);
+            },
+        };
+        if signature.as_ref().len() != FISCO_BCOS_SIGNATURE_DATA_LENGTH {
+            wedpr_println!("Signature length is not 65");
+            return Err(WedprError::DecodeError);
+        };
+        let rec_id = match RecoveryId::from_i32(
+            signature.as_ref()[FISCO_BCOS_SIGNATURE_END_INDEX] as i32,
+        ) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("Parsing RecoveryId failed");
+                return Err(WedprError::DecodeError);
+            },
+        };
+
+        // The last byte is recovery id, we only need to get the first 64 bytes
+        // for signature data.
+        let signature_byte =
+            &signature.as_ref()[0..FISCO_BCOS_SIGNATURE_END_INDEX];
+
+        let get_sign_final =
+            match RecoverableSignature::from_compact(signature_byte, rec_id) {
+                Ok(v) => v,
+                Err(_) => {
+                    wedpr_println!("Signature from_compact failed");
+                    return Err(WedprError::FormatError);
+                },
+            };
+        let recovered_public_key =
+            match SECP256K1_VERIFY.recover(&msg_hash_obj, &get_sign_final) {
+                Ok(v) => v,
+                Err(_) => {
+                    wedpr_println!("Signature recover failed");
+                    return Err(WedprError::FormatError);
+                },
+            };
+        return Ok(recovered_public_key.serialize_uncompressed().to_vec());
     }
 }
 
