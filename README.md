@@ -86,6 +86,52 @@ WeDPR-Lab-Crypto支持灵活的定制化算法选择，用户可根据业务场�
 cd ffi/ffi_java/ffi_java_crypto/ && cargo build --features "wedpr_f_base64, wedpr_f_ecies_secp256k1" --no-default-features
 ```
 
+根目录下ffi编译方法：
+1. 进入ffi下级目录，如：
+
+```bash
+cd ffi/ffi_c/ffi_c_crypto
+```
+
+2. 查看当前目录下的Cargo.toml中的[features]，明确本目录可选的条件编译选项。
+如ffi/ffi_c/ffi_c_crypto下，所有条件编译选项为：
+
+[features]
+
+default = ["wedpr_f_base64", "wedpr_f_ecies_secp256k1", "wedpr_f_signature_secp256k1", "wedpr_f_hash_keccak256", "wedpr_f_signature_sm2", "wedpr_f_hash_sm3", "wedpr_f_vrf_curve25519"]
+
+wedpr_f_base64 = [ "wedpr_ffi_common_base64" ]
+
+wedpr_f_hex = [ "wedpr_ffi_common_hex" ]
+
+wedpr_f_ecies_secp256k1 = [ "wedpr_l_crypto_ecies_secp256k1" ]
+
+wedpr_f_signature_secp256k1 = [ "wedpr_l_crypto_signature_secp256k1" ]
+
+wedpr_f_hash_keccak256 = [ "wedpr_l_crypto_hash_keccak256" ]
+
+wedpr_f_signature_sm2 = [ "wedpr_l_crypto_signature_sm2" ]
+
+wedpr_f_hash_sm3 = [ "wedpr_l_crypto_hash_sm3" ]
+
+wedpr_f_vrf_curve25519 = [ "wedpr_l_crypto_vrf_curve25519" ]
+
+
+3. 使用cargo build进行编译时，默认打开了所有条件编译选项，编译完成后，即生成本目录下所有密码算法的调用接口。
+
+4. 若只需使用部分密码算法的调用接口，则开启该密码算法对应的条件编译选项，编译时：
+
+```bash
+cargo build --features "一个或多个feature名"
+```
+
+其中，选择"一个或多个feature名"时，注意：
+
+| 互斥条件编译项             |        wedpr_ffi_common_base64， wedpr_ffi_common_hex        |
+| -------------------------- | :----------------------------------------------------------: |
+| 必选条件编译项             |        wedpr_ffi_common_base64或 wedpr_ffi_common_hex        |
+| 可选条件编译项（任意组合） | wedpr_l_crypto_ecies_secp256k1， wedpr_l_crypto_signature_secp256k1， wedpr_l_crypto_hash_keccak256， wedpr_l_crypto_signature_sm2， wedpr_l_crypto_hash_sm3， wedpr_l_crypto_vrf_curve25519 |
+
 ## 接口文档
 
 ### 生成并查看Rust SDK接口文档
