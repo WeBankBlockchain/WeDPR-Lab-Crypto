@@ -107,12 +107,11 @@ cargo build --features "一个或多个feature名"
 
 其中，选择"一个或多个feature名"时，注意：
 
-|          注意事项          |                         条件编译选项                         |
-| :------------------------: | :----------------------------------------------------------: |
-|       互斥条件编译项       |        wedpr_ffi_common_base64， wedpr_ffi_common_hex        |
-|       必选条件编译项       |        wedpr_ffi_common_base64或wedpr_ffi_common_hex        |
-| 可选条件编译项（任意组合） | wedpr_l_crypto_ecies_secp256k1， wedpr_l_crypto_signature_secp256k1， wedpr_l_crypto_hash_keccak256， wedpr_l_crypto_signature_sm2， wedpr_l_crypto_hash_sm3， wedpr_l_crypto_vrf_curve25519 |
-
+|    注意事项    |                         条件编译选项                         |
+| :------------: | :----------------------------------------------------------: |
+| 互斥条件编译项 |                 wedpr_f_base64, wedpr_f_hex                  |
+| 必选条件编译项 |                 wedpr_f_base64或wedpr_f_hex                  |
+| 可选条件编译项 | wedpr_f_ecies_secp256k1， wedpr_f_signature_secp256k1， wedpr_f_hash_keccak256， wedpr_f_signature_sm2， wedpr_f_hash_sm3， wedpr_f_vrf_curve25519 |
 
 ## 接口文档
 
