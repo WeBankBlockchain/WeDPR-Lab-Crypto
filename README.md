@@ -34,17 +34,17 @@ WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，进一步
 
 在此基础上，本次WeDPR-Lab Crypto v1.0.0又新增以下密码算法及其对应的FFI接口：
 
-1.	国密SM2签名及验证算法
+1.	**国密SM2签名及验证算法**
 
 国密SM2为我国自主设计，基于椭圆曲线密码（Elliptic Curve Cryptography, ECC）的公钥密码算法，包括SM2-1椭圆曲线数字签名算法，SM2-2椭圆曲线密钥交换协议，SM2-3椭圆曲线公钥加密算法。
 
 WeDPR-Lab Crypto v1.0.0新增的是其中的SM2-1椭圆曲线数字签名算法。
 
-2.	国密SM3
+2.	**国密SM3**
 
 国密SM3为我国自主设计的密码杂凑算法，也称消息摘要算法。适用于数字签名、消息认证码的生成与验证、随机数的生成等。
 
-3.	基于椭圆曲线的可验证随机函数VRF(Verifiable Random Functions)
+3.	**基于椭圆曲线的可验证随机函数VRF(Verifiable Random Functions)**
 
 VRF包含：
     （1）密钥生成算法
@@ -53,13 +53,13 @@ VRF包含：
 
 VRF能够实现：只有私钥的持有者才能计算哈希，但任何拥有公钥的人都可以验证哈希的正确性。可用于随机数的生成，在区块链共识机制中具有广泛应用。
 
-4.	FFI接口，支持交叉编译跨语言、跨平台所调用的FFI适配接口。
+4.	**FFI接口**，支持交叉编译跨语言、跨平台所调用的FFI适配接口。
 
 （说明：由于在进行密码算法组件迁移过程中存在接口变动，所以WeDPR-Lab-Crypto v1.0.0与WeDPR-Lab Core v1.3.0之前版本的密码算法可能存在部分接口不兼容的情况，未来我们会持续进行修复、更新。）
 
 欢迎社区伙伴参与WeDPR-Lab的共建，一起为可信开放数字新生态的构建打造坚实、可靠的技术底座。
 
-## 安装
+# 安装
 
 ### 安装Rust环境
 
@@ -76,17 +76,22 @@ rustup default nightly
 git clone https://github.com/WeBankBlockchain/WeDPR-Lab-Crypto.git
 ```
 
-## 编译
+# 条件编译
 
 WeDPR-Lab-Crypto支持灵活的定制化算法选择，用户可根据业务场景、实际需求选择对应的密码算法。
 
 譬如，若用户只希望使用“ECIES加解密算法”的Java调用接口，则只需在WeDPR-Lab Crypto的Java FFI目录下，打开ECIES加解密算法对应的特性进行编译，即进行如下条件编译即可：
 
 ```bash
-cd ffi/ffi_java/ffi_java_crypto/ && cargo build --features "wedpr_f_base64, wedpr_f_ecies_secp256k1" --no-default-features
+cd ffi/ffi_java/ffi_java_crypto/
+cargo build --features "wedpr_f_base64, wedpr_f_ecies_secp256k1" --no-default-features
 ```
 
-**../ffi目录下只有ffi_c与ffi_java会涉及条件编译，编译方法如下：**
+
+**只有../ffi目录下涉及条件编译。**其中，除**ffi_c/ffi_c_crypto和ffi_java/ffi_java_crypto**，ffi_commom， ffi_macros与ffi_c/ffi_c_commom都为工具类方法，无需编译。
+
+### ffi_c与ffi_java条件编译方法
+
 （以ffi_c目录下的条件编译为例，ffi_java与之类似）
 
 1. 进入ffi_c目录：
@@ -97,12 +102,12 @@ cd ffi/ffi_c/ffi_c_crypto
 
 2. 查看当前目录下的Cargo.toml中的[features]，明确本目录所有的条件编译选项。
 
-3. 使用cargo build进行编译时，默认打开了所有条件编译选项，编译完成后，即生成本目录下所有密码算法的调用接口。
+3. 使用cargo build进行编译时，默认打开了所有条件编译选项（默认编解码方式为base64），编译完成后，即生成本目录下所有密码算法的调用接口。
 
 4. 若只需使用部分密码算法的调用接口，则开启该密码算法对应的条件编译选项，编译时使用：
 
 ```bash
-cargo build --features "一个或多个feature名"
+cargo build --features "一个或多个feature名" --no-default-features
 ```
 
 其中，选择"一个或多个feature名"时，注意：
@@ -113,9 +118,11 @@ cargo build --features "一个或多个feature名"
 | 必选条件编译项 |                 wedpr_f_base64或wedpr_f_hex                  |
 | 可选条件编译项 | wedpr_f_ecies_secp256k1， wedpr_f_signature_secp256k1， wedpr_f_hash_keccak256， wedpr_f_signature_sm2， wedpr_f_hash_sm3， wedpr_f_vrf_curve25519 |
 
-## 接口文档
 
-### 生成并查看Rust SDK接口文档
+
+# 接口文档
+
+## 生成并查看Rust SDK接口文档
 
 在本项目的根目录（即`WeDPR-Lab-Crypto`目录）中，运行如下命令。
 
@@ -127,12 +134,12 @@ cargo doc --no-deps
 
 进入`target/doc`文档目录后，会看到所有SDK相关的包名（包含WeDPR-Lab-Crypto和其他依赖包），进入其中任意一个包名的目录，用网页浏览器打开其中的`index.html`文件，便可查看WeDPR-Lab-Crypto相关的接口说明。
 
-## 其他相关文档
+# 其他相关文档
 
 - [WeDPR方案白皮书](https://mp.weixin.qq.com/s?__biz=MzU0MDY4MDMzOA==&mid=2247483910&idx=1&sn=7b647dec9f046f1e6f94d103897f7efb&scene=19#wechat_redirect)
 - [WeDPR-Lab用户文档](https://wedpr-lab.readthedocs.io/zh_CN/latest/index.html)
 
-## 项目贡献
+# 项目贡献
 
 - 点亮我们的小星星(点击项目右上方Star按钮)
 - 提交代码(Pull Request)，参考我们的代码[贡献流程](./CONTRIBUTING.md)

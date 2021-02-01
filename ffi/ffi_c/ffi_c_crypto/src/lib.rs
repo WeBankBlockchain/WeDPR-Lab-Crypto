@@ -16,9 +16,12 @@ compile_error!("Must use feature wedpr_f_base64 or wedpr_f_hex!");
 #[allow(unused_imports)]
 #[macro_use]
 extern crate wedpr_ffi_macros;
+
+#[allow(unused_imports)]
 #[macro_use]
 extern crate wedpr_l_macros;
 
+#[allow(unused_imports)]
 #[macro_use]
 extern crate lazy_static;
 
