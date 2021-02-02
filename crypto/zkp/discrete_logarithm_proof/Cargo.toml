@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_zkp_discrete_logarithm_proof"
-version = "0.0.1"
+version = "1.0.0"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -10,7 +10,7 @@ description = "Library of WeDPR shared zkp Function implement discrete logarithm
 
 [dependencies]
 curve25519-dalek = { version = "1", features = [ "serde" ] }
-wedpr_l_crypto_zkp_utils = "0.0.1"
-wedpr_l_macros = "0.0.1"
-wedpr_l_protos = "0.0.1"
-wedpr_l_utils = "0.0.1"
+wedpr_l_crypto_zkp_utils = "1.0.0"
+wedpr_l_macros = "1.0.0"
+wedpr_l_protos = "1.0.0"
+wedpr_l_utils = "1.0.0"

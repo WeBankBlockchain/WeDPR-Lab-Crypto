@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_vrf_curve25519"
-version = "0.0.1"
+version = "1.0.0"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -12,7 +12,7 @@ description = "Library of WeDPR shared VRF Function implement by curve25519."
 curve25519-dalek = { version = "1", features = [ "serde" ] }
 rand = "0.6"
 sha3 = "0.8.2"
-wedpr_l_crypto_hash_keccak256 = "0.0.1"
-wedpr_l_crypto_zkp_utils = "0.0.1"
-wedpr_l_macros = "0.0.1"
-wedpr_l_utils = "0.0.1"
+wedpr_l_crypto_hash_keccak256 = "1.0.0"
+wedpr_l_crypto_zkp_utils = "1.0.0"
+wedpr_l_macros = "1.0.0"
+wedpr_l_utils = "1.0.0"
