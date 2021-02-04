@@ -56,6 +56,7 @@ cargo ndk --target i686-linux-android --android-platform 21 -- build --release
 # armv7-linux-androideabi
 # i686-linux-android
 # target 21 is android 5.0, work fine in old oppo, 26 is too high run in old version
+# cargo ndk --target armv7-linux-androideabi --android-platform 21 -- build --release --features "wedpr_f_hex, wedpr_f_ecies_secp256k1, wedpr_f_signature_secp256k1, wedpr_f_hash_keccak256, wedpr_f_signature_sm2, wedpr_f_hash_sm3, wedpr_f_vrf_curve25519" --no-default-features
 ```
 
 ```bash
@@ -80,6 +81,31 @@ public class NativeInterface {
     public static native CryptoResult secp256k1Sign(String priKey, String messageHash);
 
     public static native CryptoResult secp256k1Verify(String pubKey, String message, String signature);
+
+    public static native CryptoResult secp256k1RecoverPublicKey(String message, String signature);
+
+    public static native CryptoResult sm3Hash(String message);
+
+    public static native CryptoResult sm2GenKeyPair();
+
+    public static native CryptoResult sm2Sign(String priKey, String messageHash);
+
+    public static native CryptoResult sm2SignFast(String priKey, String pubKey, String messageHash);
+
+    public static native CryptoResult sm2Verify(String pubKey, String message, String signature);
+
+    public static native CryptoResult curve25519VrfProveUtf8(String privateKey, String utf8Message);
+
+    public static native CryptoResult curve25519VrfProveFastUtf8(String privateKey, String publicKey, String utf8Message);
+
+    public static native CryptoResult curve25519VrfVerifyUtf8(String publicKey, String utf8Message, String proof);
+
+    public static native CryptoResult curve25519VrfDerivePublicKey(String privateKey);
+
+    public static native CryptoResult curve25519VrfProofToHash(String proof);
+
+    public static native CryptoResult curve25519VrfProofToHash(String publicKey);
+
 }
 ```
 
