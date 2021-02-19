@@ -219,7 +219,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
                 &_env,
                 &result_jobject,
                 &format!(
-                    "secp256k1 sign failed, msg_hash={}",
+                    "sm2 sign failed, msg_hash={}",
                     bytes_to_string(&msg_hash)
                 ),
             )
@@ -263,7 +263,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignFast(
                     &_env,
                     &result_jobject,
                     &format!(
-                        "secp256k1 sign failed, msg_hash={}",
+                        "sm2 sign failed, msg_hash={}",
                         bytes_to_string(&msg_hash)
                     ),
                 )

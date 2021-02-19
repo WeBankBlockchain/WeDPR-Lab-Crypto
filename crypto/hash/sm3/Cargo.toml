@@ -9,6 +9,6 @@ description = "Library of WeDPR shared Hash Function implement by sm3."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-wedpr_l_libsm = "0.3.0"
+wedpr_l_libsm = "0.3.1"
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.0.0"
