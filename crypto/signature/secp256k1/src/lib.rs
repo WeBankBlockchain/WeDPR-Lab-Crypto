@@ -10,7 +10,7 @@ extern crate lazy_static;
 extern crate secp256k1;
 use secp256k1::{
     recovery::{RecoverableSignature, RecoveryId},
-    All, Message, Secp256k1, SecretKey, VerifyOnly,
+    All, Message, PublicKey, Secp256k1, SecretKey, VerifyOnly,
 };
 use wedpr_l_utils::{error::WedprError, traits::Signature};
 
@@ -69,10 +69,11 @@ impl Signature for WedprSecp256k1Recover {
         signature: &T,
     ) -> bool {
         // Message hash length for Secp256k1 signature should be 32 bytes.
-        let recover_public_key = match self.recover_public_key(msg_hash, signature) {
-            Ok(v) => v,
-            Err(_) => return false,
-        };
+        let recover_public_key =
+            match self.recover_public_key(msg_hash, signature) {
+                Ok(v) => v,
+                Err(_) => return false,
+            };
         if recover_public_key.ne(&public_key.as_ref().to_vec()) {
             wedpr_println!("Matching signature public key failed");
             return false;
@@ -98,6 +99,7 @@ impl Signature for WedprSecp256k1Recover {
 }
 
 impl WedprSecp256k1Recover {
+    /// Recovers public key from message hash and signature.
     pub fn recover_public_key<T: ?Sized + AsRef<[u8]>>(
         self,
         msg_hash: &T,
@@ -148,6 +150,24 @@ impl WedprSecp256k1Recover {
             };
         return Ok(recovered_public_key.serialize_uncompressed().to_vec());
     }
+
+    /// Derives public key from private key.
+    pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
+        &self,
+        private_key: &T,
+    ) -> Result<Vec<u8>, WedprError> {
+        let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("Parsing private key failed");
+                return Err(WedprError::FormatError);
+            },
+        };
+
+        let public_key =
+            PublicKey::from_secret_key(&SECP256K1_ALL, &secret_key);
+        Ok(public_key.serialize_uncompressed().to_vec())
+    }
 }
 
 #[cfg(test)]
@@ -160,6 +180,10 @@ mod tests {
         let secp256k1 = WedprSecp256k1Recover::default();
         let (public_key, secret_key) = secp256k1.generate_keypair();
 
+        let public_key_derive =
+            secp256k1.derive_public_key(&secret_key).unwrap();
+        assert_eq!(public_key, public_key_derive);
+
         // The message hash (NOT the original message) is required for
         // generating a valid signature.
         let msg_hash = BASE64_ENCODED_TEST_MESSAGE;
@@ -169,7 +193,7 @@ mod tests {
         assert_eq!(
             true,
             secp256k1.verify(
-                &public_key.to_vec(),
+                &public_key_derive.to_vec(),
                 &msg_hash.to_vec(),
                 &signature
             )
