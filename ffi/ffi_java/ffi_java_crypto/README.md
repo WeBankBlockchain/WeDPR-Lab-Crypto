@@ -76,6 +76,8 @@ public class NativeInterface {
 
     public static native CryptoResult secp256k1GenKeyPair();
 
+    public static native CryptoResult secp256k1DerivePublicKey(String priKey);
+
     public static native CryptoResult keccak256Hash(String message);
 
     public static native CryptoResult secp256k1Sign(String priKey, String messageHash);
@@ -87,6 +89,8 @@ public class NativeInterface {
     public static native CryptoResult sm3Hash(String message);
 
     public static native CryptoResult sm2GenKeyPair();
+
+    public static native CryptoResult sm2DerivePublicKey(String priKey);
 
     public static native CryptoResult sm2Sign(String priKey, String messageHash);
 

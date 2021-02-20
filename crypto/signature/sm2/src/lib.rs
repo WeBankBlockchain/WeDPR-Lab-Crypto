@@ -94,6 +94,21 @@ impl WedprSm2p256v1 {
             SM2_CTX.sign(&msg_hash.as_ref(), &secret_key, &public_key_point);
         Ok(signature.bytes_encode().to_vec())
     }
+
+    /// Derives public key from private key.
+    pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
+        &self,
+        private_key: &T,
+    ) -> Result<Vec<u8>, WedprError> {
+        let secret_key = match SM2_CTX.load_seckey(&private_key.as_ref()) {
+            Ok(v) => v,
+            Err(_) => {
+                return Err(WedprError::FormatError);
+            },
+        };
+        let public_key = SM2_CTX.pk_from_sk(&secret_key);
+        Ok(SM2_CTX.serialize_pubkey(&public_key, false))
+    }
 }
 
 #[cfg(test)]
@@ -111,11 +126,19 @@ mod tests {
 
         let (public_key, private_key) = sm2_sign.generate_keypair();
 
+        let public_key_derive =
+            sm2_sign.derive_public_key(&private_key).unwrap();
+        assert_eq!(public_key, public_key_derive);
+
         let signature_normal =
             sm2_sign.sign(&private_key, &msg_hash.to_vec()).unwrap();
         assert_eq!(
             true,
-            sm2_sign.verify(&public_key, &msg_hash.to_vec(), &signature_normal)
+            sm2_sign.verify(
+                &public_key_derive,
+                &msg_hash.to_vec(),
+                &signature_normal
+            )
         );
 
         let signature_fast = sm2_sign

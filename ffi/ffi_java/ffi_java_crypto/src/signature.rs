@@ -67,6 +67,49 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Gen
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->secp256k1DerivePublicKey'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1DerivePublicKey(
+    _env: JNIEnv,
+    _class: JClass,
+    private_key_jstring: JString,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+    let private_key =
+        java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
+
+    let public_key = match SIGNATURE_SECP256K1.derive_public_key(&private_key) {
+        Ok(v) => v,
+        Err(_) => {
+            return java_set_error_field_and_extract_jobject(
+                &_env,
+                &result_jobject,
+                &format!(
+                    "secp256k1 derive_public_key failed, private_key={}",
+                    bytes_to_string(&private_key)
+                ),
+            )
+        },
+    };
+
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&public_key),
+        "publicKey"
+    );
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&private_key),
+        "privateKey"
+    );
+    result_jobject.into_inner()
+}
+
+#[cfg(feature = "wedpr_f_signature_secp256k1")]
+#[no_mangle]
+/// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->secp256k1Sign'.
 // TODO: Add secp256k1SignUtf8 to allow non-encoded UTF8 input.
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sign(
@@ -148,19 +191,20 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
     let signature =
         java_safe_jstring_to_bytes!(_env, result_jobject, signature_jstring);
 
-    let result = match SIGNATURE_SECP256K1.recover_public_key(&msg_hash, &signature) {
-        Ok(v) => v,
-        Err(_) => {
-            return java_set_error_field_and_extract_jobject(
-                &_env,
-                &result_jobject,
-                &format!(
-                    "secp256k1 recover failed, msg_hash={}",
-                    bytes_to_string(&msg_hash)
-                ),
-            )
-        },
-    };
+    let result =
+        match SIGNATURE_SECP256K1.recover_public_key(&msg_hash, &signature) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    &format!(
+                        "secp256k1 recover failed, msg_hash={}",
+                        bytes_to_string(&msg_hash)
+                    ),
+                )
+            },
+        };
 
     java_safe_set_bytes_field!(_env, result_jobject, result, "publicKey");
     result_jobject.into_inner()
@@ -190,6 +234,49 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2GenKeyPai
         _env,
         result_jobject,
         bytes_to_string(&sk),
+        "privateKey"
+    );
+    result_jobject.into_inner()
+}
+
+#[cfg(feature = "wedpr_f_signature_sm2")]
+#[no_mangle]
+/// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->sm2DerivePublicKey'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2DerivePublicKey(
+    _env: JNIEnv,
+    _class: JClass,
+    private_key_jstring: JString,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+    let private_key =
+        java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
+
+    let public_key = match SIGNATURE_SM2.derive_public_key(&private_key) {
+        Ok(v) => v,
+        Err(_) => {
+            return java_set_error_field_and_extract_jobject(
+                &_env,
+                &result_jobject,
+                &format!(
+                    "sm2 derive_public_key failed, private_key={}",
+                    bytes_to_string(&private_key)
+                ),
+            )
+        },
+    };
+
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&public_key),
+        "publicKey"
+    );
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&private_key),
         "privateKey"
     );
     result_jobject.into_inner()
