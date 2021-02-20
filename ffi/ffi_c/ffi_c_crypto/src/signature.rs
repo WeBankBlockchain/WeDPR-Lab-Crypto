@@ -56,6 +56,33 @@ pub extern "C" fn wedpr_secp256k1_gen_key_pair() -> *mut c_char {
 
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
+/// C interface for 'wedpr_secp256k1_derive_public_key'.
+pub extern "C" fn wedpr_secp256k1_derive_public_key(
+    encoded_private_key: *mut c_char,
+) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let sk = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
+        let pk = match SIGNATURE_SECP256K1.derive_public_key(&sk) {
+            Ok(v) => v,
+            Err(_) => {
+                return ptr::null_mut();
+            },
+        };
+        let mut keypair = common::Keypair::new();
+        keypair.set_private_key(sk);
+        keypair.set_public_key(pk);
+        let c_keypair = bytes_to_string(
+            &keypair
+                .write_to_bytes()
+                .expect("proto to bytes should not fail"),
+        );
+        c_safe_string_to_c_char_pointer!(c_keypair)
+    });
+    c_safe_return!(result)
+}
+
+#[cfg(feature = "wedpr_f_signature_secp256k1")]
+#[no_mangle]
 /// C interface for 'wedpr_secp256k1_sign'.
 pub extern "C" fn wedpr_secp256k1_sign(
     encoded_private_key: *mut c_char,
@@ -121,11 +148,12 @@ pub extern "C" fn wedpr_secp256k1_recover_public_key(
             c_safe_c_char_pointer_to_bytes!(encoded_message_hash);
         let signature = c_safe_c_char_pointer_to_bytes!(encoded_signature);
 
-        let result =
-            match SIGNATURE_SECP256K1.recover_public_key(&message_hash, &signature) {
-                Ok(v) => v,
-                Err(_) => return ptr::null_mut(),
-            };
+        let result = match SIGNATURE_SECP256K1
+            .recover_public_key(&message_hash, &signature)
+        {
+            Ok(v) => v,
+            Err(_) => return ptr::null_mut(),
+        };
         c_safe_bytes_to_c_char_pointer!(&result)
     });
     c_safe_return!(result)
@@ -139,6 +167,33 @@ pub extern "C" fn wedpr_secp256k1_recover_public_key(
 pub extern "C" fn wedpr_sm2_gen_key_pair() -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let (pk, sk) = SIGNATURE_SM2.generate_keypair();
+        let mut keypair = common::Keypair::new();
+        keypair.set_private_key(sk);
+        keypair.set_public_key(pk);
+        let c_keypair = bytes_to_string(
+            &keypair
+                .write_to_bytes()
+                .expect("proto to bytes should not fail"),
+        );
+        c_safe_string_to_c_char_pointer!(c_keypair)
+    });
+    c_safe_return!(result)
+}
+
+#[cfg(feature = "wedpr_f_signature_sm2")]
+#[no_mangle]
+/// C interface for 'wedpr_sm2_derive_public_key'.
+pub extern "C" fn wedpr_sm2_derive_public_key(
+    encoded_private_key: *mut c_char,
+) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let sk = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
+        let pk = match SIGNATURE_SM2.derive_public_key(&sk) {
+            Ok(v) => v,
+            Err(_) => {
+                return ptr::null_mut();
+            },
+        };
         let mut keypair = common::Keypair::new();
         keypair.set_private_key(sk);
         keypair.set_public_key(pk);
