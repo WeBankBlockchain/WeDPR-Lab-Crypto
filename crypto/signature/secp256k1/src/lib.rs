@@ -82,9 +82,9 @@ impl Signature for WedprSecp256k1Recover {
     }
 
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
-        let mut rng = rand::thread_rng();
         loop {
             // "rand" feature of secp256k1 need to be enabled for this.
+            let mut rng = rand::thread_rng();
             let (secret_key, public_key) =
                 SECP256K1_ALL.generate_keypair(&mut rng);
             // Drop weak secret key.

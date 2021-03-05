@@ -5,7 +5,7 @@
 ``bash
 cargo build --release
 # or choose features
-cargo build --features "wedpr_f_hex wedpr_f_signature_secp256k1" --no-default-features
+cargo build --features "wedpr_f_hex wedpr_f_signature_secp256k1 wedpr_f_ecies_secp256k1 wedpr_f_signature_secp256k1 wedpr_f_hash_keccak256 wedpr_f_signature_sm2 wedpr_f_hash_sm3 wedpr_f_vrf_curve25519" --no-default-features
 ``
 
 ## ffi android
@@ -108,8 +108,7 @@ public class NativeInterface {
 
     public static native CryptoResult curve25519VrfProofToHash(String proof);
 
-    public static native CryptoResult curve25519VrfProofToHash(String publicKey);
-
+    public static native CryptoResult curve25519VrfIsValidPubKey(String publicKey);
 }
 ```
 
