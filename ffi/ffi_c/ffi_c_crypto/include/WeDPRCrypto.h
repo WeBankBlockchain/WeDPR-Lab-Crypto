@@ -30,6 +30,11 @@ char* wedpr_sm3_hash(char* encoded_message);
 char* wedpr_secp256k1_gen_key_pair(void);
 
 /**
+ * C interface for 'wedpr_secp256k1_derive_public_key'.
+ */
+char* wedpr_secp256k1_derive_public_key(char* encoded_private_key);
+
+/**
  * C interface for 'wedpr_secp256k1_sign'.
  */
 char* wedpr_secp256k1_sign(char* encoded_private_key, char* encoded_message_hash);
@@ -49,6 +54,11 @@ char* wedpr_secp256k1_recover_public_key(char* encoded_message_hash, char* encod
  * C interface for 'wedpr_sm2_gen_key_pair'.
  */
 char* wedpr_sm2_gen_key_pair(void);
+
+/**
+ * C interface for 'wedpr_sm2_derive_public_key'.
+ */
+char* wedpr_sm2_derive_public_key(char* encoded_private_key);
 
 /**
  * C interface for 'wedpr_sm2_sign'.
