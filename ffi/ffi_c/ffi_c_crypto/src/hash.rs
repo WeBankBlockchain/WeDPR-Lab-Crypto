@@ -32,7 +32,7 @@ use wedpr_ffi_common_hex::utils::{
 /// C interface for 'wedpr_keccak256_hash'.
 // TODO: Add wedpr_keccak256_hash_utf8 to allow non-encoded UTF8 input.
 pub extern "C" fn wedpr_keccak256_hash(
-    encoded_message: *mut c_char,
+    encoded_message: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
@@ -48,7 +48,7 @@ pub extern "C" fn wedpr_keccak256_hash(
 #[cfg(feature = "wedpr_f_hash_sm3")]
 #[no_mangle]
 /// C interface for 'wedpr_sm3_hash'.
-pub extern "C" fn wedpr_sm3_hash(encoded_message: *mut c_char) -> *mut c_char {
+pub extern "C" fn wedpr_sm3_hash(encoded_message: *const c_char) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
 

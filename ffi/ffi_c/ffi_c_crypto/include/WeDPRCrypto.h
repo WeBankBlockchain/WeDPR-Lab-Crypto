@@ -17,12 +17,12 @@ char* wedpr_secp256k1_ecies_decrypt(char* encoded_private_key, char* encoded_cip
 /**
  * C interface for 'wedpr_keccak256_hash'.
  */
-char* wedpr_keccak256_hash(char* encoded_message);
+char* wedpr_keccak256_hash(const char* encoded_message);
 
 /**
  * C interface for 'wedpr_sm3_hash'.
  */
-char* wedpr_sm3_hash(char* encoded_message);
+char* wedpr_sm3_hash(const char* encoded_message);
 
 /**
  * C interface for 'wedpr_secp256k1_gen_key_pair'.
@@ -32,23 +32,24 @@ char* wedpr_secp256k1_gen_key_pair(void);
 /**
  * C interface for 'wedpr_secp256k1_derive_public_key'.
  */
-char* wedpr_secp256k1_derive_public_key(char* encoded_private_key);
+char* wedpr_secp256k1_derive_public_key(const char* encoded_private_key);
 
 /**
  * C interface for 'wedpr_secp256k1_sign'.
  */
-char* wedpr_secp256k1_sign(char* encoded_private_key, char* encoded_message_hash);
+char* wedpr_secp256k1_sign(const char* encoded_private_key, const char* encoded_message_hash);
 
 /**
  * C interface for 'wedpr_secp256k1_verify'.
  */
-int8_t wedpr_secp256k1_verify(
-    char* encoded_public_key, char* encoded_message_hash, char* encoded_signature);
+int8_t wedpr_secp256k1_verify(const char* encoded_public_key, const char* encoded_message_hash,
+    const char* encoded_signature);
 
 /**
  * C interface for 'wedpr_secp256k1_recover_public_key'.
  */
-char* wedpr_secp256k1_recover_public_key(char* encoded_message_hash, char* encoded_signature);
+char* wedpr_secp256k1_recover_public_key(
+    const char* encoded_message_hash, const char* encoded_signature);
 
 /**
  * C interface for 'wedpr_sm2_gen_key_pair'.
@@ -58,24 +59,24 @@ char* wedpr_sm2_gen_key_pair(void);
 /**
  * C interface for 'wedpr_sm2_derive_public_key'.
  */
-char* wedpr_sm2_derive_public_key(char* encoded_private_key);
+char* wedpr_sm2_derive_public_key(const char* encoded_private_key);
 
 /**
  * C interface for 'wedpr_sm2_sign'.
  */
-char* wedpr_sm2_sign(char* encoded_private_key, char* encoded_message_hash);
+char* wedpr_sm2_sign(const char* encoded_private_key, const char* encoded_message_hash);
 
 /**
  * C interface for 'wedpr_sm2_sign_fast'.
  */
-char* wedpr_sm2_sign_fast(
-    char* encoded_private_key, char* encoded_public_key, char* encoded_message_hash);
+char* wedpr_sm2_sign_fast(const char* encoded_private_key, const char* encoded_public_key,
+    const char* encoded_message_hash);
 
 /**
  * C interface for 'wedpr_sm2_verify'.
  */
-int8_t wedpr_sm2_verify(
-    char* encoded_public_key, char* encoded_message_hash, char* encoded_signature);
+int8_t wedpr_sm2_verify(const char* encoded_public_key, const char* encoded_message_hash,
+    const char* encoded_signature);
 
 /**
  * C interface for 'wedpr_curve25519_vrf_derive_public_key'.
