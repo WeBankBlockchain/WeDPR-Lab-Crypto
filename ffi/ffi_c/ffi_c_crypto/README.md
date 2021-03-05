@@ -34,7 +34,7 @@ export PKG_CONFIG_ALLOW_CROSS=1
 generate .h
 
 ```bash
-cbindgen src/lib.rs -l c > wedpr_ios.h
+cbindgen src/lib.rs -l c > wedpr_ffi_c_crypto.h
 ```
 
 ```bash
