@@ -35,7 +35,10 @@ mod tests {
     fn test_hex() {
         let hex = WedprHex::default();
         let str = "5c74d17c6a";
+        let str = "5c74d17c6a".as_bytes();
+        let str_re = String::from_utf8(str.to_vec());
         let bytes = hex.decode(&str).unwrap();
+        // println!("bytes = {:?}", )
         let recovered_str = hex.encode(&bytes);
         assert_eq!(str, recovered_str);
     }
