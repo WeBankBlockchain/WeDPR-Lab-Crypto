@@ -1,9 +1,78 @@
+#ifndef _WEDPR_CRYPTO_H_
+#define _WEDPR_CRYPTO_H_
+
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <stdlib.h>
 
 extern "C" {
+/**
+ * C interface for 'wedpr_keccak256_hash_binary'.
+ */
+char* wedpr_keccak256_hash_binary(const char* encoded_message, uintptr_t message_len);
+
+/**
+ * C interface for 'wedpr_sm3_hash_binary'.
+ */
+char* wedpr_sm3_hash_binary(const char* encoded_message, uintptr_t message_len);
+
+/**
+ * C interface for 'wedpr_secp256k1_gen_binary_key_pair'.
+ */
+char* wedpr_secp256k1_gen_binary_key_pair(void);
+
+/**
+ * C interface for 'wedpr_secp256k1_derive_binary_public_key'.
+ */
+char* wedpr_secp256k1_derive_binary_public_key(char* encoded_private_key);
+
+/**
+ * C interface for 'wedpr_secp256k1_sign_binary'.
+ */
+char* wedpr_secp256k1_sign_binary(
+    const char* encoded_private_key, const char* encoded_message_hash);
+
+/**
+ * C interface for 'wedpr_secp256k1_verify_binary'.
+ */
+int8_t wedpr_secp256k1_verify_binary(const char* encoded_public_key,
+    const char* encoded_message_hash, const char* encoded_signature,
+    uintptr_t encoded_signature_len);
+
+/**
+ * C interface for 'wedpr_secp256k1_recover_binary_public_key'.
+ */
+char* wedpr_secp256k1_recover_binary_public_key(const char* encoded_message_hash,
+    const char* encoded_signature, uintptr_t encoded_signature_len);
+
+/**
+ * C interface for 'wedpr_sm2_gen_binary_key_pair'.
+ */
+char* wedpr_sm2_gen_binary_key_pair(void);
+
+/**
+ * C interface for 'wedpr_sm2_derive_binary_public_key'.
+ */
+char* wedpr_sm2_derive_binary_public_key(const char* encoded_private_key);
+
+/**
+ * C interface for 'wedpr_sm2_sign_binary'.
+ */
+char* wedpr_sm2_sign_binary(const char* encoded_private_key, const char* encoded_message_hash);
+
+/**
+ * C interface for 'wedpr_sm2_sign_binary_fast'.
+ */
+char* wedpr_sm2_sign_binary_fast(const char* encoded_private_key, const char* encoded_public_key,
+    const char* encoded_message_hash);
+
+/**
+ * C interface for 'wedpr_sm2_verify_binary'.
+ */
+int8_t wedpr_sm2_verify_binary(const char* encoded_public_key, const char* encoded_message_hash,
+    const char* encoded_signature, uintptr_t signature_len);
+
 /**
  * C interface for 'wedpr_secp256k1_ecies_encrypt'.
  */
@@ -110,3 +179,5 @@ char* wedpr_curve25519_vrf_proof_to_hash(const char* encoded_proof);
  */
 int8_t wedpr_curve25519_vrf_is_valid_public_key(const char* encoded_public_key);
 }
+
+#endif
