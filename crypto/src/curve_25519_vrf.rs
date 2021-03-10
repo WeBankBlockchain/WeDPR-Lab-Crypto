@@ -97,6 +97,7 @@ pub fn curve25519_vrf_gen_pubkey(private_message: &str) -> String {
 pub fn curve25519_vrf_proof_to_hash(proof: &vrf_proof) -> Result<String, WedprError> {
     let gamma = &proof.gamma;
     let gamma = local_utils::string_to_point(gamma)?;
+    //order 8
     let base = gamma * Scalar::from(8u8);
 
     keccak256_hex(&local_utils::point_to_string(&base))

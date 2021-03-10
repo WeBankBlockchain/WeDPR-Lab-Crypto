@@ -132,9 +132,9 @@ impl Signature for WeDPRSecp256k1Recover {
     }
 
     fn generate_keypair(&self) -> (String, String) {
-        let mut rng = rand::thread_rng();
-        let secp = secp256k1::Secp256k1::new();
         loop {
+            // let secp = secp256k1::Secp256k1::new();
+            let mut rng = try_generate_seed();
             let (secret_key, public_key) = SECP256K1_OBJ.generate_keypair(&mut rng);
             if secret_key[0] > 15 {
                 return (
@@ -143,6 +143,15 @@ impl Signature for WeDPRSecp256k1Recover {
                 );
             }
         }
+    }
+}
+
+fn try_generate_seed() -> rand::rngs::OsRng {
+    loop {
+        match rand::rngs::OsRng::new() {
+            Ok(v) => return v,
+            Err(_) => continue,
+        };
     }
 }
 
