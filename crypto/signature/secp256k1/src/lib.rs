@@ -74,6 +74,13 @@ impl Signature for WedprSecp256k1Recover {
                 Ok(v) => v,
                 Err(_) => return false,
             };
+        if recover_public_key.len() ==  FISCO_BCOS_SIGNATURE_DATA_LENGTH{
+            let recover_public_key_without_prefix = &recover_public_key[1..FISCO_BCOS_SIGNATURE_DATA_LENGTH];
+            if(recover_public_key_without_prefix.eq(&public_key.as_ref().to_vec()))
+            {
+                return true;
+            }
+        }
         if recover_public_key.ne(&public_key.as_ref().to_vec()) {
             wedpr_println!("Matching signature public key failed");
             return false;
