@@ -99,6 +99,31 @@ pub fn java_set_error_field_and_extract_jobject(
     java_object.into_inner()
 }
 
+/// Sets the default error message field and extracts actual java object to
+/// return in a erroneous condition.
+pub fn java_set_bytes_field_and_extract_jobject(
+    _env: &JNIEnv,
+    java_object: &JObject,
+    error_message: &mut [u8],
+) -> jobject {
+    let java_bytes_array;
+    // Error message should not be empty.
+    assert!(!error_message.is_empty());
+    java_bytes_array = _env
+        .new_direct_byte_buffer(error_message)
+        .expect("new_string should not fail");
+    _env.set_field(
+        *java_object,
+        DEFAULT_ERROR_FIELD,
+        "[B",
+        JValue::from(JObject::from(java_bytes_array)),
+    )
+    .expect("set_field should not fail");
+
+    // Extract actual java object.
+    java_object.into_inner()
+}
+
 /// Converts Java String to Rust bytes.
 pub fn java_jstring_to_bytes(
     _env: &JNIEnv,
