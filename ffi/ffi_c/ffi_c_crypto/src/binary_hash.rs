@@ -13,6 +13,14 @@ use crate::config::HASH_KECCAK256;
 use crate::config::HASH_SM3;
 
 use libc::c_char;
+
+// Rust to c/c++
+#[repr(C)]
+pub struct HashResult {
+    data: *mut c_char,
+    len: usize,
+}
+
 // Keccak256 implementation.
 #[cfg(feature = "wedpr_f_hash_keccak256")]
 #[no_mangle]
@@ -20,7 +28,7 @@ use libc::c_char;
 pub extern "C" fn wedpr_keccak256_hash_binary(
     encoded_message: *const c_char,
     message_len: usize,
-) -> *mut c_char
+) -> HashResult
 {
     unsafe {
         // Note: Since encode_message is an object passed in by C/CPP, it should
@@ -30,10 +38,15 @@ pub extern "C" fn wedpr_keccak256_hash_binary(
             message_len,
             message_len,
         );
-        let hash_result = HASH_KECCAK256.hash(&input_message);
+        let mut hash_result = HASH_KECCAK256.hash(&input_message);
         std::mem::forget(input_message);
-        // The ownership of hash_result has not been changed
-        return hash_result.as_ptr() as *mut c_char;
+        let hash_ptr = hash_result.as_mut_ptr();
+        let length = hash_result.len();
+        std::mem::forget(hash_result);
+        HashResult {
+            data: hash_ptr as *mut c_char,
+            len: length,
+        }
     }
 }
 
@@ -44,7 +57,7 @@ pub extern "C" fn wedpr_keccak256_hash_binary(
 pub extern "C" fn wedpr_sm3_hash_binary(
     encoded_message: *const c_char,
     message_len: usize,
-) -> *mut c_char
+) -> HashResult
 {
     unsafe {
         let input_message = Vec::from_raw_parts(
@@ -52,8 +65,28 @@ pub extern "C" fn wedpr_sm3_hash_binary(
             message_len,
             message_len,
         );
-        let hash_result = HASH_SM3.hash(&input_message);
+        let mut hash_result = HASH_SM3.hash(&input_message);
         std::mem::forget(input_message);
-        return hash_result.as_ptr() as *mut c_char;
+        let hash_ptr = hash_result.as_mut_ptr();
+        let length = hash_result.len();
+        std::mem::forget(hash_result);
+        HashResult {
+            data: hash_ptr as *mut c_char,
+            len: length,
+        }
+    }
+}
+
+#[no_mangle]
+pub extern "C" fn dealloc_hash_result(hash_result: HashResult) {
+    unsafe {
+        if hash_result.data.is_null() {
+            return;
+        }
+        Vec::from_raw_parts(
+            hash_result.data as *mut i8,
+            hash_result.len,
+            hash_result.len,
+        );
     }
 }
