@@ -24,6 +24,9 @@ use wedpr_ffi_common_base64::utils::{FAILURE, SUCCESS};
 #[cfg(feature = "wedpr_f_hex")]
 use wedpr_ffi_common_hex::utils::{FAILURE, SUCCESS};
 
+const PUBLIC_KEY_SIZE_WITH_PREFIX: usize = 65;
+const PRIVATE_KEY_SIZE: usize = 32;
+
 // Secp256k1 implementation.
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
@@ -31,10 +34,10 @@ use wedpr_ffi_common_hex::utils::{FAILURE, SUCCESS};
 pub extern "C" fn wedpr_secp256k1_gen_binary_key_pair() -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let (mut pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
-        if pk.len() != 65 {
+        if pk.len() != PUBLIC_KEY_SIZE_WITH_PREFIX {
             return ptr::null_mut();
         }
-        if sk.len() != 32 {
+        if sk.len() != PRIVATE_KEY_SIZE {
             return ptr::null_mut();
         }
         pk.extend(&sk);
@@ -47,14 +50,15 @@ pub extern "C" fn wedpr_secp256k1_gen_binary_key_pair() -> *mut c_char {
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_derive_binary_public_key'.
 pub extern "C" fn wedpr_secp256k1_derive_binary_public_key(
-    encoded_private_key: *mut c_char,
-) -> *mut c_char {
+    encoded_private_key: *const c_char,
+    encoded_private_key_len: usize,
+) -> *mut c_char
+{
     let result = panic::catch_unwind(|| unsafe {
-        let private_key_size = 32;
         let sk = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
-            private_key_size,
-            private_key_size,
+            encoded_private_key_len,
+            encoded_private_key_len,
         );
         let pk = match SIGNATURE_SECP256K1.derive_public_key(&sk) {
             Ok(v) => v,
@@ -74,21 +78,21 @@ pub extern "C" fn wedpr_secp256k1_derive_binary_public_key(
 /// C interface for 'wedpr_secp256k1_sign_binary'.
 pub extern "C" fn wedpr_secp256k1_sign_binary(
     encoded_private_key: *const c_char,
+    encoded_private_key_len: usize,
     encoded_message_hash: *const c_char,
+    encoded_message_hash_len: usize,
 ) -> *mut c_char
 {
     let result = panic::catch_unwind(|| unsafe {
-        let private_key_size = 32;
         let private_key = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
-            private_key_size,
-            private_key_size,
+            encoded_private_key_len,
+            encoded_private_key_len,
         );
-        let message_hash_size = 32;
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
-            message_hash_size,
-            message_hash_size,
+            encoded_message_hash_len,
+            encoded_message_hash_len,
         );
         let signature =
             match SIGNATURE_SECP256K1.sign(&private_key, &message_hash) {
@@ -111,23 +115,23 @@ pub extern "C" fn wedpr_secp256k1_sign_binary(
 /// C interface for 'wedpr_secp256k1_verify_binary'.
 pub extern "C" fn wedpr_secp256k1_verify_binary(
     encoded_public_key: *const c_char,
+    encoded_public_key_len: usize,
     encoded_message_hash: *const c_char,
+    encoded_message_hash_len: usize,
     encoded_signature: *const c_char,
     encoded_signature_len: usize,
 ) -> i8
 {
     let result = panic::catch_unwind(|| unsafe {
-        let public_key_size = 64;
         let public_key = Vec::from_raw_parts(
             encoded_public_key as *mut u8,
-            public_key_size,
-            public_key_size,
+            encoded_public_key_len,
+            encoded_public_key_len,
         );
-        let message_hash_size = 32;
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
-            message_hash_size,
-            message_hash_size,
+            encoded_message_hash_len,
+            encoded_message_hash_len,
         );
         let signature_data = Vec::from_raw_parts(
             encoded_signature as *mut u8,
@@ -155,16 +159,16 @@ pub extern "C" fn wedpr_secp256k1_verify_binary(
 /// C interface for 'wedpr_secp256k1_recover_binary_public_key'.
 pub extern "C" fn wedpr_secp256k1_recover_binary_public_key(
     encoded_message_hash: *const c_char,
+    encoded_message_hash_len: usize,
     encoded_signature: *const c_char,
     encoded_signature_len: usize,
 ) -> *mut c_char
 {
     let result = panic::catch_unwind(|| unsafe {
-        let message_hash_size = 32;
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
-            message_hash_size,
-            message_hash_size,
+            encoded_message_hash_len,
+            encoded_message_hash_len,
         );
         let signature_data = Vec::from_raw_parts(
             encoded_signature as *mut u8,
@@ -194,15 +198,15 @@ pub extern "C" fn wedpr_secp256k1_recover_binary_public_key(
 /// C interface for 'wedpr_sm2_gen_binary_key_pair'.
 pub extern "C" fn wedpr_sm2_gen_binary_key_pair() -> *mut c_char {
     let result = panic::catch_unwind(|| {
-        let (pk, sk) = SIGNATURE_SM2.generate_keypair();
-        if pk.len() != 65 {
+        let (mut pk, sk) = SIGNATURE_SM2.generate_keypair();
+        if pk.len() != PUBLIC_KEY_SIZE_WITH_PREFIX {
             return ptr::null_mut();
         }
-        if sk.len() != 32 {
+        if sk.len() != PRIVATE_KEY_SIZE {
             return ptr::null_mut();
         }
-        let key_pair = [pk.as_slice(), sk.as_slice()].concat();
-        key_pair.as_ptr() as *mut c_char
+        pk.extend(&sk);
+        pk.as_ptr() as *mut c_char
     });
     c_safe_return!(result)
 }
@@ -212,13 +216,14 @@ pub extern "C" fn wedpr_sm2_gen_binary_key_pair() -> *mut c_char {
 /// C interface for 'wedpr_sm2_derive_binary_public_key'.
 pub extern "C" fn wedpr_sm2_derive_binary_public_key(
     encoded_private_key: *const c_char,
-) -> *mut c_char {
+    encoded_private_key_len: usize,
+) -> *mut c_char
+{
     let result = panic::catch_unwind(|| unsafe {
-        let private_key_size = 32;
         let sk = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
-            private_key_size,
-            private_key_size,
+            encoded_private_key_len,
+            encoded_private_key_len,
         );
         let pk = match SIGNATURE_SM2.derive_public_key(&sk) {
             Ok(v) => v,
@@ -238,21 +243,21 @@ pub extern "C" fn wedpr_sm2_derive_binary_public_key(
 /// C interface for 'wedpr_sm2_sign_binary'.
 pub extern "C" fn wedpr_sm2_sign_binary(
     encoded_private_key: *const c_char,
+    encoded_private_key_len: usize,
     encoded_message_hash: *const c_char,
+    encoded_message_hash_len: usize,
 ) -> *mut c_char
 {
     let result = panic::catch_unwind(|| unsafe {
-        let private_key_size = 32;
         let private_key = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
-            private_key_size,
-            private_key_size,
+            encoded_private_key_len,
+            encoded_private_key_len,
         );
-        let message_hash_size = 32;
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
-            message_hash_size,
-            message_hash_size,
+            encoded_message_hash_len,
+            encoded_message_hash_len,
         );
         let signature = match SIGNATURE_SM2.sign(&private_key, &message_hash) {
             Ok(v) => v,
@@ -274,28 +279,28 @@ pub extern "C" fn wedpr_sm2_sign_binary(
 /// C interface for 'wedpr_sm2_sign_binary_fast'.
 pub extern "C" fn wedpr_sm2_sign_binary_fast(
     encoded_private_key: *const c_char,
+    encoded_private_key_len: usize,
     encoded_public_key: *const c_char,
+    encoded_public_key_len: usize,
     encoded_message_hash: *const c_char,
+    encoded_message_hash_len: usize,
 ) -> *mut c_char
 {
     let result = panic::catch_unwind(|| unsafe {
-        let private_key_size = 32;
         let private_key = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
-            private_key_size,
-            private_key_size,
+            encoded_private_key_len,
+            encoded_private_key_len,
         );
-        let message_hash_size = 32;
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
-            message_hash_size,
-            message_hash_size,
+            encoded_message_hash_len,
+            encoded_message_hash_len,
         );
-        let public_key_size = 64;
         let public_key = Vec::from_raw_parts(
             encoded_public_key as *mut u8,
-            public_key_size,
-            public_key_size,
+            encoded_public_key_len,
+            encoded_public_key_len,
         );
         let signature = match SIGNATURE_SM2.sign_fast(
             &private_key,
@@ -323,23 +328,23 @@ pub extern "C" fn wedpr_sm2_sign_binary_fast(
 /// C interface for 'wedpr_sm2_verify_binary'.
 pub extern "C" fn wedpr_sm2_verify_binary(
     encoded_public_key: *const c_char,
+    encoded_public_key_len: usize,
     encoded_message_hash: *const c_char,
+    encoded_message_hash_len: usize,
     encoded_signature: *const c_char,
     signature_len: usize,
 ) -> i8
 {
     let result = panic::catch_unwind(|| unsafe {
-        let public_key_size = 64;
         let public_key = Vec::from_raw_parts(
             encoded_public_key as *mut u8,
-            public_key_size,
-            public_key_size,
+            encoded_public_key_len,
+            encoded_public_key_len,
         );
-        let message_hash_size = 32;
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
-            message_hash_size,
-            message_hash_size,
+            encoded_message_hash_len,
+            encoded_message_hash_len,
         );
         let signature_data = Vec::from_raw_parts(
             encoded_signature as *mut u8,

@@ -28,13 +28,16 @@ pub struct WedprSecp256k1Recover {}
 const FISCO_BCOS_SIGNATURE_DATA_LENGTH: usize = 65;
 const FISCO_BCOS_SIGNATURE_END_INDEX: usize =
     FISCO_BCOS_SIGNATURE_DATA_LENGTH - 1;
+const PUBLIC_KEY_SIZE_WITHOUT_PREFIX: usize = 64;
+const PUBLIC_KEY_SIZE_WITH_PREFIX: usize = 65;
 
 impl Signature for WedprSecp256k1Recover {
     fn sign<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -67,20 +70,22 @@ impl Signature for WedprSecp256k1Recover {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool {
+    ) -> bool
+    {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let recover_public_key =
             match self.recover_public_key(msg_hash, signature) {
                 Ok(v) => v,
                 Err(_) => return false,
             };
-        if recover_public_key.len() ==  FISCO_BCOS_SIGNATURE_DATA_LENGTH{
-            let recover_public_key_without_prefix = &recover_public_key[1..FISCO_BCOS_SIGNATURE_DATA_LENGTH];
-            if(recover_public_key_without_prefix.eq(&public_key.as_ref().to_vec()))
-            {
+        if public_key.as_ref().len() == PUBLIC_KEY_SIZE_WITHOUT_PREFIX {
+            let recover_public_key_without_prefix =
+                &recover_public_key[1..PUBLIC_KEY_SIZE_WITH_PREFIX];
+            if recover_public_key_without_prefix.eq(public_key.as_ref()) {
                 return true;
             }
         }
+
         if recover_public_key.ne(&public_key.as_ref().to_vec()) {
             wedpr_println!("Matching signature public key failed");
             return false;
@@ -120,7 +125,8 @@ impl WedprSecp256k1Recover {
         self,
         msg_hash: &T,
         signature: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let msg_hash_obj = match Message::from_slice(&msg_hash.as_ref()) {
             Ok(v) => v,
@@ -171,7 +177,8 @@ impl WedprSecp256k1Recover {
     pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
