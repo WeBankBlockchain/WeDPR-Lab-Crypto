@@ -6,6 +6,10 @@
 #include <new>
 #include <ostream>
 
+static const int8_t SUCCESS = 0;
+
+static const int8_t FAILURE = -1;
+
 struct HashResult
 {
     char* data;
@@ -35,24 +39,24 @@ struct SignatureResult
 extern "C" {
 
 /// C interface for 'wedpr_keccak256_hash_binary'.
-HashResult wedpr_keccak256_hash_binary(const char* encoded_message, uintptr_t message_len);
+int8_t wedpr_keccak256_hash_binary(
+    HashResult* hash_result, const char* encoded_message, uintptr_t message_len);
 
 /// C interface for 'wedpr_sm3_hash_binary'.
-HashResult wedpr_sm3_hash_binary(const char* encoded_message, uintptr_t message_len);
-
-void dealloc_hash_result(HashResult hash_result);
+int8_t wedpr_sm3_hash_binary(
+    HashResult* hash_result, const char* encoded_message, uintptr_t message_len);
 
 /// C interface for 'wedpr_secp256k1_gen_binary_key_pair'.
-KeyPairData wedpr_secp256k1_gen_binary_key_pair();
+int8_t wedpr_secp256k1_gen_binary_key_pair(KeyPairData* key_pair);
 
 /// C interface for 'wedpr_secp256k1_derive_binary_public_key'.
-PublicKey wedpr_secp256k1_derive_binary_public_key(
-    const char* encoded_private_key, uintptr_t encoded_private_key_len);
+int8_t wedpr_secp256k1_derive_binary_public_key(
+    PublicKey* public_key, const char* encoded_private_key, uintptr_t encoded_private_key_len);
 
 /// C interface for 'wedpr_secp256k1_sign_binary'.
-SignatureResult wedpr_secp256k1_sign_binary(const char* encoded_private_key,
-    uintptr_t encoded_private_key_len, const char* encoded_message_hash,
-    uintptr_t encoded_message_hash_len);
+int8_t wedpr_secp256k1_sign_binary(SignatureResult* signature_result,
+    const char* encoded_private_key, uintptr_t encoded_private_key_len,
+    const char* encoded_message_hash, uintptr_t encoded_message_hash_len);
 
 /// C interface for 'wedpr_secp256k1_verify_binary'.
 int8_t wedpr_secp256k1_verify_binary(const char* encoded_public_key,
@@ -61,38 +65,32 @@ int8_t wedpr_secp256k1_verify_binary(const char* encoded_public_key,
     uintptr_t encoded_signature_len);
 
 /// C interface for 'wedpr_secp256k1_recover_binary_public_key'.
-PublicKey wedpr_secp256k1_recover_binary_public_key(const char* encoded_message_hash,
-    uintptr_t encoded_message_hash_len, const char* encoded_signature,
-    uintptr_t encoded_signature_len);
+int8_t wedpr_secp256k1_recover_binary_public_key(PublicKey* public_key,
+    const char* encoded_message_hash, uintptr_t encoded_message_hash_len,
+    const char* encoded_signature, uintptr_t encoded_signature_len);
 
 /// C interface for 'wedpr_sm2_gen_binary_key_pair'.
-KeyPairData wedpr_sm2_gen_binary_key_pair();
+int8_t wedpr_sm2_gen_binary_key_pair(KeyPairData* key_pair);
 
 /// C interface for 'wedpr_sm2_derive_binary_public_key'.
-PublicKey wedpr_sm2_derive_binary_public_key(
-    const char* encoded_private_key, uintptr_t encoded_private_key_len);
+int8_t wedpr_sm2_derive_binary_public_key(
+    PublicKey* public_key, const char* encoded_private_key, uintptr_t encoded_private_key_len);
 
 /// C interface for 'wedpr_sm2_sign_binary'.
-SignatureResult wedpr_sm2_sign_binary(const char* encoded_private_key,
+int8_t wedpr_sm2_sign_binary(SignatureResult* signature_result, const char* encoded_private_key,
     uintptr_t encoded_private_key_len, const char* encoded_message_hash,
     uintptr_t encoded_message_hash_len);
 
 /// C interface for 'wedpr_sm2_sign_binary_fast'.
-SignatureResult wedpr_sm2_sign_binary_fast(const char* encoded_private_key,
-    uintptr_t encoded_private_key_len, const char* encoded_public_key,
-    uintptr_t encoded_public_key_len, const char* encoded_message_hash,
-    uintptr_t encoded_message_hash_len);
+int8_t wedpr_sm2_sign_binary_fast(SignatureResult* signature_result,
+    const char* encoded_private_key, uintptr_t encoded_private_key_len,
+    const char* encoded_public_key, uintptr_t encoded_public_key_len,
+    const char* encoded_message_hash, uintptr_t encoded_message_hash_len);
 
 /// C interface for 'wedpr_sm2_verify_binary'.
 int8_t wedpr_sm2_verify_binary(const char* encoded_public_key, uintptr_t encoded_public_key_len,
     const char* encoded_message_hash, uintptr_t encoded_message_hash_len,
     const char* encoded_signature, uintptr_t signature_len);
-
-void dealloc_key_pair(KeyPairData key_pair);
-
-void dealloc_signature_data(SignatureResult signature_result);
-
-void dealloc_public_key_data(PublicKey public_key_result);
 
 /// C interface for 'wedpr_secp256k1_ecies_encrypt'.
 char* wedpr_secp256k1_ecies_encrypt(char* encoded_public_key, char* encoded_plaintext);
@@ -161,5 +159,4 @@ char* wedpr_curve25519_vrf_proof_to_hash(const char* encoded_proof);
 int8_t wedpr_curve25519_vrf_is_valid_public_key(const char* encoded_public_key);
 
 }  // extern "C"
-
 #endif

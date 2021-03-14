@@ -16,16 +16,15 @@ use crate::config::SIGNATURE_SECP256K1;
 use crate::config::SIGNATURE_SM2;
 
 use libc::c_char;
-use std::{panic, ptr};
+use std::panic;
 
-#[cfg(feature = "wedpr_f_base64")]
-use wedpr_ffi_common_base64::utils::{FAILURE, SUCCESS};
-
-#[cfg(feature = "wedpr_f_hex")]
-use wedpr_ffi_common_hex::utils::{FAILURE, SUCCESS};
-
+const PUBLIC_KEY_SIZE_WITHOUT_PREFIX: usize = 64;
 const PUBLIC_KEY_SIZE_WITH_PREFIX: usize = 65;
+const SECP256K1_SIGNATURE_DATA_LENGTH: usize = 65;
+const SM2_SIGNATURE_DATA_LENGTH: usize = 64;
 const PRIVATE_KEY_SIZE: usize = 32;
+pub const SUCCESS: i8 = 0;
+pub const FAILURE: i8 = -1;
 
 // the signature result
 #[repr(C)]
@@ -49,27 +48,13 @@ pub struct PublicKey {
     public_key_len: usize,
 }
 
-const EMPTY_KEYPAIR_DATA: KeyPairData = KeyPairData {
-    public_key: ptr::null_mut(),
-    public_key_len: 0,
-    private_key: ptr::null_mut(),
-    private_key_len: 0,
-};
-
-const EMPTY_PUBLIC_KEY: PublicKey = PublicKey {
-    public_key: ptr::null_mut(),
-    public_key_len: 0,
-};
-
-const EMPTY_SIGNATURE_RESULT: SignatureResult = SignatureResult {
-    signature_data: ptr::null_mut(),
-    signature_len: 0,
-};
-
 #[macro_export]
-macro_rules! c_safe_return_key_pair_object {
+macro_rules! c_safe_return_ret_code {
     ($result:expr) => {
-        c_safe_return_with_error_value!($result, EMPTY_KEYPAIR_DATA)
+        match $result {
+            Ok(v) => v,
+            Err(_) => FAILURE,
+        }
     };
 }
 
@@ -80,52 +65,53 @@ macro_rules! c_safe_return_public_key_object {
     };
 }
 
-#[macro_export]
-macro_rules! c_safe_return_signature_result_object {
-    ($result:expr) => {
-        c_safe_return_with_error_value!($result, EMPTY_SIGNATURE_RESULT)
-    };
-}
-
 // Secp256k1 implementation.
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_gen_binary_key_pair'.
-pub extern "C" fn wedpr_secp256k1_gen_binary_key_pair() -> KeyPairData {
+pub extern "C" fn wedpr_secp256k1_gen_binary_key_pair(
+    key_pair: &mut KeyPairData,
+) -> i8 {
     let result = panic::catch_unwind(|| {
-        let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
-        if pk.len() != PUBLIC_KEY_SIZE_WITH_PREFIX {
-            return KeyPairData {
-                public_key: ptr::null_mut(),
-                public_key_len: 0,
-                private_key: ptr::null_mut(),
-                private_key_len: 0,
-            };
+        if key_pair.public_key_len < PUBLIC_KEY_SIZE_WITHOUT_PREFIX {
+            return FAILURE;
         }
-        if sk.len() != PRIVATE_KEY_SIZE {
-            return EMPTY_KEYPAIR_DATA;
+        if key_pair.private_key_len < PRIVATE_KEY_SIZE {
+            return FAILURE;
         }
-        let key_pair = KeyPairData {
-            public_key: pk.as_ptr() as *mut c_char,
-            public_key_len: pk.len(),
-            private_key: sk.as_ptr() as *mut c_char,
-            private_key_len: sk.len(),
-        };
-        std::mem::forget(pk);
-        std::mem::forget(sk);
-        key_pair
+        unsafe {
+            let (public_key, private_key) =
+                SIGNATURE_SECP256K1.generate_keypair();
+            let pk = std::slice::from_raw_parts_mut(
+                key_pair.public_key as *mut u8,
+                key_pair.public_key_len,
+            );
+            let sk = std::slice::from_raw_parts_mut(
+                key_pair.private_key as *mut u8,
+                key_pair.private_key_len,
+            );
+            pk[0..PUBLIC_KEY_SIZE_WITHOUT_PREFIX]
+                .copy_from_slice(&public_key[1..PUBLIC_KEY_SIZE_WITH_PREFIX]);
+            sk[0..PRIVATE_KEY_SIZE].copy_from_slice(&private_key);
+            std::mem::forget(pk);
+            std::mem::forget(sk);
+            SUCCESS
+        }
     });
-    c_safe_return_key_pair_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_derive_binary_public_key'.
 pub extern "C" fn wedpr_secp256k1_derive_binary_public_key(
+    public_key: &mut PublicKey,
     encoded_private_key: *const c_char,
     encoded_private_key_len: usize,
-) -> PublicKey
-{
+) -> i8 {
+    if public_key.public_key_len < PUBLIC_KEY_SIZE_WITHOUT_PREFIX {
+        return FAILURE;
+    }
     let result = panic::catch_unwind(|| unsafe {
         let sk = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
@@ -136,30 +122,35 @@ pub extern "C" fn wedpr_secp256k1_derive_binary_public_key(
             Ok(v) => v,
             Err(_) => {
                 std::mem::forget(sk);
-                return EMPTY_PUBLIC_KEY;
+                return FAILURE;
             },
         };
         std::mem::forget(sk);
-        let public_key = PublicKey {
-            public_key: pk.as_ptr() as *mut c_char,
-            public_key_len: pk.len(),
-        };
-        std::mem::forget(pk);
-        public_key
+        let public_key_slice = std::slice::from_raw_parts_mut(
+            public_key.public_key as *mut u8,
+            public_key.public_key_len,
+        );
+        public_key_slice[0..PUBLIC_KEY_SIZE_WITHOUT_PREFIX]
+            .copy_from_slice(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX]);
+        std::mem::forget(public_key_slice);
+        SUCCESS
     });
-    c_safe_return_public_key_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_sign_binary'.
 pub extern "C" fn wedpr_secp256k1_sign_binary(
+    signature_result: &mut SignatureResult,
     encoded_private_key: *const c_char,
     encoded_private_key_len: usize,
     encoded_message_hash: *const c_char,
     encoded_message_hash_len: usize,
-) -> SignatureResult
-{
+) -> i8 {
+    if signature_result.signature_len < SECP256K1_SIGNATURE_DATA_LENGTH {
+        return FAILURE;
+    }
     let result = panic::catch_unwind(|| unsafe {
         let private_key = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
@@ -177,19 +168,21 @@ pub extern "C" fn wedpr_secp256k1_sign_binary(
                 Err(_) => {
                     std::mem::forget(private_key);
                     std::mem::forget(message_hash);
-                    return EMPTY_SIGNATURE_RESULT;
+                    return FAILURE;
                 },
             };
         std::mem::forget(private_key);
         std::mem::forget(message_hash);
-        let signature_result = SignatureResult {
-            signature_data: signature.as_ptr() as *mut c_char,
-            signature_len: signature.len(),
-        };
-        std::mem::forget(signature);
-        signature_result
+        let signature_result_slice = std::slice::from_raw_parts_mut(
+            signature_result.signature_data as *mut u8,
+            signature_result.signature_len,
+        );
+        signature_result_slice[0..SECP256K1_SIGNATURE_DATA_LENGTH]
+            .copy_from_slice(&signature);
+        std::mem::forget(signature_result_slice);
+        SUCCESS
     });
-    c_safe_return_signature_result_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
@@ -202,8 +195,7 @@ pub extern "C" fn wedpr_secp256k1_verify_binary(
     encoded_message_hash_len: usize,
     encoded_signature: *const c_char,
     encoded_signature_len: usize,
-) -> i8
-{
+) -> i8 {
     let result = panic::catch_unwind(|| unsafe {
         let public_key = Vec::from_raw_parts(
             encoded_public_key as *mut u8,
@@ -240,12 +232,15 @@ pub extern "C" fn wedpr_secp256k1_verify_binary(
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_recover_binary_public_key'.
 pub extern "C" fn wedpr_secp256k1_recover_binary_public_key(
+    public_key: &mut PublicKey,
     encoded_message_hash: *const c_char,
     encoded_message_hash_len: usize,
     encoded_signature: *const c_char,
     encoded_signature_len: usize,
-) -> PublicKey
-{
+) -> i8 {
+    if public_key.public_key_len < PUBLIC_KEY_SIZE_WITHOUT_PREFIX {
+        return FAILURE;
+    }
     let result = panic::catch_unwind(|| unsafe {
         let message_hash = Vec::from_raw_parts(
             encoded_message_hash as *mut u8,
@@ -257,62 +252,75 @@ pub extern "C" fn wedpr_secp256k1_recover_binary_public_key(
             encoded_signature_len,
             encoded_signature_len,
         );
-        let public_key = match SIGNATURE_SECP256K1
+        let pk = match SIGNATURE_SECP256K1
             .recover_public_key(&message_hash, &signature_data)
         {
             Ok(v) => v,
             Err(_) => {
                 std::mem::forget(message_hash);
                 std::mem::forget(signature_data);
-                return EMPTY_PUBLIC_KEY;
+                return FAILURE;
             },
         };
         std::mem::forget(message_hash);
         std::mem::forget(signature_data);
-        let public_key_result = PublicKey {
-            public_key: public_key.as_ptr() as *mut c_char,
-            public_key_len: public_key.len(),
-        };
-        std::mem::forget(public_key);
-        public_key_result
+        let public_key_slice = std::slice::from_raw_parts_mut(
+            public_key.public_key as *mut u8,
+            public_key.public_key_len,
+        );
+        public_key_slice[0..PUBLIC_KEY_SIZE_WITHOUT_PREFIX]
+            .copy_from_slice(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX]);
+        std::mem::forget(public_key_slice);
+        SUCCESS
     });
-    c_safe_return_public_key_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 // SM2 implementation.
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_gen_binary_key_pair'.
-pub extern "C" fn wedpr_sm2_gen_binary_key_pair() -> KeyPairData {
-    let result = panic::catch_unwind(|| {
-        let (pk, sk) = SIGNATURE_SM2.generate_keypair();
-        if pk.len() != PUBLIC_KEY_SIZE_WITH_PREFIX {
-            return EMPTY_KEYPAIR_DATA;
-        }
-        if sk.len() != PRIVATE_KEY_SIZE {
-            return EMPTY_KEYPAIR_DATA;
-        }
-        let key_pair = KeyPairData {
-            public_key: pk.as_ptr() as *mut c_char,
-            public_key_len: pk.len(),
-            private_key: sk.as_ptr() as *mut c_char,
-            private_key_len: sk.len(),
-        };
-        std::mem::forget(sk);
+pub extern "C" fn wedpr_sm2_gen_binary_key_pair(
+    key_pair: &mut KeyPairData,
+) -> i8 {
+    if key_pair.public_key_len < PUBLIC_KEY_SIZE_WITHOUT_PREFIX {
+        return FAILURE;
+    }
+    if key_pair.private_key_len < PRIVATE_KEY_SIZE {
+        return FAILURE;
+    }
+    let result = panic::catch_unwind(|| unsafe {
+        let (public_key, private_key) = SIGNATURE_SM2.generate_keypair();
+        let pk = std::slice::from_raw_parts_mut(
+            key_pair.public_key as *mut u8,
+            key_pair.public_key_len,
+        );
+        let sk = std::slice::from_raw_parts_mut(
+            key_pair.private_key as *mut u8,
+            key_pair.private_key_len,
+        );
+        pk[0..PUBLIC_KEY_SIZE_WITHOUT_PREFIX]
+            .copy_from_slice(&public_key[1..PUBLIC_KEY_SIZE_WITH_PREFIX]);
+        sk[0..PRIVATE_KEY_SIZE].copy_from_slice(&private_key.as_ref());
         std::mem::forget(pk);
-        key_pair
+        std::mem::forget(sk);
+        SUCCESS
     });
-    c_safe_return_key_pair_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_derive_binary_public_key'.
 pub extern "C" fn wedpr_sm2_derive_binary_public_key(
+    public_key: &mut PublicKey,
     encoded_private_key: *const c_char,
     encoded_private_key_len: usize,
-) -> PublicKey
-{
+) -> i8 {
+    // check the input length
+    if public_key.public_key_len < PUBLIC_KEY_SIZE_WITHOUT_PREFIX {
+        return FAILURE;
+    }
     let result = panic::catch_unwind(|| unsafe {
         let sk = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
@@ -323,30 +331,35 @@ pub extern "C" fn wedpr_sm2_derive_binary_public_key(
             Ok(v) => v,
             Err(_) => {
                 std::mem::forget(sk);
-                return EMPTY_PUBLIC_KEY;
+                return FAILURE;
             },
         };
         std::mem::forget(sk);
-        let public_key = PublicKey {
-            public_key: pk.as_ptr() as *mut c_char,
-            public_key_len: pk.len(),
-        };
-        std::mem::forget(pk);
-        public_key
+        let public_key_slice = std::slice::from_raw_parts_mut(
+            public_key.public_key as *mut u8,
+            public_key.public_key_len,
+        );
+        public_key_slice[0..PUBLIC_KEY_SIZE_WITHOUT_PREFIX]
+            .copy_from_slice(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX]);
+        std::mem::forget(public_key_slice);
+        SUCCESS
     });
-    c_safe_return_public_key_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_sign_binary'.
 pub extern "C" fn wedpr_sm2_sign_binary(
+    signature_result: &mut SignatureResult,
     encoded_private_key: *const c_char,
     encoded_private_key_len: usize,
     encoded_message_hash: *const c_char,
     encoded_message_hash_len: usize,
-) -> SignatureResult
-{
+) -> i8 {
+    if signature_result.signature_len < SM2_SIGNATURE_DATA_LENGTH {
+        return FAILURE;
+    }
     let result = panic::catch_unwind(|| unsafe {
         let private_key = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
@@ -363,33 +376,38 @@ pub extern "C" fn wedpr_sm2_sign_binary(
             Err(_) => {
                 std::mem::forget(private_key);
                 std::mem::forget(message_hash);
-                return EMPTY_SIGNATURE_RESULT;
+                return FAILURE;
             },
         };
         std::mem::forget(private_key);
         std::mem::forget(message_hash);
-        let signature_result = SignatureResult {
-            signature_data: signature.as_ptr() as *mut c_char,
-            signature_len: signature.len(),
-        };
-        std::mem::forget(signature);
-        signature_result
+        let signature_result_slice = std::slice::from_raw_parts_mut(
+            signature_result.signature_data as *mut u8,
+            signature_result.signature_len,
+        );
+        signature_result_slice[0..SM2_SIGNATURE_DATA_LENGTH]
+            .copy_from_slice(&signature);
+        std::mem::forget(signature_result_slice);
+        SUCCESS
     });
-    c_safe_return_signature_result_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_sign_binary_fast'.
 pub extern "C" fn wedpr_sm2_sign_binary_fast(
+    signature_result: &mut SignatureResult,
     encoded_private_key: *const c_char,
     encoded_private_key_len: usize,
     encoded_public_key: *const c_char,
     encoded_public_key_len: usize,
     encoded_message_hash: *const c_char,
     encoded_message_hash_len: usize,
-) -> SignatureResult
-{
+) -> i8 {
+    if signature_result.signature_len < SM2_SIGNATURE_DATA_LENGTH {
+        return FAILURE;
+    }
     let result = panic::catch_unwind(|| unsafe {
         let private_key = Vec::from_raw_parts(
             encoded_private_key as *mut u8,
@@ -416,20 +434,22 @@ pub extern "C" fn wedpr_sm2_sign_binary_fast(
                 std::mem::forget(private_key);
                 std::mem::forget(message_hash);
                 std::mem::forget(public_key);
-                return EMPTY_SIGNATURE_RESULT;
+                return FAILURE;
             },
         };
         std::mem::forget(private_key);
         std::mem::forget(message_hash);
         std::mem::forget(public_key);
-        let signature_result = SignatureResult {
-            signature_data: signature.as_ptr() as *mut c_char,
-            signature_len: signature.len(),
-        };
-        std::mem::forget(signature);
-        signature_result
+        let signature_result_slice = std::slice::from_raw_parts_mut(
+            signature_result.signature_data as *mut u8,
+            signature_result.signature_len,
+        );
+        signature_result_slice[0..SM2_SIGNATURE_DATA_LENGTH]
+            .copy_from_slice(&signature);
+        std::mem::forget(signature_result_slice);
+        SUCCESS
     });
-    c_safe_return_signature_result_object!(result)
+    c_safe_return_ret_code!(result)
 }
 
 #[cfg(feature = "wedpr_f_signature_sm2")]
@@ -442,8 +462,7 @@ pub extern "C" fn wedpr_sm2_verify_binary(
     encoded_message_hash_len: usize,
     encoded_signature: *const c_char,
     signature_len: usize,
-) -> i8
-{
+) -> i8 {
     let result = panic::catch_unwind(|| unsafe {
         let public_key = Vec::from_raw_parts(
             encoded_public_key as *mut u8,
@@ -474,52 +493,4 @@ pub extern "C" fn wedpr_sm2_verify_binary(
         verify_result
     });
     c_safe_return_with_error_value!(result, FAILURE)
-}
-
-#[no_mangle]
-pub extern "C" fn dealloc_key_pair(key_pair: KeyPairData) {
-    unsafe {
-        if !key_pair.public_key.is_null() {
-            Vec::from_raw_parts(
-                key_pair.public_key as *mut i8,
-                key_pair.public_key_len,
-                key_pair.public_key_len,
-            );
-        }
-        if !key_pair.private_key.is_null() {
-            Vec::from_raw_parts(
-                key_pair.private_key as *mut i8,
-                key_pair.private_key_len,
-                key_pair.private_key_len,
-            );
-        }
-    }
-}
-
-#[no_mangle]
-pub extern "C" fn dealloc_signature_data(signature_result: SignatureResult) {
-    unsafe {
-        if signature_result.signature_data.is_null() {
-            return;
-        }
-        Vec::from_raw_parts(
-            signature_result.signature_data as *mut i8,
-            signature_result.signature_len,
-            signature_result.signature_len,
-        );
-    }
-}
-
-#[no_mangle]
-pub extern "C" fn dealloc_public_key_data(public_key_result: PublicKey) {
-    unsafe {
-        if public_key_result.public_key.is_null() {
-            return;
-        }
-        Vec::from_raw_parts(
-            public_key_result.public_key as *mut i8,
-            public_key_result.public_key_len,
-            public_key_result.public_key_len,
-        );
-    }
 }
