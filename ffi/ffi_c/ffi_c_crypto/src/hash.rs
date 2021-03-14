@@ -48,7 +48,9 @@ pub extern "C" fn wedpr_keccak256_hash(
 #[cfg(feature = "wedpr_f_hash_sm3")]
 #[no_mangle]
 /// C interface for 'wedpr_sm3_hash'.
-pub extern "C" fn wedpr_sm3_hash(encoded_message: *const c_char) -> *mut c_char {
+pub extern "C" fn wedpr_sm3_hash(
+    encoded_message: *const c_char,
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
 
