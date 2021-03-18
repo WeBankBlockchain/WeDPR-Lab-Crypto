@@ -1,0 +1,18 @@
+[package]
+name = "wedpr_third_party_fisco_bcos"
+version = "1.0.1"
+authors = [ "WeDPR <wedpr@webank.com>" ]
+edition = "2018"
+license = "Apache-2.0"
+description = "Library of FISCO BCOS tools."
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+sputnikvm-precompiled-bn128 = "0.10.1"
+etcommon-bigint = "0.2"
+wedpr_l_utils = "1.0.0"
+sputnikvm = "0.10.1"
+
+[dev-dependencies]
+hex = "0.4"

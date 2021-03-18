@@ -107,3 +107,25 @@ pub trait Vrf {
     /// Checks the validity of a VRF public key.
     fn is_valid_public_key<T: ?Sized + AsRef<[u8]>>(public_key: &T) -> bool;
 }
+
+/// Trait of a block cipher algorithm.
+pub trait BlockCipher {
+    /// Encrypts a block with a symmetric key and a initialization vector(iv).
+    fn encrypt<T: ?Sized + AsRef<[u8]>>(
+        &self,
+        block_text: &T,
+        key: &T,
+        iv: &T,
+    ) -> Result<Vec<u8>, WedprError>;
+
+    /// Decrypts a cipher with a symmetric key and a initialization vector(iv).
+    fn decrypt<T: ?Sized + AsRef<[u8]>>(
+        &self,
+        cipher_text: &T,
+        key: &T,
+        iv: &T,
+    ) -> Result<Vec<u8>, WedprError>;
+
+    /// Generates a new key for block cipher,
+    fn generate_key(&self) -> Vec<u8>;
+}
