@@ -6,6 +6,8 @@
 
 // Type conversion section.
 
+pub mod binary;
+
 /// Converts Java String to Rust bytes, and returns an error object if failed.
 #[macro_export]
 macro_rules! java_safe_jstring_to_bytes {

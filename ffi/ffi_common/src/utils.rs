@@ -12,7 +12,6 @@ compile_error!("Must use feature wedpr_f_base64 or wedpr_f_hex!");
 
 // From Rust to Java.
 extern crate jni;
-use self::jni::objects::JByteBuffer;
 use jni::{
     objects::{JObject, JString, JValue},
     sys::jobject,
@@ -30,6 +29,7 @@ use wedpr_l_common_coder_base64::WedprBase64;
 
 #[cfg(feature = "wedpr_f_hex")]
 use wedpr_l_common_coder_hex::WedprHex;
+use self::jni::sys::jbyteArray;
 
 #[cfg(feature = "wedpr_f_hex")]
 lazy_static! {
@@ -83,7 +83,7 @@ pub fn java_set_error_field_and_extract_jobject(
 ) -> jobject {
     let java_string;
     // Error message should not be empty.
-    assert!(!error_message.is_empty());
+    // assert!(!error_message.is_empty());
     java_string = _env
         .new_string(error_message)
         .expect("new_string should not fail");
@@ -99,29 +99,51 @@ pub fn java_set_error_field_and_extract_jobject(
     java_object.into_inner()
 }
 
-/// Sets the default error message field and extracts actual java object to
-/// return in a erroneous condition.
-pub fn java_set_bytes_field_and_extract_jobject(
-    _env: &JNIEnv,
-    java_object: &JObject,
-    error_message: &mut [u8],
-) -> jobject {
-    let java_bytes_array;
-    // Error message should not be empty.
-    assert!(!error_message.is_empty());
-    java_bytes_array = _env
-        .new_direct_byte_buffer(error_message)
-        .expect("new_string should not fail");
-    _env.set_field(
-        *java_object,
-        DEFAULT_ERROR_FIELD,
-        "[B",
-        JValue::from(JObject::from(java_bytes_array)),
-    )
-    .expect("set_field should not fail");
+// /// Sets the default error message field and extracts actual java object to
+// /// return in a erroneous condition.
+// pub fn java_set_error_field_and_extract_jobject_binary(
+//     _env: &JNIEnv,
+//     java_object: &JObject,
+//     // error_message: &mut [u8],
+// ) -> jobject {
+//     let java_bytes_array;
+//     // Error message should not be empty.
+//     // assert!(!error_message.is_empty());
+//     java_bytes_array = _env.new_byte_array(4).expect("new new_bytes should not fail");
+//     let rust_bytes_arry = b"0123";
+//     let i8slice = unsafe {&*(rust_bytes_arry as *const [u8] as *const [i8])};
+//     _env.set_byte_array_region(java_bytes_array, 4, &i8slice);
+//     // java_bytes_array = _env
+//     //     .new_byte_array(&mut ERROR_MESSAGE_BYTES)
+//     //     .expect("new_bytes should not fail");
+//     _env.set_field(
+//         *java_object,
+//         DEFAULT_ERROR_FIELD,
+//         "[B",
+//         JValue::from(JObject::from(java_bytes_array)),
+//     )
+//     .expect("set_field should not fail");
+//
+//     // Extract actual java object.
+//     java_object.into_inner()
+// }
 
-    // Extract actual java object.
-    java_object.into_inner()
+pub fn java_bytes_to_jbyte_array(_env: &JNIEnv,
+                                 rust_bytes_array: &[u8]) -> Result<jbyteArray, WedprError> {
+    return match _env.byte_array_from_slice(rust_bytes_array)
+    {
+        Ok(v) => Ok(v),
+        Err(_) => Err(WedprError::ArgumentError),
+    };
+
+    //
+    // let i8slice = unsafe {&*(rust_bytes_array as *const [u8] as *const [i8])};
+    // return match _env.set_byte_array_region(java_bytes_array, bytes_size, &i8slice) {
+    //     Ok(_) => Ok(java_bytes_array),
+    //     Err(_) => Err(WedprError::FormatError),
+    // };
+
+
 }
 
 /// Converts Java String to Rust bytes.
@@ -150,9 +172,9 @@ pub fn java_jstring_to_string(
 /// Converts Java bytes to Rust bytes.
 pub fn java_jbytes_to_bytes(
     _env: &JNIEnv,
-    java_bytes: JByteBuffer,
+    java_bytes: jbyteArray,
 ) -> Result<Vec<u8>, WedprError> {
-    match _env.get_direct_buffer_address(java_bytes) {
+    match _env.convert_byte_array(java_bytes) {
         Ok(rust_bytes_array) => Ok(rust_bytes_array.to_vec()),
         Err(_) => return Err(WedprError::FormatError),
     }
