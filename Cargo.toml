@@ -23,6 +23,7 @@ members = [
     "ffi/ffi_common",
     "ffi/ffi_c/ffi_c_common",
     "ffi/ffi_c/ffi_c_crypto",
+    "ffi/ffi_c/ffi_c_crypto_binary",
     "ffi/ffi_java/ffi_java_crypto",
     "ffi/ffi_java/ffi_java_crypto_binary",
     "ffi/ffi_macros",

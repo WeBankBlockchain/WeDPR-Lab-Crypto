@@ -51,3 +51,13 @@ macro_rules! java_safe_bytes_to_jbyteArray {
         })
     };
 }
+
+/// Check C pointer input length.
+#[macro_export]
+macro_rules! check_c_pointer_length {
+    ($c_pointer:expr, $c_pointer_expected_length:expr) => {
+        if $c_pointer.len < $c_pointer_expected_length {
+        return FAILURE;
+    }
+    };
+}

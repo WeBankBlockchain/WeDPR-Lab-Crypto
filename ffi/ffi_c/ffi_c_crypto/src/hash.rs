@@ -38,6 +38,7 @@ pub extern "C" fn wedpr_keccak256_hash(
         let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
 
         let msg_hash = bytes_to_string(&HASH_KECCAK256.hash(&message));
+
         c_safe_string_to_c_char_pointer!(msg_hash)
     });
     c_safe_return!(result)
