@@ -41,6 +41,20 @@ lazy_static! {
     pub static ref CODER: WedprBase64 = WedprBase64::default();
 }
 
+// Rust to c/c++
+#[repr(C)]
+pub struct CPointOutput {
+    pub data: *mut c_char,
+    pub len: usize,
+}
+
+// Rust to c/c++
+#[repr(C)]
+pub struct CPointInput {
+    pub data: *const c_char,
+    pub len: usize,
+}
+
 // Java FFI functions.
 
 // Default error field name used by WeDPR FFI output data types.
@@ -197,3 +211,34 @@ pub fn c_char_pointer_to_string(
         Err(_) => Err(WedprError::FormatError),
     }
 }
+
+/// Converts C char pointer to Rust bytes.
+pub fn c_char_pointer_to_bytes(
+    param: *const c_char,
+) -> Vec<u8> {
+    let cstr_param = unsafe { CStr::from_ptr(param) };
+    cstr_param.to_bytes().to_vec()
+}
+
+/// Converts C pointer to Rust bytes.
+pub unsafe fn c_pointer_to_rust_bytes(input: &CPointInput) -> Vec<u8> {
+    Vec::from_raw_parts(
+        input.data as *mut u8,
+        input.len,
+        input.len,
+    )
+}
+
+/// Set Rust bytes to C pointer.
+pub unsafe fn set_c_pointer<T: ?Sized + AsRef<[u8]>>(input: &T, output: &mut CPointOutput) {
+    let data_slice = std::slice::from_raw_parts_mut(
+        output.data as *mut u8,
+        output.len,
+    );
+    data_slice.copy_from_slice(&input.as_ref());
+    std::mem::forget(data_slice);
+}
+
+
+
+
