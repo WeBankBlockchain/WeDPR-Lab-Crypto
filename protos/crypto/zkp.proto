@@ -17,3 +17,12 @@ message BalanceProof {
     bytes m4 = 5;
     bytes m5 = 6;
 }
+
+// ZKP data to verify the equality relationship among value commitments.
+// For example, given C(x), C(y), this proof data can be used to
+// verify whether x =? y.
+message EqualityProof {
+    bytes m1 = 1;
+    bytes t1 = 2;
+    bytes t2 = 3;
+}

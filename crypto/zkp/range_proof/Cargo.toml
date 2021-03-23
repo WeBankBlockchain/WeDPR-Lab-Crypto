@@ -14,4 +14,4 @@ curve25519-dalek = { version = "1", features = [ "serde" ] }
 merlin = "1"
 wedpr_l_crypto_zkp_utils = "1.0.0"
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils = "1.0.0"
+wedpr_l_utils = { path = "/Users/asher/WeDPR/WeDPR-Lab-Crypto/common/utils/"}

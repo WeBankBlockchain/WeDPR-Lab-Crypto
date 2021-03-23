@@ -6,10 +6,10 @@ use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
 use wedpr_l_crypto_zkp_utils::{
-    bytes_to_scalar, get_random_scalar, hash_to_scalar, point_to_bytes,
-    scalar_to_bytes,
+    bytes_to_point, bytes_to_scalar, get_random_scalar, get_random_u8,
+    hash_to_scalar, point_to_bytes, scalar_to_bytes,
 };
-use wedpr_l_protos::generated::zkp::BalanceProof;
+use wedpr_l_protos::generated::zkp::{BalanceProof, EqualityProof};
 use wedpr_l_utils::error::WedprError;
 
 /// Proves three commitments satisfying a sum relationship, i.e.
@@ -267,6 +267,136 @@ pub fn verify_product_relationship(
     Ok(computed.eq(&check))
 }
 
+/// Proves two commitments satisfying a equality relationship, i.e.
+/// the values embedded in them satisfying c1_value = c2_value .
+/// c?_blinding are random blinding values used in the commitments.
+/// The commitments (c?_value*basepoint)
+/// It returns a proof for the above equality relationship.
+pub fn prove_equality_proof(
+    c1_value: &Scalar,
+    value_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> EqualityProof {
+    let blinding_a = get_random_scalar();
+    let c1_point =
+        RistrettoPoint::multiscalar_mul(&[*c1_value], &[*value_basepoint]);
+    let c2_point =
+        RistrettoPoint::multiscalar_mul(&[*c1_value], &[*blinding_basepoint]);
+
+    let t1_p =
+        RistrettoPoint::multiscalar_mul(&[blinding_a], &[*value_basepoint]);
+    let t2_p =
+        RistrettoPoint::multiscalar_mul(&[blinding_a], &[*blinding_basepoint]);
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_p));
+    hash_vec.append(&mut point_to_bytes(&t2_p));
+    hash_vec.append(&mut point_to_bytes(&c1_point));
+    hash_vec.append(&mut point_to_bytes(&c2_point));
+    hash_vec.append(&mut point_to_bytes(value_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+
+    let check = hash_to_scalar(&hash_vec);
+    let m1 = blinding_a - (check * (c1_value));
+
+    let mut proof = EqualityProof::new();
+    proof.set_m1(scalar_to_bytes(&m1));
+    proof.set_t1(point_to_bytes(&t1_p));
+    proof.set_t2(point_to_bytes(&t2_p));
+    proof
+}
+
+/// Verifies two commitments satisfying a equality relationship, i.e.
+/// the values embedded in c1_point, c2_point satisfying
+/// c1_value = c2_value.
+pub fn verify_equality_proof(
+    c1_point: &RistrettoPoint,
+    c2_point: &RistrettoPoint,
+    proof: &EqualityProof,
+    value_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    let m1 = bytes_to_scalar(proof.get_m1())?;
+    let t1_p = bytes_to_point(proof.get_t1())?;
+    let t2_p = bytes_to_point(proof.get_t2())?;
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_p));
+    hash_vec.append(&mut point_to_bytes(&t2_p));
+    hash_vec.append(&mut point_to_bytes(&c1_point));
+    hash_vec.append(&mut point_to_bytes(&c2_point));
+    hash_vec.append(&mut point_to_bytes(value_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+
+    let check = hash_to_scalar(&hash_vec);
+    let t1_v = RistrettoPoint::multiscalar_mul(&[m1, check], &[
+        *value_basepoint,
+        *c1_point,
+    ]);
+    let t2_v = RistrettoPoint::multiscalar_mul(&[m1, check], &[
+        *blinding_basepoint,
+        *c2_point,
+    ]);
+    if t1_v == t1_p && t2_v == t2_p {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+/// Verifies multi pairs commitments satisfying a equality relationship, i.e.
+/// the values embedded in c1_point, c2_point satisfying
+/// c1_1_value = c2_1_value.
+/// c1_2_value = c2_2_value etc...
+pub fn verify_batch_equality_proof(
+    c1_point_list: &Vec<RistrettoPoint>,
+    c2_point_list: &Vec<RistrettoPoint>,
+    proof_list: &Vec<EqualityProof>,
+    value_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    if c1_point_list.len() != c2_point_list.len()
+        && c1_point_list.len() != proof_list.len()
+    {
+        return Ok(false);
+    };
+    let mut t1_sum_expected: RistrettoPoint = Default::default();
+    let mut t2_sum_expected: RistrettoPoint = Default::default();
+    let mut c1_c_expected: RistrettoPoint = Default::default();
+    let mut c2_c_expected: RistrettoPoint = Default::default();
+    let mut m1_expected: Scalar = Scalar::zero();
+    // let mut blinding_factor_sum: Scalar;
+    for i in 0..c1_point_list.len() {
+        // 32 bit random scalar
+        let blinding_factor = Scalar::from(get_random_u8());
+        let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
+        let t1_p = bytes_to_point(proof_list[i].get_t1())?;
+        let t2_p = bytes_to_point(proof_list[i].get_t2())?;
+        let c1_point = c1_point_list[i];
+        let c2_point = c2_point_list[i];
+        let mut hash_vec = Vec::new();
+        hash_vec.append(&mut point_to_bytes(&t1_p));
+        hash_vec.append(&mut point_to_bytes(&t2_p));
+        hash_vec.append(&mut point_to_bytes(&c1_point));
+        hash_vec.append(&mut point_to_bytes(&c2_point));
+        hash_vec.append(&mut point_to_bytes(value_basepoint));
+        hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+        let check = hash_to_scalar(&hash_vec);
+        let c_factor = blinding_factor * check;
+        m1_expected += blinding_factor * m1;
+        c1_c_expected += c_factor * c1_point;
+        c2_c_expected += c_factor * c2_point;
+        t1_sum_expected += blinding_factor * t1_p;
+        t2_sum_expected += blinding_factor * t2_p;
+        // blinding_factor_sum += blinding_factor;
+    }
+    let t1_compute_sum_final = m1_expected * value_basepoint + c1_c_expected;
+    let t2_compute_sum_final = m1_expected * blinding_basepoint + c2_c_expected;
+    if t1_sum_expected == t1_compute_sum_final
+        && t2_sum_expected == t2_compute_sum_final
+    {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -359,6 +489,102 @@ mod tests {
                 &c2_point,
                 &c3_point,
                 &proof,
+                &value_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_equality() {
+        let c_value = get_random_scalar();
+        let c_value_false = get_random_scalar();
+        let value_basepoint = *BASEPOINT_G1;
+        let blinding_basepoint = *BASEPOINT_G2;
+        let c1_point = value_basepoint * &c_value;
+        let c2_point = blinding_basepoint * &c_value;
+        let proof = prove_equality_proof(
+            &c_value,
+            &value_basepoint,
+            &blinding_basepoint,
+        );
+        assert_eq!(
+            true,
+            verify_equality_proof(
+                &c1_point,
+                &c2_point,
+                &proof,
+                &value_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+        let c2_point_false1 = blinding_basepoint * &c_value_false;
+        assert_eq!(
+            false,
+            verify_equality_proof(
+                &c1_point,
+                &c2_point_false1,
+                &proof,
+                &value_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_batch_equality() {
+        let mut proofs: Vec<EqualityProof> = vec![];
+        let mut c1_points: Vec<RistrettoPoint> = vec![];
+        let mut c2_points: Vec<RistrettoPoint> = vec![];
+        let value_basepoint = *BASEPOINT_G1;
+        let blinding_basepoint = *BASEPOINT_G2;
+        for _ in 0..100 {
+            let c_value = get_random_scalar();
+            let c_value_false = get_random_scalar();
+
+            let c1_point = value_basepoint * &c_value;
+            let c2_point = blinding_basepoint * &c_value;
+            let proof = prove_equality_proof(
+                &c_value,
+                &value_basepoint,
+                &blinding_basepoint,
+            );
+            assert_eq!(
+                true,
+                verify_equality_proof(
+                    &c1_point,
+                    &c2_point,
+                    &proof,
+                    &value_basepoint,
+                    &blinding_basepoint
+                )
+                .unwrap()
+            );
+            proofs.push(proof);
+            c1_points.push(c1_point);
+            c2_points.push(c2_point);
+        }
+        assert_eq!(
+            true,
+            verify_batch_equality_proof(
+                &c1_points,
+                &c2_points,
+                &proofs,
+                &value_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+        c1_points[50] = c2_points[60];
+        assert_eq!(
+            false,
+            verify_batch_equality_proof(
+                &c1_points,
+                &c2_points,
+                &proofs,
                 &value_basepoint,
                 &blinding_basepoint
             )

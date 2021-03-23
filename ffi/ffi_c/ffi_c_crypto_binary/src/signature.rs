@@ -15,6 +15,9 @@ use crate::config::SIGNATURE_SECP256K1;
 #[cfg(feature = "wedpr_f_signature_sm2")]
 use crate::config::SIGNATURE_SM2;
 
+#[cfg(feature = "wedpr_f_signature_ed25519")]
+use crate::config::SIGNATURE_ED25519;
+
 use wedpr_ffi_common::utils::{
     c_pointer_to_rust_bytes, set_c_pointer, CPointInput, CPointOutput, FAILURE,
     SUCCESS,
@@ -243,6 +246,87 @@ pub unsafe extern "C" fn wedpr_sm2_verify(
     let signature = c_pointer_to_rust_bytes(&signature_input);
 
     let result = SIGNATURE_SM2.verify(&public_key, &message_hash, &signature);
+    std::mem::forget(public_key);
+    std::mem::forget(message_hash);
+    std::mem::forget(signature);
+    match result {
+        true => SUCCESS,
+        false => FAILURE,
+    }
+}
+
+// Ed25519 implementation.
+
+#[cfg(feature = "wedpr_f_signature_ed25519")]
+#[no_mangle]
+/// C interface for 'wedpr_ed25519_gen_key_pair'.
+pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
+    public_key_result: &mut CPointOutput,
+    private_key_result: &mut CPointOutput,
+) -> i8 {
+    let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
+    if public_key_result.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
+        set_c_pointer(&pk, public_key_result);
+    } else {
+        set_c_pointer(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX], public_key_result);
+    }
+    set_c_pointer(&sk, private_key_result);
+    SUCCESS
+}
+
+#[cfg(feature = "wedpr_f_signature_ed25519")]
+#[no_mangle]
+/// C interface for 'wedpr_ed25519_derive_public_key'.
+pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
+    private_key_input: &CPointInput,
+    public_key_result: &mut CPointOutput,
+) -> i8 {
+    let sk = c_pointer_to_rust_bytes(private_key_input);
+    let result = SIGNATURE_ED25519.derive_public_key(&sk);
+    std::mem::forget(sk);
+    let pk = match result {
+        Ok(v) => v,
+        Err(_) => return FAILURE,
+    };
+    set_c_pointer(&pk, public_key_result);
+    SUCCESS
+}
+
+#[cfg(feature = "wedpr_f_signature_ed25519")]
+#[no_mangle]
+/// C interface for 'wedpr_ed25519_sign'.
+pub unsafe extern "C" fn wedpr_ed25519_sign(
+    private_key_input: &CPointInput,
+    message_hash_input: &CPointInput,
+    signature_result: &mut CPointOutput,
+) -> i8 {
+    let private_key = c_pointer_to_rust_bytes(private_key_input);
+    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
+    let result = SIGNATURE_ED25519.sign(&private_key, &message_hash);
+    std::mem::forget(private_key);
+    std::mem::forget(message_hash);
+    let signature = match result {
+        Ok(v) => v,
+        Err(_) => return FAILURE,
+    };
+    set_c_pointer(&signature, signature_result);
+    SUCCESS
+}
+
+#[cfg(feature = "wedpr_f_signature_ed25519")]
+#[no_mangle]
+/// C interface for 'wedpr_ed25519_verify'.
+pub unsafe extern "C" fn wedpr_ed25519_verify(
+    public_key_input: &CPointInput,
+    message_hash_input: &CPointInput,
+    signature_input: &CPointInput,
+) -> i8 {
+    let public_key = c_pointer_to_rust_bytes(public_key_input);
+    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
+    let signature = c_pointer_to_rust_bytes(&signature_input);
+
+    let result =
+        SIGNATURE_ED25519.verify(&public_key, &message_hash, &signature);
     std::mem::forget(public_key);
     std::mem::forget(message_hash);
     std::mem::forget(signature);

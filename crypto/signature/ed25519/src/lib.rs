@@ -72,6 +72,23 @@ impl Signature for WedprEd25519 {
     }
 }
 
+impl WedprEd25519 {
+    /// Derives public key from private key.
+    pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
+        &self,
+        private_key: &T,
+    ) -> Result<Vec<u8>, WedprError> {
+        let secret_key: SecretKey =
+            match SecretKey::from_bytes(&private_key.as_ref()) {
+                Ok(v) => v,
+                Err(_) => return Err(WedprError::DecodeError),
+            };
+        let public_key: PublicKey = (&secret_key).into();
+
+        Ok(public_key.to_bytes().to_vec())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
