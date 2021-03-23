@@ -109,13 +109,13 @@ pub unsafe extern "C" fn wedpr_sha3_hash(
 #[no_mangle]
 /// C interface for 'wedpr_blake2b_hash'.
 pub unsafe extern "C" fn wedpr_blake2b_hash(
-    encoded_message: &CPointInput,
+    message_input: &CPointInput,
     hash_result: &mut CPointOutput,
 ) -> i8 {
     check_c_pointer_length!(hash_result, HASH_256_DATA_SIZE);
     // Note: Since encode_message is an object passed in by C/CPP, it should
     // not be released
-    let input_message = c_pointer_to_rust_bytes(encoded_message);
+    let input_message = c_pointer_to_rust_bytes(message_input);
     let hash_data = HASH_BLAKE2B.hash(&input_message);
     std::mem::forget(input_message);
     set_c_pointer(&hash_data, hash_result);
