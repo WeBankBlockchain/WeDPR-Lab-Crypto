@@ -15,6 +15,7 @@ extern crate wedpr_l_macros;
 #[macro_use]
 extern crate lazy_static;
 
+pub mod block_cipher;
 mod config;
 pub mod ecies;
 pub mod hash;

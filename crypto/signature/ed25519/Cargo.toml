@@ -11,7 +11,7 @@ description = "Library of WeDPR shared Siganture Function implement by ed25519."
 [dependencies]
 ed25519-dalek = {version = "1.0.1"}
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils = "1.0.0"
+wedpr_l_utils = { path = "/Users/asher/WeDPR/WeDPR-Lab-Crypto/common/utils/"}
 lazy_static = "1.4.0"
 rand = "0.7"
 

@@ -27,9 +27,9 @@ use wedpr_l_utils::{error::WedprError, traits::Coder};
 #[cfg(feature = "wedpr_f_base64")]
 use wedpr_l_common_coder_base64::WedprBase64;
 
+use self::jni::sys::jbyteArray;
 #[cfg(feature = "wedpr_f_hex")]
 use wedpr_l_common_coder_hex::WedprHex;
-use self::jni::sys::jbyteArray;
 
 #[cfg(feature = "wedpr_f_hex")]
 lazy_static! {
@@ -123,8 +123,8 @@ pub fn java_set_error_field_and_extract_jobject(
 //     let java_bytes_array;
 //     // Error message should not be empty.
 //     // assert!(!error_message.is_empty());
-//     java_bytes_array = _env.new_byte_array(4).expect("new new_bytes should not fail");
-//     let rust_bytes_arry = b"0123";
+//     java_bytes_array = _env.new_byte_array(4).expect("new new_bytes should
+// not fail");     let rust_bytes_arry = b"0123";
 //     let i8slice = unsafe {&*(rust_bytes_arry as *const [u8] as *const [i8])};
 //     _env.set_byte_array_region(java_bytes_array, 4, &i8slice);
 //     // java_bytes_array = _env
@@ -142,22 +142,20 @@ pub fn java_set_error_field_and_extract_jobject(
 //     java_object.into_inner()
 // }
 
-pub fn java_bytes_to_jbyte_array(_env: &JNIEnv,
-                                 rust_bytes_array: &[u8]) -> Result<jbyteArray, WedprError> {
-    return match _env.byte_array_from_slice(rust_bytes_array)
-    {
+pub fn java_bytes_to_jbyte_array(
+    _env: &JNIEnv,
+    rust_bytes_array: &[u8],
+) -> Result<jbyteArray, WedprError> {
+    return match _env.byte_array_from_slice(rust_bytes_array) {
         Ok(v) => Ok(v),
         Err(_) => Err(WedprError::ArgumentError),
     };
 
-    //
-    // let i8slice = unsafe {&*(rust_bytes_array as *const [u8] as *const [i8])};
-    // return match _env.set_byte_array_region(java_bytes_array, bytes_size, &i8slice) {
-    //     Ok(_) => Ok(java_bytes_array),
+    // let i8slice = unsafe {&*(rust_bytes_array as *const [u8] as *const
+    // [i8])}; return match _env.set_byte_array_region(java_bytes_array,
+    // bytes_size, &i8slice) {     Ok(_) => Ok(java_bytes_array),
     //     Err(_) => Err(WedprError::FormatError),
     // };
-
-
 }
 
 /// Converts Java String to Rust bytes.
@@ -213,32 +211,23 @@ pub fn c_char_pointer_to_string(
 }
 
 /// Converts C char pointer to Rust bytes.
-pub fn c_char_pointer_to_bytes(
-    param: *const c_char,
-) -> Vec<u8> {
+pub fn c_char_pointer_to_bytes(param: *const c_char) -> Vec<u8> {
     let cstr_param = unsafe { CStr::from_ptr(param) };
     cstr_param.to_bytes().to_vec()
 }
 
 /// Converts C pointer to Rust bytes.
 pub unsafe fn c_pointer_to_rust_bytes(input: &CPointInput) -> Vec<u8> {
-    Vec::from_raw_parts(
-        input.data as *mut u8,
-        input.len,
-        input.len,
-    )
+    Vec::from_raw_parts(input.data as *mut u8, input.len, input.len)
 }
 
 /// Set Rust bytes to C pointer.
-pub unsafe fn set_c_pointer<T: ?Sized + AsRef<[u8]>>(input: &T, output: &mut CPointOutput) {
-    let data_slice = std::slice::from_raw_parts_mut(
-        output.data as *mut u8,
-        output.len,
-    );
+pub unsafe fn set_c_pointer<T: ?Sized + AsRef<[u8]>>(
+    input: &T,
+    output: &mut CPointOutput,
+) {
+    let data_slice =
+        std::slice::from_raw_parts_mut(output.data as *mut u8, output.len);
     data_slice.copy_from_slice(&input.as_ref());
     std::mem::forget(data_slice);
 }
-
-
-
-

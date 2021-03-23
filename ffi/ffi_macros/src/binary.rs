@@ -14,7 +14,8 @@ macro_rules! java_safe_set_bytes_binary_field {
     };
 }
 
-/// Converts Rust String to Java bytes buffer, and returns an error object if failed.
+/// Converts Rust String to Java bytes buffer, and returns an error object if
+/// failed.
 #[macro_export]
 macro_rules! java_safe_bytes_to_jByteBuffer {
     ($_env:expr, $result_jobject:expr, $rust_bytes:expr) => {
@@ -24,16 +25,15 @@ macro_rules! java_safe_bytes_to_jByteBuffer {
                 return java_set_error_field_and_extract_jobject(
                     &$_env,
                     &$result_jobject,
-                    &format!(
-                        "java_safe_bytes_to_jByteBuffer failed",
-                    ),
+                    &format!("java_safe_bytes_to_jByteBuffer failed",),
                 )
             },
         })
     };
 }
 
-/// Converts Rust String to Java bytes array, and returns an error object if failed.
+/// Converts Rust String to Java bytes array, and returns an error object if
+/// failed.
 #[macro_export]
 macro_rules! java_safe_bytes_to_jbyteArray {
     ($_env:expr, $result_jobject:expr, $rust_bytes:expr) => {
@@ -43,9 +43,7 @@ macro_rules! java_safe_bytes_to_jbyteArray {
                 return java_set_error_field_and_extract_jobject(
                     &$_env,
                     &$result_jobject,
-                    &format!(
-                        "java_safe_bytes_to_jbyteArray failed",
-                    ),
+                    &format!("java_safe_bytes_to_jbyteArray failed",),
                 )
             },
         })
@@ -57,7 +55,7 @@ macro_rules! java_safe_bytes_to_jbyteArray {
 macro_rules! check_c_pointer_length {
     ($c_pointer:expr, $c_pointer_expected_length:expr) => {
         if $c_pointer.len < $c_pointer_expected_length {
-        return FAILURE;
-    }
+            return FAILURE;
+        }
     };
 }

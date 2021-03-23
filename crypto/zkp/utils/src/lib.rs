@@ -18,6 +18,7 @@ extern crate lazy_static;
 
 mod config;
 use config::HASH;
+use rand::Rng;
 use sha3::Sha3_512;
 use std::convert::TryInto;
 use wedpr_l_utils::{error::WedprError, traits::Hash};
@@ -104,4 +105,11 @@ pub fn bytes_to_point(point: &[u8]) -> Result<RistrettoPoint, WedprError> {
         },
     };
     Ok(point_value)
+}
+
+/// Gets a random u8 integer.
+pub fn get_random_u8() -> u8 {
+    let mut rng = rand::thread_rng();
+    let blinding: u8 = rng.gen();
+    blinding
 }

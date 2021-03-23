@@ -12,6 +12,15 @@ use crate::config::HASH_KECCAK256;
 #[cfg(feature = "wedpr_f_hash_sm3")]
 use crate::config::HASH_SM3;
 
+#[cfg(feature = "wedpr_f_hash_sha3")]
+use crate::config::HASH_SHA3;
+
+#[cfg(feature = "wedpr_f_hash_ripemd160")]
+use crate::config::HASH_RIPEMD160;
+
+#[cfg(feature = "wedpr_f_hash_blake2b")]
+use crate::config::HASH_BLAKE2B;
+
 use libc::c_char;
 use std::{ffi::CString, panic, ptr};
 
@@ -56,6 +65,57 @@ pub extern "C" fn wedpr_sm3_hash(
         let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
 
         let msg_hash = bytes_to_string(&HASH_SM3.hash(&message));
+        c_safe_string_to_c_char_pointer!(msg_hash)
+    });
+    c_safe_return!(result)
+}
+
+// ripemd160 implementation.
+
+#[cfg(feature = "wedpr_f_hash_ripemd160")]
+#[no_mangle]
+/// C interface for 'wedpr_ripemd160_hash'.
+pub extern "C" fn wedpr_ripemd160_hash(
+    encoded_message: *const c_char,
+) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
+
+        let msg_hash = bytes_to_string(&HASH_RIPEMD160.hash(&message));
+        c_safe_string_to_c_char_pointer!(msg_hash)
+    });
+    c_safe_return!(result)
+}
+
+// SHA3 implementation.
+
+#[cfg(feature = "wedpr_f_hash_sha3")]
+#[no_mangle]
+/// C interface for 'wedpr_sha3_hash'.
+pub extern "C" fn wedpr_sha3_hash(
+    encoded_message: *const c_char,
+) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
+
+        let msg_hash = bytes_to_string(&HASH_SHA3.hash(&message));
+        c_safe_string_to_c_char_pointer!(msg_hash)
+    });
+    c_safe_return!(result)
+}
+
+// BLAKE2B implementation.
+
+#[cfg(feature = "wedpr_f_hash_blake2b")]
+#[no_mangle]
+/// C interface for 'wedpr_blake2b_hash'.
+pub extern "C" fn wedpr_blake2b_hash(
+    encoded_message: *const c_char,
+) -> *mut c_char {
+    let result = panic::catch_unwind(|| {
+        let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
+
+        let msg_hash = bytes_to_string(&HASH_BLAKE2B.hash(&message));
         c_safe_string_to_c_char_pointer!(msg_hash)
     });
     c_safe_return!(result)
