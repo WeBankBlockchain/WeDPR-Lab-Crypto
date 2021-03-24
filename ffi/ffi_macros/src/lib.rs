@@ -123,6 +123,26 @@ macro_rules! java_safe_jstring_to_pb {
     };
 }
 
+/// Converts Rust string to Rust bytes, and returns an error object if failed.
+#[macro_export]
+macro_rules! java_safe_string_to_bytes {
+    ($_env:expr, $result_jobject:expr, $rust_string:expr) => {
+        match string_to_bytes(&$rust_string) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &$_env,
+                    &$result_jobject,
+                    &format!(
+                        "string to bytes failed, input={}",
+                        $rust_string
+                    ),
+                )
+            },
+        }
+    };
+}
+
 /// Converts Rust bytes to Rust protobuf, and returns an error object if failed.
 #[macro_export]
 macro_rules! java_safe_bytes_to_pb {
