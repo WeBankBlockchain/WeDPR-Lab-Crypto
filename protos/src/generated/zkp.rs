@@ -26,7 +26,9 @@
 #[derive(PartialEq,Clone,Default)]
 pub struct BalanceProof {
     // message fields
-    pub c: ::std::vec::Vec<u8>,
+    pub t1: ::std::vec::Vec<u8>,
+    pub t2: ::std::vec::Vec<u8>,
+    pub t3: ::std::vec::Vec<u8>,
     pub m1: ::std::vec::Vec<u8>,
     pub m2: ::std::vec::Vec<u8>,
     pub m3: ::std::vec::Vec<u8>,
@@ -48,33 +50,85 @@ impl BalanceProof {
         ::std::default::Default::default()
     }
 
-    // bytes c = 1;
+    // bytes t1 = 1;
 
 
-    pub fn get_c(&self) -> &[u8] {
-        &self.c
+    pub fn get_t1(&self) -> &[u8] {
+        &self.t1
     }
-    pub fn clear_c(&mut self) {
-        self.c.clear();
+    pub fn clear_t1(&mut self) {
+        self.t1.clear();
     }
 
     // Param is passed by value, moved
-    pub fn set_c(&mut self, v: ::std::vec::Vec<u8>) {
-        self.c = v;
+    pub fn set_t1(&mut self, v: ::std::vec::Vec<u8>) {
+        self.t1 = v;
     }
 
     // Mutable pointer to the field.
     // If field is not initialized, it is initialized with default value first.
-    pub fn mut_c(&mut self) -> &mut ::std::vec::Vec<u8> {
-        &mut self.c
+    pub fn mut_t1(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.t1
     }
 
     // Take field
-    pub fn take_c(&mut self) -> ::std::vec::Vec<u8> {
-        ::std::mem::replace(&mut self.c, ::std::vec::Vec::new())
+    pub fn take_t1(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.t1, ::std::vec::Vec::new())
     }
 
-    // bytes m1 = 2;
+    // bytes t2 = 2;
+
+
+    pub fn get_t2(&self) -> &[u8] {
+        &self.t2
+    }
+    pub fn clear_t2(&mut self) {
+        self.t2.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_t2(&mut self, v: ::std::vec::Vec<u8>) {
+        self.t2 = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_t2(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.t2
+    }
+
+    // Take field
+    pub fn take_t2(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.t2, ::std::vec::Vec::new())
+    }
+
+    // bytes t3 = 3;
+
+
+    pub fn get_t3(&self) -> &[u8] {
+        &self.t3
+    }
+    pub fn clear_t3(&mut self) {
+        self.t3.clear();
+    }
+
+    // Param is passed by value, moved
+    pub fn set_t3(&mut self, v: ::std::vec::Vec<u8>) {
+        self.t3 = v;
+    }
+
+    // Mutable pointer to the field.
+    // If field is not initialized, it is initialized with default value first.
+    pub fn mut_t3(&mut self) -> &mut ::std::vec::Vec<u8> {
+        &mut self.t3
+    }
+
+    // Take field
+    pub fn take_t3(&mut self) -> ::std::vec::Vec<u8> {
+        ::std::mem::replace(&mut self.t3, ::std::vec::Vec::new())
+    }
+
+    // bytes m1 = 4;
 
 
     pub fn get_m1(&self) -> &[u8] {
@@ -100,7 +154,7 @@ impl BalanceProof {
         ::std::mem::replace(&mut self.m1, ::std::vec::Vec::new())
     }
 
-    // bytes m2 = 3;
+    // bytes m2 = 5;
 
 
     pub fn get_m2(&self) -> &[u8] {
@@ -126,7 +180,7 @@ impl BalanceProof {
         ::std::mem::replace(&mut self.m2, ::std::vec::Vec::new())
     }
 
-    // bytes m3 = 4;
+    // bytes m3 = 6;
 
 
     pub fn get_m3(&self) -> &[u8] {
@@ -152,7 +206,7 @@ impl BalanceProof {
         ::std::mem::replace(&mut self.m3, ::std::vec::Vec::new())
     }
 
-    // bytes m4 = 5;
+    // bytes m4 = 7;
 
 
     pub fn get_m4(&self) -> &[u8] {
@@ -178,7 +232,7 @@ impl BalanceProof {
         ::std::mem::replace(&mut self.m4, ::std::vec::Vec::new())
     }
 
-    // bytes m5 = 6;
+    // bytes m5 = 8;
 
 
     pub fn get_m5(&self) -> &[u8] {
@@ -215,21 +269,27 @@ impl ::protobuf::Message for BalanceProof {
             let (field_number, wire_type) = is.read_tag_unpack()?;
             match field_number {
                 1 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.c)?;
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.t1)?;
                 },
                 2 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m1)?;
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.t2)?;
                 },
                 3 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m2)?;
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.t3)?;
                 },
                 4 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m3)?;
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m1)?;
                 },
                 5 => {
-                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m4)?;
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m2)?;
                 },
                 6 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m3)?;
+                },
+                7 => {
+                    ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m4)?;
+                },
+                8 => {
                     ::protobuf::rt::read_singular_proto3_bytes_into(wire_type, is, &mut self.m5)?;
                 },
                 _ => {
@@ -244,23 +304,29 @@ impl ::protobuf::Message for BalanceProof {
     #[allow(unused_variables)]
     fn compute_size(&self) -> u32 {
         let mut my_size = 0;
-        if !self.c.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(1, &self.c);
+        if !self.t1.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(1, &self.t1);
+        }
+        if !self.t2.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(2, &self.t2);
+        }
+        if !self.t3.is_empty() {
+            my_size += ::protobuf::rt::bytes_size(3, &self.t3);
         }
         if !self.m1.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(2, &self.m1);
+            my_size += ::protobuf::rt::bytes_size(4, &self.m1);
         }
         if !self.m2.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(3, &self.m2);
+            my_size += ::protobuf::rt::bytes_size(5, &self.m2);
         }
         if !self.m3.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(4, &self.m3);
+            my_size += ::protobuf::rt::bytes_size(6, &self.m3);
         }
         if !self.m4.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(5, &self.m4);
+            my_size += ::protobuf::rt::bytes_size(7, &self.m4);
         }
         if !self.m5.is_empty() {
-            my_size += ::protobuf::rt::bytes_size(6, &self.m5);
+            my_size += ::protobuf::rt::bytes_size(8, &self.m5);
         }
         my_size += ::protobuf::rt::unknown_fields_size(self.get_unknown_fields());
         self.cached_size.set(my_size);
@@ -268,23 +334,29 @@ impl ::protobuf::Message for BalanceProof {
     }
 
     fn write_to_with_cached_sizes(&self, os: &mut ::protobuf::CodedOutputStream<'_>) -> ::protobuf::ProtobufResult<()> {
-        if !self.c.is_empty() {
-            os.write_bytes(1, &self.c)?;
+        if !self.t1.is_empty() {
+            os.write_bytes(1, &self.t1)?;
+        }
+        if !self.t2.is_empty() {
+            os.write_bytes(2, &self.t2)?;
+        }
+        if !self.t3.is_empty() {
+            os.write_bytes(3, &self.t3)?;
         }
         if !self.m1.is_empty() {
-            os.write_bytes(2, &self.m1)?;
+            os.write_bytes(4, &self.m1)?;
         }
         if !self.m2.is_empty() {
-            os.write_bytes(3, &self.m2)?;
+            os.write_bytes(5, &self.m2)?;
         }
         if !self.m3.is_empty() {
-            os.write_bytes(4, &self.m3)?;
+            os.write_bytes(6, &self.m3)?;
         }
         if !self.m4.is_empty() {
-            os.write_bytes(5, &self.m4)?;
+            os.write_bytes(7, &self.m4)?;
         }
         if !self.m5.is_empty() {
-            os.write_bytes(6, &self.m5)?;
+            os.write_bytes(8, &self.m5)?;
         }
         os.write_unknown_fields(self.get_unknown_fields())?;
         ::std::result::Result::Ok(())
@@ -325,9 +397,19 @@ impl ::protobuf::Message for BalanceProof {
         descriptor.get(|| {
             let mut fields = ::std::vec::Vec::new();
             fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
-                "c",
-                |m: &BalanceProof| { &m.c },
-                |m: &mut BalanceProof| { &mut m.c },
+                "t1",
+                |m: &BalanceProof| { &m.t1 },
+                |m: &mut BalanceProof| { &mut m.t1 },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "t2",
+                |m: &BalanceProof| { &m.t2 },
+                |m: &mut BalanceProof| { &mut m.t2 },
+            ));
+            fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
+                "t3",
+                |m: &BalanceProof| { &m.t3 },
+                |m: &mut BalanceProof| { &mut m.t3 },
             ));
             fields.push(::protobuf::reflect::accessor::make_simple_field_accessor::<_, ::protobuf::types::ProtobufTypeBytes>(
                 "m1",
@@ -370,7 +452,9 @@ impl ::protobuf::Message for BalanceProof {
 
 impl ::protobuf::Clear for BalanceProof {
     fn clear(&mut self) {
-        self.c.clear();
+        self.t1.clear();
+        self.t2.clear();
+        self.t3.clear();
         self.m1.clear();
         self.m2.clear();
         self.m3.clear();
@@ -636,14 +720,16 @@ impl ::protobuf::reflect::ProtobufValue for EqualityProof {
 }
 
 static file_descriptor_proto_data: &'static [u8] = b"\
-    \n\x10crypto/zkp.proto\x12\"com.webank.blockchain.crypto.proto\"l\n\x0cB\
-    alanceProof\x12\x0c\n\x01c\x18\x01\x20\x01(\x0cR\x01c\x12\x0e\n\x02m1\
-    \x18\x02\x20\x01(\x0cR\x02m1\x12\x0e\n\x02m2\x18\x03\x20\x01(\x0cR\x02m2\
-    \x12\x0e\n\x02m3\x18\x04\x20\x01(\x0cR\x02m3\x12\x0e\n\x02m4\x18\x05\x20\
-    \x01(\x0cR\x02m4\x12\x0e\n\x02m5\x18\x06\x20\x01(\x0cR\x02m5\"?\n\rEqual\
-    ityProof\x12\x0e\n\x02m1\x18\x01\x20\x01(\x0cR\x02m1\x12\x0e\n\x02t1\x18\
-    \x02\x20\x01(\x0cR\x02t1\x12\x0e\n\x02t2\x18\x03\x20\x01(\x0cR\x02t2B&\n\
-    \"com.webank.blockchain.crypto.protoP\x01b\x06proto3\
+    \n\x10crypto/zkp.proto\x12\"com.webank.blockchain.crypto.proto\"\x8e\x01\
+    \n\x0cBalanceProof\x12\x0e\n\x02t1\x18\x01\x20\x01(\x0cR\x02t1\x12\x0e\n\
+    \x02t2\x18\x02\x20\x01(\x0cR\x02t2\x12\x0e\n\x02t3\x18\x03\x20\x01(\x0cR\
+    \x02t3\x12\x0e\n\x02m1\x18\x04\x20\x01(\x0cR\x02m1\x12\x0e\n\x02m2\x18\
+    \x05\x20\x01(\x0cR\x02m2\x12\x0e\n\x02m3\x18\x06\x20\x01(\x0cR\x02m3\x12\
+    \x0e\n\x02m4\x18\x07\x20\x01(\x0cR\x02m4\x12\x0e\n\x02m5\x18\x08\x20\x01\
+    (\x0cR\x02m5\"?\n\rEqualityProof\x12\x0e\n\x02m1\x18\x01\x20\x01(\x0cR\
+    \x02m1\x12\x0e\n\x02t1\x18\x02\x20\x01(\x0cR\x02t1\x12\x0e\n\x02t2\x18\
+    \x03\x20\x01(\x0cR\x02t2B&\n\"com.webank.blockchain.crypto.protoP\x01b\
+    \x06proto3\
 ";
 
 static file_descriptor_proto_lazy: ::protobuf::rt::LazyV2<::protobuf::descriptor::FileDescriptorProto> = ::protobuf::rt::LazyV2::INIT;

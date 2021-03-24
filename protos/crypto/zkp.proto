@@ -10,12 +10,14 @@ option java_multiple_files = true;
 // For example, given C(x), C(y), C(z), this proof data can be used to
 // verify whether x * y =? z.
 message BalanceProof {
-    bytes c = 1;
-    bytes m1 = 2;
-    bytes m2 = 3;
-    bytes m3 = 4;
-    bytes m4 = 5;
-    bytes m5 = 6;
+    bytes t1 = 1;
+    bytes t2 = 2;
+    bytes t3 = 3;
+    bytes m1 = 4;
+    bytes m2 = 5;
+    bytes m3 = 6;
+    bytes m4 = 7;
+    bytes m5 = 8;
 }
 
 // ZKP data to verify the equality relationship among value commitments.
