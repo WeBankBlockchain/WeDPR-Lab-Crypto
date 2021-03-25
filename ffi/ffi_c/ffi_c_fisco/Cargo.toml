@@ -16,6 +16,6 @@ wedpr_ffi_common= { path = "../../ffi_common/" }
 wedpr_ffi_macros =  { path = "../../ffi_macros/" }
 wedpr_ffi_c_common = "1.0.0"
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils = { path = "/Users/asher/WeDPR/WeDPR-Lab-Crypto/common/utils/"}
+wedpr_l_utils =  {path = "../../../common/utils"}
 wedpr_third_party_fisco_bcos = { path = "../../../third_party/fisco_bcos/" }
 

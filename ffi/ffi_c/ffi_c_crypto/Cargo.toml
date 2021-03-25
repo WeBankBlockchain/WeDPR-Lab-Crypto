@@ -46,9 +46,9 @@ wedpr_l_crypto_signature_sm2 = { path = "../../../crypto/signature/sm2", optiona
 wedpr_l_crypto_signature_ed25519 = { path = "../../../crypto/signature/ed25519", optional = true }
 wedpr_l_crypto_block_cipher_aes = { path = "../../../crypto/block_cipher/aes", optional = true }
 wedpr_l_crypto_block_cipher_sm4 = { path = "../../../crypto/block_cipher/sm4", optional = true }
-wedpr_l_protos = "1.0.0"
+wedpr_l_protos = { path = "../../../protos"}
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils = { path = "/Users/asher/WeDPR/WeDPR-Lab-Crypto/common/utils/"}
+wedpr_l_utils =  {path = "../../../common/utils"}
 # This is required to generate C/C++ header files.
 [build-dependencies]
 cbindgen = "0.9.0"
