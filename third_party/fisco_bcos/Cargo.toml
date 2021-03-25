@@ -11,7 +11,7 @@ description = "Library of FISCO BCOS tools."
 [dependencies]
 sputnikvm-precompiled-bn128 = "0.10.1"
 etcommon-bigint = "0.2"
-wedpr_l_utils = { path = "/Users/asher/WeDPR/WeDPR-Lab-Crypto/common/utils/"}
+wedpr_l_utils = {path = "../../common/utils"}
 sputnikvm = "0.10.1"
 
 [dev-dependencies]

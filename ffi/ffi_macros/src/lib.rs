@@ -133,10 +133,7 @@ macro_rules! java_safe_string_to_bytes {
                 return java_set_error_field_and_extract_jobject(
                     &$_env,
                     &$result_jobject,
-                    &format!(
-                        "string to bytes failed, input={}",
-                        $rust_string
-                    ),
+                    &format!("string to bytes failed, input={}", $rust_string),
                 )
             },
         }
@@ -398,8 +395,7 @@ macro_rules! c_safe_c_char_pointer_to_bytes_with_error_value {
 #[macro_export]
 macro_rules! c_safe_string_to_bytes_with_error_value {
     ($rust_string:expr, $error_value:expr) => {
-        match string_to_bytes(&$rust_string)
-            {
+        match string_to_bytes(&$rust_string) {
             Ok(v) => v,
             Err(_) => return $error_value,
         }

@@ -11,4 +11,4 @@ description = "Library of WeDPR shared Hash Function implement by sm3."
 [dependencies]
 wedpr_l_libsm = "0.3.1"
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils = { path = "/Users/asher/WeDPR/WeDPR-Lab-Crypto/common/utils/"}
+wedpr_l_utils =  {path = "../../../common/utils"}
