@@ -32,7 +32,30 @@ WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，进一步
 
 2. **FFI接口**，支持交叉编译跨语言、跨平台所调用的FFI适配接口。
 
-在此基础上，本次WeDPR-Lab Crypto v1.0.0又新增以下密码算法及其对应的FFI接口：
+WeDPR-Lab Crypto v1.1.0新增以下密码算法及其对应的FFI接口：
+
+1. **分组加密算法**
+- AES-256
+
+AES-256的分组长度为128比特，密钥长度为256比特。
+
+- 国密SM4
+
+国密SM4的分组长度为128比特，密钥长度为128比特。
+
+2. **哈希算法**
+- SHA3
+- BLAKE2
+- RIPEMD-160
+3. bn128 点加，点乘，paring
+4. **数字签名算法**
+- Ed25519
+
+5. **零知识证明的聚合验证**
+- 加和证明的聚合验证
+- 乘积证明的聚合验证
+
+WeDPR-Lab Crypto v1.0.0新增以下密码算法及其对应的FFI接口：
 
 1.	**国密SM2签名及验证算法**
 
@@ -118,21 +141,11 @@ cargo build --features "一个或多个feature名" --no-default-features
 | 必选条件编译项 |                 wedpr_f_base64或wedpr_f_hex                  |
 | 可选条件编译项 | wedpr_f_ecies_secp256k1， wedpr_f_signature_secp256k1， wedpr_f_hash_keccak256， wedpr_f_signature_sm2， wedpr_f_hash_sm3， wedpr_f_vrf_curve25519 |
 
-
-
 # 接口文档
 
-## 生成并查看Rust SDK接口文档
+查看WeDPR所有crate对应文档
 
-在本项目的根目录（即`WeDPR-Lab-Crypto`目录）中，运行如下命令。
-
-```bash
-cargo doc --no-deps
-```
-
-以上命令将根据代码中的注释，在`target/doc`子目录中，生成的SDK接口文档。
-
-进入`target/doc`文档目录后，会看到所有SDK相关的包名（包含WeDPR-Lab-Crypto和其他依赖包），进入其中任意一个包名的目录，用网页浏览器打开其中的`index.html`文件，便可查看WeDPR-Lab-Crypto相关的接口说明。
+- [点击这里](https://crates.io/search?q=wedpr)
 
 # 其他相关文档
 

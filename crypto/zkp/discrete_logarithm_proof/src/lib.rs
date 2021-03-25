@@ -140,9 +140,10 @@ pub fn verify_sum_relationship(
     Ok(false)
 }
 
-/// Verifies multi three commitments paris satisfying a sum relationship, i.e.
-/// the values embedded in c1_point, c2_point, c3_point satisfying
-/// c1_value + c2_value = c3_value.
+/// Verifies multiple commitments tuples satisfying a sum relationship simultaneously,
+/// where a commitments tuple contains three commitment points, c1_point, c2_point, c3_point,
+/// each of which come from c?_point_list in turn,
+/// and the values embedded in c1_point, c2_point, c3_point satisfying
 pub fn verify_batch_sum_relationship(
     c1_point_list: &Vec<RistrettoPoint>,
     c2_point_list: &Vec<RistrettoPoint>,
@@ -366,9 +367,10 @@ pub fn verify_product_relationship(
     Ok(false)
 }
 
-/// Verifies multi three commitments paris satisfying a sum relationship, i.e.
-/// the values embedded in c1_point, c2_point, c3_point satisfying
-/// c1_value * c2_value = c3_value.
+/// Verifies multiple commitments tuples satisfying a product relationship simultaneously,
+/// where a commitments tuple contains three commitment points, c1_point, c2_point, c3_point,
+/// each of which come from c?_point_list in turn,
+/// and the values embedded in c1_point, c2_point, c3_point satisfying
 pub fn verify_batch_product_relationship(
     c1_point_list: &Vec<RistrettoPoint>,
     c2_point_list: &Vec<RistrettoPoint>,
@@ -460,10 +462,10 @@ pub fn verify_batch_product_relationship(
     Ok(false)
 }
 
-/// Proves two commitments satisfying a equality relationship, i.e.
-/// the values embedded in them satisfying c1_value = c2_value .
-/// c?_blinding are random blinding values used in the commitments.
-/// The commitments (c?_value*basepoint)
+/// Proves two commitments(c1_point and c2_point) satisfying a equality relationship, i.e.
+/// the values embedded in them satisfying c1_value = c2_value,
+/// where c1_point = c1_value * value_basepoint,
+/// c2_point = c2_value * blinding_basepoint.
 /// It returns a proof for the above equality relationship.
 pub fn prove_equality_proof(
     c1_value: &Scalar,
@@ -500,7 +502,9 @@ pub fn prove_equality_proof(
 
 /// Verifies two commitments satisfying a equality relationship, i.e.
 /// the values embedded in c1_point, c2_point satisfying
-/// c1_value = c2_value.
+/// c1_value = c2_value,
+/// where c1_point = c1_value * value_basepoint,
+/// c2_point = c2_value * blinding_basepoint.
 pub fn verify_equality_proof(
     c1_point: &RistrettoPoint,
     c2_point: &RistrettoPoint,
@@ -534,10 +538,11 @@ pub fn verify_equality_proof(
     Ok(false)
 }
 
-/// Verifies multi pairs commitments satisfying a equality relationship, i.e.
-/// the values embedded in c1_point, c2_point satisfying
-/// c1_1_value = c2_1_value.
-/// c1_2_value = c2_2_value etc...
+/// Verifies multiple commitment pairs satisfying a equality relationship respectively,
+/// where a commitments pair contains two commitment points
+/// (c1_point = c1_value * value_basepoint and c2_point = c2_value * blinding_basepoint),
+/// each of which come from c?_point_list in turn,
+/// and the values embedded in them satisfying c1_value = c2_value.
 pub fn verify_batch_equality_proof(
     c1_point_list: &Vec<RistrettoPoint>,
     c2_point_list: &Vec<RistrettoPoint>,
