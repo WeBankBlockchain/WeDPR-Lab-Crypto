@@ -15,7 +15,8 @@ use wedpr_l_utils::{error::WedprError, traits::BlockCipher};
 pub struct WedprBlockCipherAES {}
 
 impl BlockCipher for WedprBlockCipherAES {
-    /// Encrypts a block with a symmetric key and a initialization vector(iv).
+    /// Encrypts a block text with a symmetric key and a initialization vector(iv).
+    /// It retures a ciphertext of the block text.
     fn encrypt<T: ?Sized + AsRef<[u8]>>(
         &self,
         block_text: &T,
@@ -36,7 +37,8 @@ impl BlockCipher for WedprBlockCipherAES {
         };
     }
 
-    /// Decrypts a cipher with a symmetric key and a initialization vector(iv).
+    /// Decrypts a ciphertext with a symmetric key and a initialization vector(iv).
+    /// It retures a plaintext corresponding to the ciphertext.
     fn decrypt<T: ?Sized + AsRef<[u8]>>(
         &self,
         cipher_text: &T,
@@ -55,7 +57,7 @@ impl BlockCipher for WedprBlockCipherAES {
         };
     }
 
-    /// Generates a new key for block cipher,
+    /// Generates a new symmetric key for block ecipher.
     fn generate_key(&self) -> Vec<u8> {
         let mut rng = rand::rngs::OsRng::default();
         let mut key = [0u8; 32];
