@@ -26,7 +26,8 @@ impl Signature for WedprSm2p256v1 {
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SM2_CTX.load_seckey(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -44,7 +45,8 @@ impl Signature for WedprSm2p256v1 {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool {
+    ) -> bool
+    {
         let public_key_point = match SM2_CTX.load_pubkey(&public_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -71,13 +73,14 @@ impl Signature for WedprSm2p256v1 {
 }
 
 impl WedprSm2p256v1 {
-    /// Signes a message hash faster with both the private and public keys.
+    /// Signs a message hash faster with both the private and public keys.
     pub fn sign_fast<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
         public_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SM2_CTX.load_seckey(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -99,7 +102,8 @@ impl WedprSm2p256v1 {
     pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SM2_CTX.load_seckey(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {

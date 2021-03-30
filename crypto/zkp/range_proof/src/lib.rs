@@ -31,7 +31,8 @@ pub fn prove_value_range_with_blinding_and_blinding_basepoint(
     value: u64,
     blinding: &Scalar,
     blinding_basepoint: &RistrettoPoint,
-) -> (Vec<u8>, RistrettoPoint) {
+) -> (Vec<u8>, RistrettoPoint)
+{
     let mut pc_gens = PedersenGens::default();
     // Allow replacing the blinding basepoint for customized protocol design.
     pc_gens.B_blinding = blinding_basepoint.clone();
@@ -63,7 +64,8 @@ pub fn prove_value_range_with_blinding_and_blinding_basepoint(
 pub fn prove_value_range_with_blinding(
     value: u64,
     blinding: &Scalar,
-) -> (Vec<u8>, RistrettoPoint) {
+) -> (Vec<u8>, RistrettoPoint)
+{
     let (proof, value_commitment_point) =
         prove_value_range_with_blinding_and_blinding_basepoint(
             value,
@@ -94,7 +96,8 @@ pub fn verify_value_range_with_blinding_basepoint(
     commitment: &RistrettoPoint,
     proof_bytes: &[u8],
     blinding_basepoint: &RistrettoPoint,
-) -> bool {
+) -> bool
+{
     let mut pc_gens = PedersenGens::default();
     // Allow replacing the blinding basepoint for customized protocol design.
     pc_gens.B_blinding = blinding_basepoint.clone();
@@ -137,7 +140,8 @@ pub fn prove_value_range_in_batch(
     values: &[u64],
     blindings: &[Scalar],
     blinding_basepoint: &RistrettoPoint,
-) -> Result<(Vec<u8>, Vec<RistrettoPoint>), WedprError> {
+) -> Result<(Vec<u8>, Vec<RistrettoPoint>), WedprError>
+{
     // Two slices should have the same length, and the length should be a
     // multiple of 2.
     if values.len() != blindings.len() || values.len() & 0x1 != 0 {
@@ -178,7 +182,8 @@ pub fn verify_value_range_in_batch(
     commitments: &Vec<RistrettoPoint>,
     proof_bytes: &[u8],
     blinding_basepoint: &RistrettoPoint,
-) -> bool {
+) -> bool
+{
     let mut pc_gens = PedersenGens::default();
     // Allow replacing the blinding basepoint for customized protocol design.
     pc_gens.B_blinding = blinding_basepoint.clone();

@@ -8,10 +8,10 @@ extern crate jni;
 
 use wedpr_l_utils::traits::Ecies;
 
-use crate::{config, get_result_jobject};
+use crate::get_result_jobject;
 
 #[cfg(feature = "wedpr_f_ecies_secp256k1")]
-use config::ECIES_SECP256K1;
+use crate::config::ECIES_SECP256K1;
 
 use jni::{
     objects::{JClass, JObject, JValue},
@@ -36,7 +36,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     _class: JClass,
     public_key_jbyte_array: jbyteArray,
     message_hash_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let public_key = java_safe_jbytes_to_bytes!(
@@ -66,7 +67,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
             },
         };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &encrypted_data,
@@ -84,7 +85,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
     ciphertext_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -111,7 +113,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &decrypted_data,

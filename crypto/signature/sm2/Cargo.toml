@@ -10,6 +10,6 @@ description = "Library of WeDPR shared Siganture Function implement by sm2."
 
 [dependencies]
 lazy_static = "1.4.0"
-wedpr_l_libsm = { git = "https://github.com/WeDPR-Team/libsm" }
+wedpr_l_libsm = { git = "https://github.com.cnpmjs.org/WeDPR-Team/libsm" }
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils =    {path = "../../../common/utils"}
+wedpr_l_utils = { path = "../../../common/utils" }

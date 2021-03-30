@@ -36,7 +36,8 @@ impl Signature for WedprSecp256k1Recover {
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -69,7 +70,8 @@ impl Signature for WedprSecp256k1Recover {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool {
+    ) -> bool
+    {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let recover_public_key =
             match self.recover_public_key(msg_hash, signature) {
@@ -94,7 +96,13 @@ impl Signature for WedprSecp256k1Recover {
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
         loop {
             // "rand" feature of secp256k1 need to be enabled for this.
-            let mut rng = try_generate_seed();
+            let mut rng: rand::rngs::OsRng = loop {
+                // Keep retrying if encountering any error.
+                match rand::rngs::OsRng::new() {
+                    Ok(v) => break v,
+                    Err(_) => continue,
+                }
+            };
             let (secret_key, public_key) =
                 SECP256K1_ALL.generate_keypair(&mut rng);
             // Drop weak secret key.
@@ -108,22 +116,14 @@ impl Signature for WedprSecp256k1Recover {
     }
 }
 
-fn try_generate_seed() -> rand::rngs::OsRng {
-    loop {
-        match rand::rngs::OsRng::new() {
-            Ok(v) => return v,
-            Err(_) => continue,
-        };
-    }
-}
-
 impl WedprSecp256k1Recover {
     /// Recovers public key from message hash and signature.
     pub fn recover_public_key<T: ?Sized + AsRef<[u8]>>(
         self,
         msg_hash: &T,
         signature: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let msg_hash_obj = match Message::from_slice(&msg_hash.as_ref()) {
             Ok(v) => v,
@@ -174,7 +174,8 @@ impl WedprSecp256k1Recover {
     pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {

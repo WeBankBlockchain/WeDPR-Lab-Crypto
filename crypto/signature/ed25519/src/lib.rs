@@ -2,11 +2,6 @@
 
 //! Ed25519 signature functions.
 
-// #[macro_use]
-// extern crate wedpr_l_macros;
-// #[macro_use]
-// extern crate lazy_static;
-
 use ed25519_dalek::{
     ed25519::signature::Signature as ed25519_signature_try, Keypair, PublicKey,
     SecretKey, Signature as ed25519_signature, Signer, Verifier,
@@ -14,7 +9,7 @@ use ed25519_dalek::{
 use rand::rngs::OsRng;
 use wedpr_l_utils::{error::WedprError, traits::Signature};
 
-/// Implements Ed25519 as a Signature instance.
+/// Implements FISCO-BCOS-compatible Ed25519 as a Signature instance.
 #[derive(Default, Debug, Clone, Copy)]
 pub struct WedprEd25519 {}
 
@@ -23,7 +18,8 @@ impl Signature for WedprEd25519 {
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key: SecretKey =
             match SecretKey::from_bytes(&private_key.as_ref()) {
                 Ok(v) => v,
@@ -42,7 +38,8 @@ impl Signature for WedprEd25519 {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool {
+    ) -> bool
+    {
         let public_key_parser: PublicKey =
             match PublicKey::from_bytes(&public_key.as_ref()) {
                 Ok(v) => v,
@@ -77,7 +74,8 @@ impl WedprEd25519 {
     pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
-    ) -> Result<Vec<u8>, WedprError> {
+    ) -> Result<Vec<u8>, WedprError>
+    {
         let secret_key: SecretKey =
             match SecretKey::from_bytes(&private_key.as_ref()) {
                 Ok(v) => v,

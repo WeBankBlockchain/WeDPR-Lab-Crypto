@@ -1,7 +1,8 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 //! Library of FFI of wedpr_crypto wrapper functions, targeting
-//! Java-compatible architectures (including Android).
+//! Java-compatible architectures (including Android), with fast binary
+//! interfaces.
 
 #![cfg(not(tarpaulin_include))]
 

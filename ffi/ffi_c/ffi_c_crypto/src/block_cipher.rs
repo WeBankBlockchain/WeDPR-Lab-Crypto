@@ -5,10 +5,10 @@
 use wedpr_l_utils::traits::BlockCipher;
 
 #[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
-use crate::config::AES;
+use crate::config::BLOCK_CIPHER_AES256;
 
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
-use crate::config::SM4;
+use crate::config::BLOCK_CIPHER_SM4;
 
 use libc::c_char;
 use std::{ffi::CString, panic, ptr};
@@ -29,27 +29,30 @@ use wedpr_ffi_common_hex::utils::{
 #[no_mangle]
 /// C interface for 'wedpr_aes256_encrypt'.
 pub extern "C" fn wedpr_aes256_encrypt(
-    encoded_message: *mut c_char,
+    encoded_plaintext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char {
+) -> *mut c_char
+{
     let result = panic::catch_unwind(|| {
-        let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
+        let plaintext = c_safe_c_char_pointer_to_bytes!(encoded_plaintext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
         let iv = c_safe_c_char_pointer_to_bytes!(encoded_iv);
 
-        let encrypt_data = match AES.encrypt(&message, &key, &iv) {
+        let ciphertext = match BLOCK_CIPHER_AES256
+            .encrypt(&plaintext, &key, &iv)
+        {
             Ok(v) => v,
             Err(_) => {
                 wedpr_println!(
-                    "AES encrypt failed, encoded_message={}, public_key={}",
-                    bytes_to_string(&message),
+                    "AES encrypt failed, encoded_plaintext={}, public_key={}",
+                    bytes_to_string(&plaintext),
                     bytes_to_string(&key)
                 );
                 return ptr::null_mut();
             },
         };
-        c_safe_bytes_to_c_char_pointer!(&encrypt_data)
+        c_safe_bytes_to_c_char_pointer!(&ciphertext)
     });
     c_safe_return!(result)
 }
@@ -58,26 +61,27 @@ pub extern "C" fn wedpr_aes256_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_aes256_decrypt'.
 pub extern "C" fn wedpr_aes256_decrypt(
-    encoded_encrypt_data: *mut c_char,
+    encoded_ciphertext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char {
+) -> *mut c_char
+{
     let result = panic::catch_unwind(|| {
-        let encrypt_data =
-            c_safe_c_char_pointer_to_bytes!(encoded_encrypt_data);
+        let ciphertext = c_safe_c_char_pointer_to_bytes!(encoded_ciphertext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
         let iv = c_safe_c_char_pointer_to_bytes!(encoded_iv);
 
-        let decrypted_data = match AES.decrypt(&encrypt_data, &key, &iv) {
-            Ok(v) => v,
-            Err(_) => {
-                wedpr_println!(
-                    "AES decrypt failed, ciphertext={}",
-                    bytes_to_string(&encrypt_data)
-                );
-                return ptr::null_mut();
-            },
-        };
+        let decrypted_data =
+            match BLOCK_CIPHER_AES256.decrypt(&ciphertext, &key, &iv) {
+                Ok(v) => v,
+                Err(_) => {
+                    wedpr_println!(
+                        "AES decrypt failed, ciphertext={}",
+                        bytes_to_string(&ciphertext)
+                    );
+                    return ptr::null_mut();
+                },
+            };
         c_safe_bytes_to_c_char_pointer!(&decrypted_data)
     });
     c_safe_return!(result)
@@ -89,27 +93,28 @@ pub extern "C" fn wedpr_aes256_decrypt(
 #[no_mangle]
 /// C interface for 'wedpr_sm4_encrypt'.
 pub extern "C" fn wedpr_sm4_encrypt(
-    encoded_message: *mut c_char,
+    encoded_plaintext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char {
+) -> *mut c_char
+{
     let result = panic::catch_unwind(|| {
-        let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
+        let plaintext = c_safe_c_char_pointer_to_bytes!(encoded_plaintext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
         let iv = c_safe_c_char_pointer_to_bytes!(encoded_iv);
 
-        let encrypt_data = match SM4.encrypt(&message, &key, &iv) {
+        let ciphertext = match BLOCK_CIPHER_SM4.encrypt(&plaintext, &key, &iv) {
             Ok(v) => v,
             Err(_) => {
                 wedpr_println!(
-                    "AES encrypt failed, encoded_message={}, public_key={}",
-                    bytes_to_string(&message),
+                    "AES encrypt failed, encoded_plaintext={}, public_key={}",
+                    bytes_to_string(&plaintext),
                     bytes_to_string(&key)
                 );
                 return ptr::null_mut();
             },
         };
-        c_safe_bytes_to_c_char_pointer!(&encrypt_data)
+        c_safe_bytes_to_c_char_pointer!(&ciphertext)
     });
     c_safe_return!(result)
 }
@@ -118,26 +123,27 @@ pub extern "C" fn wedpr_sm4_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_sm4_decrypt'.
 pub extern "C" fn wedpr_sm4_decrypt(
-    encoded_encrypt_data: *mut c_char,
+    encoded_ciphertext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char {
+) -> *mut c_char
+{
     let result = panic::catch_unwind(|| {
-        let encrypt_data =
-            c_safe_c_char_pointer_to_bytes!(encoded_encrypt_data);
+        let ciphertext = c_safe_c_char_pointer_to_bytes!(encoded_ciphertext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
         let iv = c_safe_c_char_pointer_to_bytes!(encoded_iv);
 
-        let decrypted_data = match SM4.decrypt(&encrypt_data, &key, &iv) {
-            Ok(v) => v,
-            Err(_) => {
-                wedpr_println!(
-                    "SM4 decrypt failed, ciphertext={}",
-                    bytes_to_string(&encrypt_data)
-                );
-                return ptr::null_mut();
-            },
-        };
+        let decrypted_data =
+            match BLOCK_CIPHER_SM4.decrypt(&ciphertext, &key, &iv) {
+                Ok(v) => v,
+                Err(_) => {
+                    wedpr_println!(
+                        "SM4 decrypt failed, ciphertext={}",
+                        bytes_to_string(&ciphertext)
+                    );
+                    return ptr::null_mut();
+                },
+            };
         c_safe_bytes_to_c_char_pointer!(&decrypted_data)
     });
     c_safe_return!(result)

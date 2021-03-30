@@ -5,8 +5,8 @@
 #![cfg(feature = "wedpr_f_vrf_curve25519")]
 
 use wedpr_ffi_common::utils::{
-    c_pointer_to_rust_bytes, set_c_pointer, CPointInput, CPointOutput, FAILURE,
-    SUCCESS,
+    c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
+    FAILURE, SUCCESS,
 };
 
 #[cfg(feature = "wedpr_f_vrf_curve25519")]
@@ -18,26 +18,28 @@ use wedpr_l_utils::traits::Vrf;
 #[no_mangle]
 /// C interface for 'wedpr_curve25519_vrf_derive_public_key'.
 pub unsafe extern "C" fn wedpr_curve25519_vrf_derive_public_key(
-    private_key_input: &CPointInput,
-    public_key_result: &mut CPointOutput,
-) -> i8 {
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
+    raw_private_key: &CInputBuffer,
+    output_public_key: &mut COutputBuffer,
+) -> i8
+{
+    let private_key = c_read_raw_pointer(raw_private_key);
 
     let public_key = WedprCurve25519Vrf::derive_public_key(&private_key);
     std::mem::forget(private_key);
-    set_c_pointer(&public_key, public_key_result);
+    c_write_raw_pointer(&public_key, output_public_key);
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_curve25519_vrf_prove_utf8'.
 pub unsafe extern "C" fn wedpr_curve25519_vrf_prove_utf8(
-    private_key_input: &CPointInput,
-    utf8_message_input: &CPointInput,
-    proof_result: &mut CPointOutput,
-) -> i8 {
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let message = c_pointer_to_rust_bytes(utf8_message_input);
+    raw_private_key: &CInputBuffer,
+    raw_utf8_message: &CInputBuffer,
+    output_proof: &mut COutputBuffer,
+) -> i8
+{
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let message = c_read_raw_pointer(raw_utf8_message);
 
     let result = WedprCurve25519Vrf::prove(&private_key, &message);
     std::mem::forget(private_key);
@@ -46,21 +48,22 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_prove_utf8(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&proof.encode_proof(), proof_result);
+    c_write_raw_pointer(&proof.encode_proof(), output_proof);
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_curve25519_vrf_prove_fast_utf8'.
 pub unsafe extern "C" fn wedpr_curve25519_vrf_prove_fast_utf8(
-    private_key_input: &CPointInput,
-    public_key_input: &CPointInput,
-    utf8_message_input: &CPointInput,
-    proof_result: &mut CPointOutput,
-) -> i8 {
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let message = c_pointer_to_rust_bytes(utf8_message_input);
+    raw_private_key: &CInputBuffer,
+    raw_public_key: &CInputBuffer,
+    raw_utf8_message: &CInputBuffer,
+    output_proof: &mut COutputBuffer,
+) -> i8
+{
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let message = c_read_raw_pointer(raw_utf8_message);
 
     let result =
         WedprCurve25519Vrf::prove_fast(&private_key, &public_key, &message);
@@ -71,20 +74,21 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_prove_fast_utf8(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&proof.encode_proof(), proof_result);
+    c_write_raw_pointer(&proof.encode_proof(), output_proof);
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_curve25519_vrf_verify_utf8'.
 pub unsafe extern "C" fn wedpr_curve25519_vrf_verify_utf8(
-    public_key_input: &CPointInput,
-    utf8_message_input: &CPointInput,
-    proof_input: &CPointInput,
-) -> i8 {
-    let proof_bytes = c_pointer_to_rust_bytes(proof_input);
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let message = c_pointer_to_rust_bytes(utf8_message_input);
+    raw_public_key: &CInputBuffer,
+    raw_utf8_message: &CInputBuffer,
+    raw_proof: &CInputBuffer,
+) -> i8
+{
+    let proof_bytes = c_read_raw_pointer(raw_proof);
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let message = c_read_raw_pointer(raw_utf8_message);
 
     let proof = match WedprCurve25519Vrf::decode_proof(&proof_bytes) {
         Ok(v) => v,
@@ -109,10 +113,11 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_verify_utf8(
 #[no_mangle]
 /// C interface for 'wedpr_curve25519_vrf_proof_to_hash'.
 pub unsafe extern "C" fn wedpr_curve25519_vrf_proof_to_hash(
-    proof_input: &CPointInput,
-    hash_result: &mut CPointOutput,
-) -> i8 {
-    let proof_bytes = c_pointer_to_rust_bytes(proof_input);
+    raw_proof: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8
+{
+    let proof_bytes = c_read_raw_pointer(raw_proof);
     let proof = match WedprCurve25519Vrf::decode_proof(&proof_bytes) {
         Ok(v) => v,
         Err(_) => {
@@ -129,16 +134,16 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_proof_to_hash(
             return FAILURE;
         },
     };
-    set_c_pointer(&hash, hash_result);
+    c_write_raw_pointer(&hash, output_hash);
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_curve25519_vrf_is_valid_public_key'.
 pub unsafe extern "C" fn wedpr_curve25519_vrf_is_valid_public_key(
-    public_key_input: &CPointInput,
+    raw_public_key: &CInputBuffer,
 ) -> i8 {
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
+    let public_key = c_read_raw_pointer(raw_public_key);
 
     let result = WedprCurve25519Vrf::is_valid_public_key(&public_key);
     std::mem::forget(public_key);

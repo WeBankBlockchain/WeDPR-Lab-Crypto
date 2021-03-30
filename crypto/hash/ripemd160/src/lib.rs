@@ -25,15 +25,15 @@ mod tests {
     use wedpr_l_utils::constant::tests::BASE64_ENCODED_TEST_MESSAGE;
 
     #[test]
-    fn test_blake2b() {
-        let blake2 = WedprRipemd160::default();
+    fn test_ripemd160() {
+        let ripemd160 = WedprRipemd160::default();
         let expected_hash: [u8; 20] = [
             43, 86, 224, 109, 4, 234, 34, 233, 103, 85, 46, 191, 164, 66, 70,
             109, 107, 195, 199, 241,
         ];
         assert_eq!(
             expected_hash.to_vec(),
-            blake2.hash(&BASE64_ENCODED_TEST_MESSAGE)
+            ripemd160.hash(&BASE64_ENCODED_TEST_MESSAGE)
         );
     }
 }
