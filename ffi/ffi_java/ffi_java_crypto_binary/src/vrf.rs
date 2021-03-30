@@ -33,7 +33,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _class: JClass,
     encoded_private_key_jbyte_array: jbyteArray,
     message_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
@@ -60,7 +61,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
             },
         };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &proof.encode_proof(),
@@ -79,7 +80,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_private_key_jbyte_array: jbyteArray,
     encoded_public_key_jbyte_array: jbyteArray,
     utf8_message_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
@@ -117,7 +119,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &proof.encode_proof(),
@@ -136,7 +138,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_public_key_jbyte_array: jbyteArray,
     utf8_message_jbyte_array: jbyteArray,
     encoded_proof_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let public_key_bytes = java_safe_jbytes_to_bytes!(
@@ -182,7 +185,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _env: JNIEnv,
     _class: JClass,
     encoded_private_key_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
@@ -193,7 +197,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
 
     let public_key = WedprCurve25519Vrf::derive_public_key(&private_key_bytes);
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &public_key,
@@ -210,7 +214,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _env: JNIEnv,
     _class: JClass,
     encoded_proof_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let proof_bytes = java_safe_jbytes_to_bytes!(
@@ -247,12 +252,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
         },
     };
 
-    java_safe_set_bytes_binary_field!(
-        _env,
-        result_jobject,
-        &hash_bytes,
-        "hash"
-    );
+    java_safe_set_byte_array_field!(_env, result_jobject, &hash_bytes, "hash");
     result_jobject.into_inner()
 }
 
@@ -264,7 +264,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _env: JNIEnv,
     _class: JClass,
     encoded_public_key_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let public_key_bytes = java_safe_jbytes_to_bytes!(

@@ -39,7 +39,8 @@ pub mod backtrace_patch {
         _threaded: c_int,
         _error: backtrace_error_callback,
         _data: *mut c_void,
-    ) -> *mut backtrace_state {
+    ) -> *mut backtrace_state
+    {
         0 as *mut _
     }
 
@@ -50,7 +51,8 @@ pub mod backtrace_patch {
         _cb: backtrace_syminfo_callback,
         _error: backtrace_error_callback,
         _data: *mut c_void,
-    ) -> c_int {
+    ) -> c_int
+    {
         0
     }
 
@@ -61,7 +63,8 @@ pub mod backtrace_patch {
         _cb: backtrace_full_callback,
         _error: backtrace_error_callback,
         _data: *mut c_void,
-    ) -> c_int {
+    ) -> c_int
+    {
         0
     }
 }

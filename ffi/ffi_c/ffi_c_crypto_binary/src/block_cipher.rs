@@ -7,14 +7,14 @@
 use wedpr_l_utils::traits::BlockCipher;
 
 #[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
-use crate::config::AES;
+use crate::config::BLOCK_CIPHER_AES256;
 
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
-use crate::config::SM4;
+use crate::config::BLOCK_CIPHER_SM4;
 
 use wedpr_ffi_common::utils::{
-    c_pointer_to_rust_bytes, set_c_pointer, CPointInput, CPointOutput, FAILURE,
-    SUCCESS,
+    c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
+    FAILURE, SUCCESS,
 };
 
 // AES256 implementation.
@@ -23,23 +23,25 @@ use wedpr_ffi_common::utils::{
 #[no_mangle]
 /// C interface for 'wedpr_aes256_encrypt'.
 pub unsafe extern "C" fn wedpr_aes256_encrypt(
-    message_input: &CPointInput,
-    key_input: &CPointInput,
-    iv_input: &CPointInput,
-    encrypt_data_result: &mut CPointOutput,
-) -> i8 {
-    let message = c_pointer_to_rust_bytes(message_input);
-    let key = c_pointer_to_rust_bytes(&key_input);
-    let iv = c_pointer_to_rust_bytes(&iv_input);
-    let result = AES.encrypt(&message, &key, &iv);
-    std::mem::forget(message);
+    raw_plaintext: &CInputBuffer,
+    raw_key: &CInputBuffer,
+    raw_iv: &CInputBuffer,
+    output_ciphertext: &mut COutputBuffer,
+) -> i8
+{
+    let plaintext = c_read_raw_pointer(raw_plaintext);
+    let key = c_read_raw_pointer(&raw_key);
+    let iv = c_read_raw_pointer(&raw_iv);
+
+    let result = BLOCK_CIPHER_AES256.encrypt(&plaintext, &key, &iv);
+    std::mem::forget(plaintext);
     std::mem::forget(key);
     std::mem::forget(iv);
-    let encrypt_data = match result {
+    let ciphertext = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&encrypt_data, encrypt_data_result);
+    c_write_raw_pointer(&ciphertext, output_ciphertext);
     SUCCESS
 }
 
@@ -47,24 +49,25 @@ pub unsafe extern "C" fn wedpr_aes256_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_aes256_decrypt'.
 pub unsafe extern "C" fn wedpr_aes256_decrypt(
-    encrypt_data_input: &CPointInput,
-    key_input: &CPointInput,
-    iv_input: &CPointInput,
-    plaintext_result: &mut CPointOutput,
-) -> i8 {
-    let encrypt_data = c_pointer_to_rust_bytes(encrypt_data_input);
-    let key = c_pointer_to_rust_bytes(&key_input);
-    let iv = c_pointer_to_rust_bytes(&iv_input);
+    raw_ciphertext: &CInputBuffer,
+    raw_key: &CInputBuffer,
+    raw_iv: &CInputBuffer,
+    output_plaintext: &mut COutputBuffer,
+) -> i8
+{
+    let ciphertext = c_read_raw_pointer(raw_ciphertext);
+    let key = c_read_raw_pointer(&raw_key);
+    let iv = c_read_raw_pointer(&raw_iv);
 
-    let result = AES.decrypt(&encrypt_data, &key, &iv);
-    std::mem::forget(encrypt_data);
+    let result = BLOCK_CIPHER_AES256.decrypt(&ciphertext, &key, &iv);
+    std::mem::forget(ciphertext);
     std::mem::forget(key);
     std::mem::forget(iv);
     let plaintext = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&plaintext, plaintext_result);
+    c_write_raw_pointer(&plaintext, output_plaintext);
     SUCCESS
 }
 
@@ -74,23 +77,25 @@ pub unsafe extern "C" fn wedpr_aes256_decrypt(
 #[no_mangle]
 /// C interface for 'wedpr_sm4_encrypt'.
 pub unsafe extern "C" fn wedpr_sm4_encrypt(
-    message_input: &CPointInput,
-    key_input: &CPointInput,
-    iv_input: &CPointInput,
-    encrypt_data_result: &mut CPointOutput,
-) -> i8 {
-    let message = c_pointer_to_rust_bytes(message_input);
-    let key = c_pointer_to_rust_bytes(&key_input);
-    let iv = c_pointer_to_rust_bytes(&iv_input);
-    let result = SM4.encrypt(&message, &key, &iv);
-    std::mem::forget(message);
+    raw_plaintext: &CInputBuffer,
+    raw_key: &CInputBuffer,
+    raw_iv: &CInputBuffer,
+    output_ciphertext: &mut COutputBuffer,
+) -> i8
+{
+    let plaintext = c_read_raw_pointer(raw_plaintext);
+    let key = c_read_raw_pointer(&raw_key);
+    let iv = c_read_raw_pointer(&raw_iv);
+
+    let result = BLOCK_CIPHER_SM4.encrypt(&plaintext, &key, &iv);
+    std::mem::forget(plaintext);
     std::mem::forget(key);
     std::mem::forget(iv);
-    let encrypt_data = match result {
+    let ciphertext = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&encrypt_data, encrypt_data_result);
+    c_write_raw_pointer(&ciphertext, output_ciphertext);
     SUCCESS
 }
 
@@ -98,23 +103,24 @@ pub unsafe extern "C" fn wedpr_sm4_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_sm4_decrypt'.
 pub unsafe extern "C" fn wedpr_sm4_decrypt(
-    encrypt_data_input: &CPointInput,
-    key_input: &CPointInput,
-    iv_input: &CPointInput,
-    plaintext_result: &mut CPointOutput,
-) -> i8 {
-    let encrypt_data = c_pointer_to_rust_bytes(encrypt_data_input);
-    let key = c_pointer_to_rust_bytes(&key_input);
-    let iv = c_pointer_to_rust_bytes(&iv_input);
+    raw_ciphertext: &CInputBuffer,
+    raw_key: &CInputBuffer,
+    raw_iv: &CInputBuffer,
+    output_plaintext: &mut COutputBuffer,
+) -> i8
+{
+    let ciphertext = c_read_raw_pointer(raw_ciphertext);
+    let key = c_read_raw_pointer(&raw_key);
+    let iv = c_read_raw_pointer(&raw_iv);
 
-    let result = SM4.decrypt(&encrypt_data, &key, &iv);
-    std::mem::forget(encrypt_data);
+    let result = BLOCK_CIPHER_SM4.decrypt(&ciphertext, &key, &iv);
+    std::mem::forget(ciphertext);
     std::mem::forget(key);
     std::mem::forget(iv);
     let plaintext = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&plaintext, plaintext_result);
+    c_write_raw_pointer(&plaintext, output_plaintext);
     SUCCESS
 }

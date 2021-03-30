@@ -6,7 +6,7 @@ edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [features]
-default = ["wedpr_f_ecies_secp256k1", "wedpr_f_signature_secp256k1", "wedpr_f_hash_keccak256", "wedpr_f_signature_sm2", "wedpr_f_hash_sm3", "wedpr_f_vrf_curve25519", "wedpr_f_crypto_block_cipher_aes", "wedpr_f_crypto_block_cipher_sm4", "wedpr_f_hash_ripemd160", "wedpr_f_hash_sha3", "wedpr_f_hash_blake2b", "wedpr_f_signature_ed25519"]
+default = [ "wedpr_f_ecies_secp256k1", "wedpr_f_signature_secp256k1", "wedpr_f_hash_keccak256", "wedpr_f_signature_sm2", "wedpr_f_hash_sm3", "wedpr_f_vrf_curve25519", "wedpr_f_crypto_block_cipher_aes", "wedpr_f_crypto_block_cipher_sm4", "wedpr_f_hash_ripemd160", "wedpr_f_hash_sha3", "wedpr_f_hash_blake2b", "wedpr_f_signature_ed25519" ]
 wedpr_f_ecies_secp256k1 = [ "wedpr_l_crypto_ecies_secp256k1" ]
 wedpr_f_signature_secp256k1 = [ "wedpr_l_crypto_signature_secp256k1" ]
 wedpr_f_hash_keccak256 = [ "wedpr_l_crypto_hash_keccak256" ]
@@ -28,20 +28,20 @@ crate-type = [ "cdylib", "staticlib" ]
 jni = "0.13.0"
 lazy_static = "1.4.0"
 wedpr_ffi_common = { path = "../../ffi_common" }
-wedpr_ffi_macros =  { path = "../../ffi_macros" }
-wedpr_l_crypto_vrf_curve25519 = { path = "../../../crypto/vrf/curve25519", optional = true }
-wedpr_l_crypto_ecies_secp256k1 = { path = "../../../crypto/ecies/secp256k1", optional = true }
-wedpr_l_crypto_hash_keccak256 = { path = "../../../crypto/hash/keccak256", optional = true }
-wedpr_l_crypto_hash_sm3 = { path = "../../../crypto/hash/sm3", optional = true }
-wedpr_l_crypto_hash_ripemd160 = { path = "../../../crypto/hash/ripemd160", optional = true }
-wedpr_l_crypto_hash_sha3 = { path = "../../../crypto/hash/sha3", optional = true }
-wedpr_l_crypto_hash_blake2b = { path = "../../../crypto/hash/blake2b", optional = true }
-wedpr_l_crypto_signature_secp256k1 = { path = "../../../crypto/signature/secp256k1", optional = true }
-wedpr_l_crypto_signature_sm2 = { path = "../../../crypto/signature/sm2", optional = true }
-wedpr_l_crypto_signature_ed25519 = { path = "../../../crypto/signature/ed25519", optional = true }
+wedpr_ffi_macros = { path = "../../ffi_macros" }
 wedpr_l_crypto_block_cipher_aes = { path = "../../../crypto/block_cipher/aes", optional = true }
 wedpr_l_crypto_block_cipher_sm4 = { path = "../../../crypto/block_cipher/sm4", optional = true }
 
+wedpr_l_crypto_ecies_secp256k1 = { path = "../../../crypto/ecies/secp256k1", optional = true }
+wedpr_l_crypto_hash_blake2b = { path = "../../../crypto/hash/blake2b", optional = true }
+wedpr_l_crypto_hash_keccak256 = { path = "../../../crypto/hash/keccak256", optional = true }
+wedpr_l_crypto_hash_ripemd160 = { path = "../../../crypto/hash/ripemd160", optional = true }
+wedpr_l_crypto_hash_sha3 = { path = "../../../crypto/hash/sha3", optional = true }
+wedpr_l_crypto_hash_sm3 = { path = "../../../crypto/hash/sm3", optional = true }
+wedpr_l_crypto_signature_ed25519 = { path = "../../../crypto/signature/ed25519", optional = true }
+wedpr_l_crypto_signature_secp256k1 = { path = "../../../crypto/signature/secp256k1", optional = true }
+wedpr_l_crypto_signature_sm2 = { path = "../../../crypto/signature/sm2", optional = true }
+wedpr_l_crypto_vrf_curve25519 = { path = "../../../crypto/vrf/curve25519", optional = true }
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = { path = "../../../common/utils" }
 

@@ -11,4 +11,4 @@ description = "Library of WeDPR shared Hash Function implement by sha3."
 [dependencies]
 sha3 = "0.8"
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils =  {path = "../../../common/utils"}
+wedpr_l_utils = { path = "../../../common/utils" }

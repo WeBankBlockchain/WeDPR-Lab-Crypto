@@ -26,7 +26,7 @@ mod tests {
 
     #[test]
     fn test_blake2b() {
-        let blake2 = WedprBlake2b::default();
+        let blake2b = WedprBlake2b::default();
         let expected_hash: [u8; 64] = [
             160, 107, 156, 125, 120, 142, 80, 102, 194, 240, 157, 64, 13, 186,
             17, 255, 165, 14, 143, 39, 139, 129, 93, 173, 174, 142, 172, 217,
@@ -36,7 +36,7 @@ mod tests {
         ];
         assert_eq!(
             expected_hash.to_vec(),
-            blake2.hash(&BASE64_ENCODED_TEST_MESSAGE)
+            blake2b.hash(&BASE64_ENCODED_TEST_MESSAGE)
         );
     }
 }

@@ -19,15 +19,16 @@ use crate::config::SIGNATURE_SM2;
 use crate::config::SIGNATURE_ED25519;
 
 use wedpr_ffi_common::utils::{
-    c_pointer_to_rust_bytes, set_c_pointer, CPointInput, CPointOutput, FAILURE,
-    SUCCESS,
+    c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
+    FAILURE, SUCCESS,
 };
 
 const PUBLIC_KEY_SIZE_WITHOUT_PREFIX: usize = 64;
 const PUBLIC_KEY_SIZE_WITH_PREFIX: usize = 65;
+const PRIVATE_KEY_SIZE: usize = 32;
+
 const SECP256K1_SIGNATURE_DATA_LENGTH: usize = 65;
 const SM2_SIGNATURE_DATA_LENGTH: usize = 64;
-const PRIVATE_KEY_SIZE: usize = 32;
 
 // Secp256k1 implementation.
 
@@ -35,19 +36,26 @@ const PRIVATE_KEY_SIZE: usize = 32;
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_gen_key_pair'.
 pub unsafe extern "C" fn wedpr_secp256k1_gen_key_pair(
-    public_key_result: &mut CPointOutput,
-    private_key_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(public_key_result, PUBLIC_KEY_SIZE_WITHOUT_PREFIX);
-    check_c_pointer_length!(private_key_result, PRIVATE_KEY_SIZE);
+    output_public_key: &mut COutputBuffer,
+    output_private_key: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(
+        output_public_key,
+        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+    );
+    c_check_exact_buffer_size!(output_private_key, PRIVATE_KEY_SIZE);
 
     let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
-    if public_key_result.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
-        set_c_pointer(&pk, public_key_result);
+    if output_public_key.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
+        c_write_raw_pointer(&pk, output_public_key);
     } else {
-        set_c_pointer(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX], public_key_result);
+        c_write_raw_pointer(
+            &pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX],
+            output_public_key,
+        );
     }
-    set_c_pointer(&sk, private_key_result);
+    c_write_raw_pointer(&sk, output_private_key);
     SUCCESS
 }
 
@@ -55,19 +63,23 @@ pub unsafe extern "C" fn wedpr_secp256k1_gen_key_pair(
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_derive_public_key'.
 pub unsafe extern "C" fn wedpr_secp256k1_derive_public_key(
-    private_key_input: &CPointInput,
-    public_key_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(public_key_result, PUBLIC_KEY_SIZE_WITHOUT_PREFIX);
+    raw_private_key: &CInputBuffer,
+    output_public_key: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(
+        output_public_key,
+        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+    );
+    let sk = c_read_raw_pointer(raw_private_key);
 
-    let sk = c_pointer_to_rust_bytes(private_key_input);
     let result = SIGNATURE_SECP256K1.derive_public_key(&sk);
     std::mem::forget(sk);
     let pk = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&pk, public_key_result);
+    c_write_raw_pointer(&pk, output_public_key);
     SUCCESS
 }
 
@@ -75,13 +87,18 @@ pub unsafe extern "C" fn wedpr_secp256k1_derive_public_key(
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_sign'.
 pub unsafe extern "C" fn wedpr_secp256k1_sign(
-    private_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(signature_result, SECP256K1_SIGNATURE_DATA_LENGTH);
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
+    raw_private_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    output_signature: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(
+        output_signature,
+        SECP256K1_SIGNATURE_DATA_LENGTH
+    );
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+
     let result = SIGNATURE_SECP256K1.sign(&private_key, &message_hash);
     std::mem::forget(private_key);
     std::mem::forget(message_hash);
@@ -89,7 +106,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_sign(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&signature, signature_result);
+    c_write_raw_pointer(&signature, output_signature);
     SUCCESS
 }
 
@@ -97,13 +114,14 @@ pub unsafe extern "C" fn wedpr_secp256k1_sign(
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_verify'.
 pub unsafe extern "C" fn wedpr_secp256k1_verify(
-    public_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_input: &CPointInput,
-) -> i8 {
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
-    let signature = c_pointer_to_rust_bytes(&signature_input);
+    raw_public_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    raw_signature: &CInputBuffer,
+) -> i8
+{
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+    let signature = c_read_raw_pointer(&raw_signature);
 
     let result =
         SIGNATURE_SECP256K1.verify(&public_key, &message_hash, &signature);
@@ -120,13 +138,18 @@ pub unsafe extern "C" fn wedpr_secp256k1_verify(
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_recover_public_key'.
 pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
-    message_hash_input: &CPointInput,
-    signature_input: &CPointInput,
-    public_key_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(public_key_result, PUBLIC_KEY_SIZE_WITHOUT_PREFIX);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
-    let signature = c_pointer_to_rust_bytes(&signature_input);
+    raw_message_hash: &CInputBuffer,
+    raw_signature: &CInputBuffer,
+    output_public_key: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(
+        output_public_key,
+        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+    );
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+    let signature = c_read_raw_pointer(&raw_signature);
+
     let result =
         SIGNATURE_SECP256K1.recover_public_key(&message_hash, &signature);
     std::mem::forget(message_hash);
@@ -135,10 +158,13 @@ pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    if public_key_result.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
-        set_c_pointer(&pk, public_key_result);
+    if output_public_key.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
+        c_write_raw_pointer(&pk, output_public_key);
     } else {
-        set_c_pointer(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX], public_key_result);
+        c_write_raw_pointer(
+            &pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX],
+            output_public_key,
+        );
     }
     SUCCESS
 }
@@ -149,19 +175,26 @@ pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
 #[no_mangle]
 /// C interface for 'wedpr_sm2_gen_key_pair'.
 pub unsafe extern "C" fn wedpr_sm2_gen_key_pair(
-    public_key_result: &mut CPointOutput,
-    private_key_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(public_key_result, PUBLIC_KEY_SIZE_WITHOUT_PREFIX);
-    check_c_pointer_length!(private_key_result, PRIVATE_KEY_SIZE);
+    output_public_key: &mut COutputBuffer,
+    output_private_key: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(
+        output_public_key,
+        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+    );
+    c_check_exact_buffer_size!(output_private_key, PRIVATE_KEY_SIZE);
 
     let (pk, sk) = SIGNATURE_SM2.generate_keypair();
-    if public_key_result.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
-        set_c_pointer(&pk, public_key_result);
+    if output_public_key.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
+        c_write_raw_pointer(&pk, output_public_key);
     } else {
-        set_c_pointer(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX], public_key_result);
+        c_write_raw_pointer(
+            &pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX],
+            output_public_key,
+        );
     }
-    set_c_pointer(&sk, private_key_result);
+    c_write_raw_pointer(&sk, output_private_key);
     SUCCESS
 }
 
@@ -169,19 +202,23 @@ pub unsafe extern "C" fn wedpr_sm2_gen_key_pair(
 #[no_mangle]
 /// C interface for 'wedpr_sm2_derive_public_key'.
 pub unsafe extern "C" fn wedpr_sm2_derive_public_key(
-    private_key_input: &CPointInput,
-    public_key_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(public_key_result, PUBLIC_KEY_SIZE_WITHOUT_PREFIX);
+    raw_private_key: &CInputBuffer,
+    output_public_key: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(
+        output_public_key,
+        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+    );
+    let sk = c_read_raw_pointer(raw_private_key);
 
-    let sk = c_pointer_to_rust_bytes(private_key_input);
     let result = SIGNATURE_SM2.derive_public_key(&sk);
     std::mem::forget(sk);
     let pk = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&pk, public_key_result);
+    c_write_raw_pointer(&pk, output_public_key);
     SUCCESS
 }
 
@@ -189,13 +226,15 @@ pub unsafe extern "C" fn wedpr_sm2_derive_public_key(
 #[no_mangle]
 /// C interface for 'wedpr_sm2_sign'.
 pub unsafe extern "C" fn wedpr_sm2_sign(
-    private_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(signature_result, SM2_SIGNATURE_DATA_LENGTH);
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
+    raw_private_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    output_signature: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_signature, SM2_SIGNATURE_DATA_LENGTH);
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+
     let result = SIGNATURE_SM2.sign(&private_key, &message_hash);
     std::mem::forget(private_key);
     std::mem::forget(message_hash);
@@ -203,7 +242,7 @@ pub unsafe extern "C" fn wedpr_sm2_sign(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&signature, signature_result);
+    c_write_raw_pointer(&signature, output_signature);
     SUCCESS
 }
 
@@ -211,15 +250,17 @@ pub unsafe extern "C" fn wedpr_sm2_sign(
 #[no_mangle]
 /// C interface for 'wedpr_sm2_sign_fast'.
 pub unsafe extern "C" fn wedpr_sm2_sign_fast(
-    private_key_input: &CPointInput,
-    public_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(signature_result, SM2_SIGNATURE_DATA_LENGTH);
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
+    raw_private_key: &CInputBuffer,
+    raw_public_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    output_signature: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_signature, SM2_SIGNATURE_DATA_LENGTH);
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+
     let result =
         SIGNATURE_SM2.sign_fast(&private_key, &public_key, &message_hash);
     std::mem::forget(private_key);
@@ -229,7 +270,7 @@ pub unsafe extern "C" fn wedpr_sm2_sign_fast(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&signature, signature_result);
+    c_write_raw_pointer(&signature, output_signature);
     SUCCESS
 }
 
@@ -237,13 +278,14 @@ pub unsafe extern "C" fn wedpr_sm2_sign_fast(
 #[no_mangle]
 /// C interface for 'wedpr_sm2_verify'.
 pub unsafe extern "C" fn wedpr_sm2_verify(
-    public_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_input: &CPointInput,
-) -> i8 {
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
-    let signature = c_pointer_to_rust_bytes(&signature_input);
+    raw_public_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    raw_signature: &CInputBuffer,
+) -> i8
+{
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+    let signature = c_read_raw_pointer(&raw_signature);
 
     let result = SIGNATURE_SM2.verify(&public_key, &message_hash, &signature);
     std::mem::forget(public_key);
@@ -261,16 +303,20 @@ pub unsafe extern "C" fn wedpr_sm2_verify(
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_gen_key_pair'.
 pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
-    public_key_result: &mut CPointOutput,
-    private_key_result: &mut CPointOutput,
-) -> i8 {
+    output_public_key: &mut COutputBuffer,
+    output_private_key: &mut COutputBuffer,
+) -> i8
+{
     let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
-    if public_key_result.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
-        set_c_pointer(&pk, public_key_result);
+    if output_public_key.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
+        c_write_raw_pointer(&pk, output_public_key);
     } else {
-        set_c_pointer(&pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX], public_key_result);
+        c_write_raw_pointer(
+            &pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX],
+            output_public_key,
+        );
     }
-    set_c_pointer(&sk, private_key_result);
+    c_write_raw_pointer(&sk, output_private_key);
     SUCCESS
 }
 
@@ -278,17 +324,19 @@ pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_derive_public_key'.
 pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
-    private_key_input: &CPointInput,
-    public_key_result: &mut CPointOutput,
-) -> i8 {
-    let sk = c_pointer_to_rust_bytes(private_key_input);
+    raw_private_key: &CInputBuffer,
+    output_public_key: &mut COutputBuffer,
+) -> i8
+{
+    let sk = c_read_raw_pointer(raw_private_key);
+
     let result = SIGNATURE_ED25519.derive_public_key(&sk);
     std::mem::forget(sk);
     let pk = match result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&pk, public_key_result);
+    c_write_raw_pointer(&pk, output_public_key);
     SUCCESS
 }
 
@@ -296,12 +344,14 @@ pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_sign'.
 pub unsafe extern "C" fn wedpr_ed25519_sign(
-    private_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_result: &mut CPointOutput,
-) -> i8 {
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
+    raw_private_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    output_signature: &mut COutputBuffer,
+) -> i8
+{
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+
     let result = SIGNATURE_ED25519.sign(&private_key, &message_hash);
     std::mem::forget(private_key);
     std::mem::forget(message_hash);
@@ -309,7 +359,7 @@ pub unsafe extern "C" fn wedpr_ed25519_sign(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&signature, signature_result);
+    c_write_raw_pointer(&signature, output_signature);
     SUCCESS
 }
 
@@ -317,13 +367,14 @@ pub unsafe extern "C" fn wedpr_ed25519_sign(
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_verify'.
 pub unsafe extern "C" fn wedpr_ed25519_verify(
-    public_key_input: &CPointInput,
-    message_hash_input: &CPointInput,
-    signature_input: &CPointInput,
-) -> i8 {
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let message_hash = c_pointer_to_rust_bytes(&message_hash_input);
-    let signature = c_pointer_to_rust_bytes(&signature_input);
+    raw_public_key: &CInputBuffer,
+    raw_message_hash: &CInputBuffer,
+    raw_signature: &CInputBuffer,
+) -> i8
+{
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let message_hash = c_read_raw_pointer(&raw_message_hash);
+    let signature = c_read_raw_pointer(&raw_signature);
 
     let result =
         SIGNATURE_ED25519.verify(&public_key, &message_hash, &signature);

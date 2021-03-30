@@ -1,6 +1,6 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
-//! Hash function wrappers.
+//! Block cipher function wrappers.
 
 #![cfg(all(
     feature = "wedpr_l_crypto_block_cipher_aes",
@@ -9,13 +9,13 @@
 
 use wedpr_l_utils::traits::BlockCipher;
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
-use crate::config::AES;
+use crate::get_result_jobject;
 
-use crate::{config, get_result_jobject};
+#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+use crate::config::BLOCK_CIPHER_AES256;
 
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
-use config::SM4;
+use crate::config::BLOCK_CIPHER_SM4;
 
 use jni::{
     objects::{JClass, JObject, JValue},
@@ -41,34 +41,36 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Encryp
     message_jbyte_array: jbyteArray,
     key_jbyte_array: jbyteArray,
     iv_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
-
     let key_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, key_jbyte_array);
-
     let iv_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, iv_jbyte_array);
 
-    let encrypted_data =
-        match AES.encrypt(&message_bytes, &key_bytes, &iv_bytes) {
-            Ok(v) => v,
-            Err(_) => {
-                return java_set_error_field_and_extract_jobject(
-                    &_env,
-                    &result_jobject,
-                    &format!(
-                        "AES encrypt failed, message_bytes={:?}",
-                        &message_bytes
-                    ),
-                )
-            },
-        };
+    let encrypted_data = match BLOCK_CIPHER_AES256.encrypt(
+        &message_bytes,
+        &key_bytes,
+        &iv_bytes,
+    ) {
+        Ok(v) => v,
+        Err(_) => {
+            return java_set_error_field_and_extract_jobject(
+                &_env,
+                &result_jobject,
+                &format!(
+                    "AES encrypt failed, message_bytes={:?}",
+                    &message_bytes
+                ),
+            )
+        },
+    };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &encrypted_data,
@@ -87,7 +89,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Decryp
     encrypted_data_jbyte_array: jbyteArray,
     key_jbyte_array: jbyteArray,
     iv_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let encrypted_data = java_safe_jbytes_to_bytes!(
@@ -98,21 +101,22 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Decryp
     let key = java_safe_jbytes_to_bytes!(_env, result_jobject, key_jbyte_array);
     let iv = java_safe_jbytes_to_bytes!(_env, result_jobject, iv_jbyte_array);
 
-    let decrypted_data = match AES.decrypt(&encrypted_data, &key, &iv) {
-        Ok(v) => v,
-        Err(_) => {
-            return java_set_error_field_and_extract_jobject(
-                &_env,
-                &result_jobject,
-                &format!(
-                    "AES decrypt failed, ciphertext={:?}",
-                    &encrypted_data
-                ),
-            )
-        },
-    };
+    let decrypted_data =
+        match BLOCK_CIPHER_AES256.decrypt(&encrypted_data, &key, &iv) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    &format!(
+                        "AES decrypt failed, ciphertext={:?}",
+                        &encrypted_data
+                    ),
+                )
+            },
+        };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &decrypted_data,
@@ -133,20 +137,19 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Encrypt(
     message_jbyte_array: jbyteArray,
     key_jbyte_array: jbyteArray,
     iv_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
-
     let key_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, key_jbyte_array);
-
     let iv_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, iv_jbyte_array);
 
     let encrypted_data =
-        match SM4.encrypt(&message_bytes, &key_bytes, &iv_bytes) {
+        match BLOCK_CIPHER_SM4.encrypt(&message_bytes, &key_bytes, &iv_bytes) {
             Ok(v) => v,
             Err(_) => {
                 return java_set_error_field_and_extract_jobject(
@@ -160,7 +163,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Encrypt(
             },
         };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &encrypted_data,
@@ -179,7 +182,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Decrypt(
     encrypted_data_jbyte_array: jbyteArray,
     key_jbyte_array: jbyteArray,
     iv_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let encrypted_data = java_safe_jbytes_to_bytes!(
@@ -190,21 +194,22 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Decrypt(
     let key = java_safe_jbytes_to_bytes!(_env, result_jobject, key_jbyte_array);
     let iv = java_safe_jbytes_to_bytes!(_env, result_jobject, iv_jbyte_array);
 
-    let decrypted_data = match SM4.decrypt(&encrypted_data, &key, &iv) {
-        Ok(v) => v,
-        Err(_) => {
-            return java_set_error_field_and_extract_jobject(
-                &_env,
-                &result_jobject,
-                &format!(
-                    "AES decrypt failed, ciphertext={:?}",
-                    &encrypted_data
-                ),
-            )
-        },
-    };
+    let decrypted_data =
+        match BLOCK_CIPHER_SM4.decrypt(&encrypted_data, &key, &iv) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    &format!(
+                        "AES decrypt failed, ciphertext={:?}",
+                        &encrypted_data
+                    ),
+                )
+            },
+        };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &decrypted_data,

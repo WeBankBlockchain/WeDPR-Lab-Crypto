@@ -2,8 +2,8 @@
 
 syntax = "proto3";
 
-package com.webank.blockchain.crypto.proto;
-option java_package = "com.webank.blockchain.crypto.proto";
+package com.webank.wedpr.crypto.proto;
+option java_package = "com.webank.wedpr.crypto.proto";
 option java_multiple_files = true;
 
 // Cryptographic key pair containing a public key and a private key.

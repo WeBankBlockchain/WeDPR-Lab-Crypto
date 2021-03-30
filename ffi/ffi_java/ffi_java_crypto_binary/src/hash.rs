@@ -6,22 +6,22 @@
 
 use wedpr_l_utils::traits::Hash;
 
+use crate::get_result_jobject;
+
 #[cfg(feature = "wedpr_f_hash_keccak256")]
 use crate::config::HASH_KECCAK256;
 
-use crate::{config, get_result_jobject};
-
 #[cfg(feature = "wedpr_f_hash_sm3")]
-use config::HASH_SM3;
+use crate::config::HASH_SM3;
 
 #[cfg(feature = "wedpr_f_hash_sha3")]
-use config::HASH_SHA3;
+use crate::config::HASH_SHA3_256;
 
 #[cfg(feature = "wedpr_f_hash_ripemd160")]
-use config::HASH_RIPEMD160;
+use crate::config::HASH_RIPEMD160;
 
 #[cfg(feature = "wedpr_f_hash_blake2b")]
-use config::HASH_BLAKE2B;
+use crate::config::HASH_BLAKE2B;
 
 use jni::{
     objects::{JClass, JObject, JValue},
@@ -45,18 +45,16 @@ use wedpr_ffi_common::utils::{
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256Hash(
     _env: JNIEnv,
     _class: JClass,
-    encoded_message_jbytes: jbyteArray,
-) -> jobject {
+    message_jbyte_array: jbyteArray,
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
-    let encoded_message_bytes = java_safe_jbytes_to_bytes!(
-        _env,
-        result_jobject,
-        encoded_message_jbytes
-    );
+    let message_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
 
-    let hash = HASH_KECCAK256.hash(&encoded_message_bytes);
+    let hash = HASH_KECCAK256.hash(&message_bytes);
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &hash, "hash");
+    java_safe_set_byte_array_field!(_env, result_jobject, &hash, "hash");
     result_jobject.into_inner()
 }
 
@@ -69,19 +67,17 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256Has
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3Hash(
     _env: JNIEnv,
     _class: JClass,
-    encoded_message_jbytes: jbyteArray,
-) -> jobject {
+    message_jbyte_array: jbyteArray,
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
-    let encoded_message_bytes = java_safe_jbytes_to_bytes!(
-        _env,
-        result_jobject,
-        encoded_message_jbytes
-    );
+    let message_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
 
-    let hash = HASH_SM3.hash(&encoded_message_bytes);
+    let hash = HASH_SM3.hash(&message_bytes);
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &hash, "hash");
+    java_safe_set_byte_array_field!(_env, result_jobject, &hash, "hash");
     result_jobject.into_inner()
 }
 
@@ -94,19 +90,17 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3Hash(
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ripemd160Hash(
     _env: JNIEnv,
     _class: JClass,
-    encoded_message_jbytes: jbyteArray,
-) -> jobject {
+    message_jbyte_array: jbyteArray,
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
-    let encoded_message_bytes = java_safe_jbytes_to_bytes!(
-        _env,
-        result_jobject,
-        encoded_message_jbytes
-    );
+    let message_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
 
-    let hash = HASH_RIPEMD160.hash(&encoded_message_bytes);
+    let hash = HASH_RIPEMD160.hash(&message_bytes);
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &hash, "hash");
+    java_safe_set_byte_array_field!(_env, result_jobject, &hash, "hash");
     result_jobject.into_inner()
 }
 
@@ -119,19 +113,17 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ripemd160Has
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sha3Hash(
     _env: JNIEnv,
     _class: JClass,
-    encoded_message_jbytes: jbyteArray,
-) -> jobject {
+    message_jbyte_array: jbyteArray,
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
-    let encoded_message_bytes = java_safe_jbytes_to_bytes!(
-        _env,
-        result_jobject,
-        encoded_message_jbytes
-    );
+    let message_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
 
-    let hash = HASH_SHA3.hash(&encoded_message_bytes);
+    let hash = HASH_SHA3_256.hash(&message_bytes);
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &hash, "hash");
+    java_safe_set_byte_array_field!(_env, result_jobject, &hash, "hash");
     result_jobject.into_inner()
 }
 
@@ -144,18 +136,16 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sha3Hash(
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_blake2bHash(
     _env: JNIEnv,
     _class: JClass,
-    encoded_message_jbytes: jbyteArray,
-) -> jobject {
+    message_jbyte_array: jbyteArray,
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
-    let encoded_message_bytes = java_safe_jbytes_to_bytes!(
-        _env,
-        result_jobject,
-        encoded_message_jbytes
-    );
+    let message_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
 
-    let hash = HASH_BLAKE2B.hash(&encoded_message_bytes);
+    let hash = HASH_BLAKE2B.hash(&message_bytes);
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &hash, "hash");
+    java_safe_set_byte_array_field!(_env, result_jobject, &hash, "hash");
     result_jobject.into_inner()
 }

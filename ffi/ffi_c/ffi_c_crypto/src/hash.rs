@@ -13,7 +13,7 @@ use crate::config::HASH_KECCAK256;
 use crate::config::HASH_SM3;
 
 #[cfg(feature = "wedpr_f_hash_sha3")]
-use crate::config::HASH_SHA3;
+use crate::config::HASH_SHA3_256;
 
 #[cfg(feature = "wedpr_f_hash_ripemd160")]
 use crate::config::HASH_RIPEMD160;
@@ -70,7 +70,7 @@ pub extern "C" fn wedpr_sm3_hash(
     c_safe_return!(result)
 }
 
-// ripemd160 implementation.
+// RIPEMD160 implementation.
 
 #[cfg(feature = "wedpr_f_hash_ripemd160")]
 #[no_mangle]
@@ -98,7 +98,7 @@ pub extern "C" fn wedpr_sha3_hash(
     let result = panic::catch_unwind(|| {
         let message = c_safe_c_char_pointer_to_bytes!(encoded_message);
 
-        let msg_hash = bytes_to_string(&HASH_SHA3.hash(&message));
+        let msg_hash = bytes_to_string(&HASH_SHA3_256.hash(&message));
         c_safe_string_to_c_char_pointer!(msg_hash)
     });
     c_safe_return!(result)

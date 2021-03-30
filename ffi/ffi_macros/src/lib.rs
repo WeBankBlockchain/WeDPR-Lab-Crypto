@@ -8,6 +8,8 @@
 
 pub mod binary;
 
+// TODO: Extract Proto-related macros to proto.rs.
+
 /// Converts Java String to Rust bytes, and returns an error object if failed.
 #[macro_export]
 macro_rules! java_safe_jstring_to_bytes {
@@ -28,7 +30,8 @@ macro_rules! java_safe_jstring_to_bytes {
     };
 }
 
-/// Converts Java bytes to Rust bytes, and returns an error object if failed.
+/// Converts Java byte array to Rust bytes, and returns an error object if
+/// failed.
 #[macro_export]
 macro_rules! java_safe_jbytes_to_bytes {
     ($_env:expr, $result_jobject:expr, $java_bytes:expr) => {

@@ -10,8 +10,8 @@ use wedpr_l_utils::traits::Ecies;
 use crate::config::ECIES_SECP256K1;
 
 use wedpr_ffi_common::utils::{
-    c_pointer_to_rust_bytes, set_c_pointer, CPointInput, CPointOutput, FAILURE,
-    SUCCESS,
+    c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
+    FAILURE, SUCCESS,
 };
 
 // Secp256k1 implementation.
@@ -21,12 +21,14 @@ use wedpr_ffi_common::utils::{
 /// C interface for 'wedpr_secp256k1_ecies_encrypt'.
 // TODO: Add wedpr_secp256k1_ecies_encrypt_utf8 to allow non-encoded UTF8 input.
 pub unsafe extern "C" fn wedpr_secp256k1_ecies_encrypt(
-    public_key_input: &CPointInput,
-    plaintext_input: &CPointInput,
-    encrypt_data_result: &mut CPointOutput,
-) -> i8 {
-    let public_key = c_pointer_to_rust_bytes(public_key_input);
-    let plaintext = c_pointer_to_rust_bytes(&plaintext_input);
+    raw_public_key: &CInputBuffer,
+    raw_plaintext: &CInputBuffer,
+    output_ciphertext: &mut COutputBuffer,
+) -> i8
+{
+    let public_key = c_read_raw_pointer(raw_public_key);
+    let plaintext = c_read_raw_pointer(&raw_plaintext);
+
     let result = ECIES_SECP256K1.encrypt(&public_key, &plaintext);
     std::mem::forget(public_key);
     std::mem::forget(plaintext);
@@ -34,7 +36,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_ecies_encrypt(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&encrypt_data, encrypt_data_result);
+    c_write_raw_pointer(&encrypt_data, output_ciphertext);
     SUCCESS
 }
 
@@ -42,12 +44,13 @@ pub unsafe extern "C" fn wedpr_secp256k1_ecies_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_ecies_decrypt'.
 pub unsafe extern "C" fn wedpr_secp256k1_ecies_decrypt(
-    private_key_input: &CPointInput,
-    encrypt_data_input: &CPointInput,
-    plaintext_result: &mut CPointOutput,
-) -> i8 {
-    let private_key = c_pointer_to_rust_bytes(private_key_input);
-    let ciphertext = c_pointer_to_rust_bytes(encrypt_data_input);
+    raw_private_key: &CInputBuffer,
+    raw_ciphertext: &CInputBuffer,
+    output_plaintext: &mut COutputBuffer,
+) -> i8
+{
+    let private_key = c_read_raw_pointer(raw_private_key);
+    let ciphertext = c_read_raw_pointer(raw_ciphertext);
 
     let result = ECIES_SECP256K1.decrypt(&private_key, &ciphertext);
     std::mem::forget(private_key);
@@ -56,6 +59,6 @@ pub unsafe extern "C" fn wedpr_secp256k1_ecies_decrypt(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    set_c_pointer(&plaintext, plaintext_result);
+    c_write_raw_pointer(&plaintext, output_plaintext);
     SUCCESS
 }

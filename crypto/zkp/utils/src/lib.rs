@@ -107,9 +107,9 @@ pub fn bytes_to_point(point: &[u8]) -> Result<RistrettoPoint, WedprError> {
     Ok(point_value)
 }
 
-/// Gets a random u8 integer.
-pub fn get_random_u8() -> u8 {
+/// Gets a random u32 integer.
+pub fn get_random_u32() -> u32 {
     let mut rng = rand::thread_rng();
-    let blinding: u8 = rng.gen();
+    let blinding: u32 = rng.gen();
     blinding
 }

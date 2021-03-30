@@ -13,7 +13,7 @@ use crate::config::HASH_KECCAK256;
 use crate::config::HASH_SM3;
 
 #[cfg(feature = "wedpr_f_hash_sha3")]
-use crate::config::HASH_SHA3;
+use crate::config::HASH_SHA3_256;
 
 #[cfg(feature = "wedpr_f_hash_ripemd160")]
 use crate::config::HASH_RIPEMD160;
@@ -22,9 +22,10 @@ use crate::config::HASH_RIPEMD160;
 use crate::config::HASH_BLAKE2B;
 
 use wedpr_ffi_common::utils::{
-    c_pointer_to_rust_bytes, set_c_pointer, CPointInput, CPointOutput, FAILURE,
-    SUCCESS,
+    c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
+    FAILURE, SUCCESS,
 };
+
 const HASH_256_DATA_SIZE: usize = 32;
 
 // Keccak256 implementation.
@@ -32,17 +33,19 @@ const HASH_256_DATA_SIZE: usize = 32;
 #[no_mangle]
 /// C interface for 'wedpr_keccak256_hash'.
 pub unsafe extern "C" fn wedpr_keccak256_hash(
-    encoded_message: &CPointInput,
-    hash_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(hash_result, HASH_256_DATA_SIZE);
+    raw_message: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
 
-    // Note: Since encode_message is an object passed in by C/CPP, it should
+    // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
-    let input_message = c_pointer_to_rust_bytes(encoded_message);
-    let hash_data = HASH_KECCAK256.hash(&input_message);
-    std::mem::forget(input_message);
-    set_c_pointer(&hash_data, hash_result);
+    let message = c_read_raw_pointer(raw_message);
+
+    let hash_data = HASH_KECCAK256.hash(&message);
+    std::mem::forget(message);
+    c_write_raw_pointer(&hash_data, output_hash);
     SUCCESS
 }
 
@@ -52,35 +55,39 @@ pub unsafe extern "C" fn wedpr_keccak256_hash(
 #[no_mangle]
 /// C interface for 'wedpr_sm3_hash'.
 pub unsafe extern "C" fn wedpr_sm3_hash(
-    encoded_message: &CPointInput,
-    hash_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(hash_result, HASH_256_DATA_SIZE);
-    // Note: Since encode_message is an object passed in by C/CPP, it should
+    raw_message: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
-    let input_message = c_pointer_to_rust_bytes(encoded_message);
-    let hash_data = HASH_SM3.hash(&input_message);
-    std::mem::forget(input_message);
-    set_c_pointer(&hash_data, hash_result);
+    let message = c_read_raw_pointer(raw_message);
+
+    let hash_data = HASH_SM3.hash(&message);
+    std::mem::forget(message);
+    c_write_raw_pointer(&hash_data, output_hash);
     SUCCESS
 }
 
-// ripemd160 implementation.
+// RIPEMD160 implementation.
 
 #[cfg(feature = "wedpr_f_hash_ripemd160")]
 #[no_mangle]
 /// C interface for 'wedpr_ripemd160_hash'.
 pub unsafe extern "C" fn wedpr_ripemd160_hash(
-    encoded_message: &CPointInput,
-    hash_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(hash_result, HASH_256_DATA_SIZE);
-    // Note: Since encode_message is an object passed in by C/CPP, it should
+    raw_message: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
-    let input_message = c_pointer_to_rust_bytes(encoded_message);
-    let hash_data = HASH_RIPEMD160.hash(&input_message);
-    std::mem::forget(input_message);
-    set_c_pointer(&hash_data, hash_result);
+    let message = c_read_raw_pointer(raw_message);
+
+    let hash_data = HASH_RIPEMD160.hash(&message);
+    std::mem::forget(message);
+    c_write_raw_pointer(&hash_data, output_hash);
     SUCCESS
 }
 
@@ -90,16 +97,18 @@ pub unsafe extern "C" fn wedpr_ripemd160_hash(
 #[no_mangle]
 /// C interface for 'wedpr_sha3_hash'.
 pub unsafe extern "C" fn wedpr_sha3_hash(
-    encoded_message: &CPointInput,
-    hash_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(hash_result, HASH_256_DATA_SIZE);
-    // Note: Since encode_message is an object passed in by C/CPP, it should
+    raw_message: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
-    let input_message = c_pointer_to_rust_bytes(encoded_message);
-    let hash_data = HASH_SHA3.hash(&input_message);
-    std::mem::forget(input_message);
-    set_c_pointer(&hash_data, hash_result);
+    let message = c_read_raw_pointer(raw_message);
+
+    let hash_data = HASH_SHA3_256.hash(&message);
+    std::mem::forget(message);
+    c_write_raw_pointer(&hash_data, output_hash);
     SUCCESS
 }
 
@@ -109,15 +118,17 @@ pub unsafe extern "C" fn wedpr_sha3_hash(
 #[no_mangle]
 /// C interface for 'wedpr_blake2b_hash'.
 pub unsafe extern "C" fn wedpr_blake2b_hash(
-    message_input: &CPointInput,
-    hash_result: &mut CPointOutput,
-) -> i8 {
-    check_c_pointer_length!(hash_result, HASH_256_DATA_SIZE);
-    // Note: Since encode_message is an object passed in by C/CPP, it should
+    message_input: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8
+{
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
-    let input_message = c_pointer_to_rust_bytes(message_input);
-    let hash_data = HASH_BLAKE2B.hash(&input_message);
-    std::mem::forget(input_message);
-    set_c_pointer(&hash_data, hash_result);
+    let message = c_read_raw_pointer(message_input);
+
+    let hash_data = HASH_BLAKE2B.hash(&message);
+    std::mem::forget(message);
+    c_write_raw_pointer(&hash_data, output_hash);
     SUCCESS
 }

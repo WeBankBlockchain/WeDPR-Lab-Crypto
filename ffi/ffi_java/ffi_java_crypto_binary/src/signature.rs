@@ -9,16 +9,16 @@
 
 use wedpr_l_utils::traits::Signature;
 
+use crate::get_result_jobject;
+
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 use crate::config::SIGNATURE_SECP256K1;
 
-use crate::{config, get_result_jobject};
-
 #[cfg(feature = "wedpr_f_signature_sm2")]
-use config::SIGNATURE_SM2;
+use crate::config::SIGNATURE_SM2;
 
 #[cfg(feature = "wedpr_f_signature_ed25519")]
-use config::SIGNATURE_ED25519;
+use crate::config::SIGNATURE_ED25519;
 
 use jni::{
     objects::{JClass, JObject, JValue},
@@ -41,13 +41,14 @@ use wedpr_ffi_common::utils::{
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1GenKeyPair(
     _env: JNIEnv,
     _class: JClass,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &pk, "publicKey");
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &sk, "privateKey");
+    java_safe_set_byte_array_field!(_env, result_jobject, &pk, "publicKey");
+    java_safe_set_byte_array_field!(_env, result_jobject, &sk, "privateKey");
     result_jobject.into_inner()
 }
 
@@ -59,7 +60,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Der
     _env: JNIEnv,
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -82,13 +84,13 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Der
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &public_key,
         "publicKey"
     );
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &private_key,
@@ -107,7 +109,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sig
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -129,7 +132,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sig
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &signature,
@@ -148,7 +151,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Ver
     public_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
     signature_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let public_key = java_safe_jbytes_to_bytes!(
@@ -176,7 +180,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
     _class: JClass,
     msg_hash_jbyte_array: jbyteArray,
     signature_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let msg_hash =
@@ -197,12 +202,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
         },
     };
 
-    java_safe_set_bytes_binary_field!(
-        _env,
-        result_jobject,
-        &result,
-        "publicKey"
-    );
+    java_safe_set_byte_array_field!(_env, result_jobject, &result, "publicKey");
     result_jobject.into_inner()
 }
 
@@ -215,13 +215,14 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2GenKeyPair(
     _env: JNIEnv,
     _class: JClass,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let (pk, sk) = SIGNATURE_SM2.generate_keypair();
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &pk, "publicKey");
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &sk, "privateKey");
+    java_safe_set_byte_array_field!(_env, result_jobject, &pk, "publicKey");
+    java_safe_set_byte_array_field!(_env, result_jobject, &sk, "privateKey");
     result_jobject.into_inner()
 }
 
@@ -233,7 +234,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2DerivePub
     _env: JNIEnv,
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -256,13 +258,13 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2DerivePub
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &public_key,
         "publicKey"
     );
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &private_key,
@@ -280,7 +282,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -302,7 +305,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &signature,
@@ -321,7 +324,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignFast(
     private_key_jbyte_array: jbyteArray,
     public_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -349,7 +353,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignFast(
             },
         };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &signature,
@@ -368,7 +372,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
     public_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
     signature_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let public_key = java_safe_jbytes_to_bytes!(
@@ -396,13 +401,14 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519GenKeyPair(
     _env: JNIEnv,
     _class: JClass,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
 
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &pk, "publicKey");
-    java_safe_set_bytes_binary_field!(_env, result_jobject, &sk, "privateKey");
+    java_safe_set_byte_array_field!(_env, result_jobject, &pk, "publicKey");
+    java_safe_set_byte_array_field!(_env, result_jobject, &sk, "privateKey");
     result_jobject.into_inner()
 }
 
@@ -414,7 +420,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Deriv
     _env: JNIEnv,
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -438,13 +445,13 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Deriv
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &public_key,
         "publicKey"
     );
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &private_key,
@@ -463,7 +470,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Sign(
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(
@@ -488,7 +496,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Sign(
         },
     };
 
-    java_safe_set_bytes_binary_field!(
+    java_safe_set_byte_array_field!(
         _env,
         result_jobject,
         &signature,
@@ -507,7 +515,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Verif
     public_key_jbyte_array: jbyteArray,
     msg_hash_jbyte_array: jbyteArray,
     signature_jbyte_array: jbyteArray,
-) -> jobject {
+) -> jobject
+{
     let result_jobject = get_result_jobject(&_env);
 
     let public_key = java_safe_jbytes_to_bytes!(

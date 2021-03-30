@@ -57,7 +57,7 @@ pub trait Signature {
     /// Generates a new key pair for signature algorithm,
     /// where the first part is public key,
     /// the second part is private key.
-    // TODO: Replace output list with a struct or protobuf.
+    // TODO: Replace output list with a struct.
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>);
 }
 
@@ -108,24 +108,29 @@ pub trait Vrf {
     fn is_valid_public_key<T: ?Sized + AsRef<[u8]>>(public_key: &T) -> bool;
 }
 
-/// Trait of a block cipher algorithm.
+/// Trait of a replaceable block cipher algorithm.
 pub trait BlockCipher {
-    /// Encrypts a block with a symmetric key and a initialization vector(iv).
+    /// Encrypts a message with a symmetric key and an initialization vector
+    /// (IV).
     fn encrypt<T: ?Sized + AsRef<[u8]>>(
         &self,
-        block_text: &T,
+        message: &T,
         key: &T,
         iv: &T,
     ) -> Result<Vec<u8>, WedprError>;
 
-    /// Decrypts a cipher with a symmetric key and a initialization vector(iv).
+    /// Decrypts a cipher with a symmetric key and an initialization vector
+    /// (IV).
     fn decrypt<T: ?Sized + AsRef<[u8]>>(
         &self,
-        cipher_text: &T,
+        ciphertext: &T,
         key: &T,
         iv: &T,
     ) -> Result<Vec<u8>, WedprError>;
 
-    /// Generates a new key for block cipher,
+    /// Generates a new key for block cipher algorithm.
     fn generate_key(&self) -> Vec<u8>;
+
+    /// Generates a new random initialization vector.
+    fn generate_iv(&self) -> Vec<u8>;
 }
