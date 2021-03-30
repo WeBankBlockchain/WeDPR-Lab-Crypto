@@ -29,8 +29,7 @@ pub fn prove_sum_relationship(
     c3_blinding: &Scalar,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> BalanceProof
-{
+) -> BalanceProof {
     let blinding_a = get_random_scalar();
     let blinding_b = get_random_scalar();
     let blinding_c = get_random_scalar();
@@ -101,8 +100,7 @@ pub fn verify_sum_relationship(
     proof: &BalanceProof,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     let m1 = bytes_to_scalar(proof.get_m1())?;
     let m2 = bytes_to_scalar(proof.get_m2())?;
     let m3 = bytes_to_scalar(proof.get_m3())?;
@@ -154,8 +152,7 @@ pub fn verify_sum_relationship_in_batch(
     proof_list: &Vec<BalanceProof>,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     if c1_point_list.len() != c2_point_list.len()
         && c1_point_list.len() != c3_point_list.len()
         && c1_point_list.len() != proof_list.len()
@@ -246,8 +243,7 @@ pub fn prove_product_relationship(
     c3_blinding: &Scalar,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> BalanceProof
-{
+) -> BalanceProof {
     let blinding_a = get_random_scalar();
     let blinding_b = get_random_scalar();
     let blinding_c = get_random_scalar();
@@ -325,8 +321,7 @@ pub fn verify_product_relationship(
     proof: &BalanceProof,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     let t1_p = bytes_to_point(proof.get_t1())?;
     let t2_p = bytes_to_point(proof.get_t2())?;
     let t3_p = bytes_to_point(proof.get_t3())?;
@@ -385,8 +380,7 @@ pub fn verify_product_relationship_in_batch(
     proof_list: &Vec<BalanceProof>,
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     if c1_point_list.len() != c2_point_list.len()
         && c1_point_list.len() != c3_point_list.len()
         && c1_point_list.len() != proof_list.len()
@@ -478,8 +472,7 @@ pub fn prove_equality_relationship_proof(
     c1_value: &Scalar,
     basepoint1: &RistrettoPoint,
     basepoint2: &RistrettoPoint,
-) -> EqualityProof
-{
+) -> EqualityProof {
     let blinding_a = get_random_scalar();
     let c1_point =
         RistrettoPoint::multiscalar_mul(&[*c1_value], &[*basepoint1]);
@@ -516,8 +509,7 @@ pub fn verify_equality_relationship_proof(
     proof: &EqualityProof,
     basepoint1: &RistrettoPoint,
     basepoint2: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     let m1 = bytes_to_scalar(proof.get_m1())?;
     let t1_p = bytes_to_point(proof.get_t1())?;
     let t2_p = bytes_to_point(proof.get_t2())?;
@@ -555,8 +547,7 @@ pub fn verify_equality_relationship_proof_in_batch(
     proof_list: &Vec<EqualityProof>,
     basepoint1: &RistrettoPoint,
     basepoint2: &RistrettoPoint,
-) -> Result<bool, WedprError>
-{
+) -> Result<bool, WedprError> {
     if c1_point_list.len() != c2_point_list.len()
         && c1_point_list.len() != proof_list.len()
     {

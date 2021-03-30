@@ -33,8 +33,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _class: JClass,
     encoded_private_key_jbyte_array: jbyteArray,
     message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
@@ -80,8 +79,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_private_key_jbyte_array: jbyteArray,
     encoded_public_key_jbyte_array: jbyteArray,
     utf8_message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
@@ -138,8 +136,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_public_key_jbyte_array: jbyteArray,
     utf8_message_jbyte_array: jbyteArray,
     encoded_proof_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let public_key_bytes = java_safe_jbytes_to_bytes!(
@@ -185,8 +182,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _env: JNIEnv,
     _class: JClass,
     encoded_private_key_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
@@ -214,8 +210,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _env: JNIEnv,
     _class: JClass,
     encoded_proof_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let proof_bytes = java_safe_jbytes_to_bytes!(
@@ -264,8 +259,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     _env: JNIEnv,
     _class: JClass,
     encoded_public_key_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let public_key_bytes = java_safe_jbytes_to_bytes!(

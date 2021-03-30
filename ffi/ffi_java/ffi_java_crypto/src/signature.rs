@@ -47,8 +47,7 @@ use wedpr_ffi_common_hex::utils::{
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1GenKeyPair(
     _env: JNIEnv,
     _class: JClass,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
@@ -76,8 +75,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Der
     _env: JNIEnv,
     _class: JClass,
     private_key_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -122,8 +120,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sig
     _class: JClass,
     private_key_jstring: JString,
     msg_hash_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -164,8 +161,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Ver
     public_key_jstring: JString,
     msg_hash_jstring: JString,
     signature_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let public_key =
@@ -190,8 +186,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
     _class: JClass,
     msg_hash_jstring: JString,
     signature_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let msg_hash =
@@ -227,8 +222,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2GenKeyPair(
     _env: JNIEnv,
     _class: JClass,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let (pk, sk) = SIGNATURE_SM2.generate_keypair();
@@ -256,8 +250,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2DerivePub
     _env: JNIEnv,
     _class: JClass,
     private_key_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -301,8 +294,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
     _class: JClass,
     private_key_jstring: JString,
     msg_hash_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -343,8 +335,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignFast(
     private_key_jstring: JString,
     public_key_jstring: JString,
     msg_hash_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -388,8 +379,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
     public_key_jstring: JString,
     msg_hash_jstring: JString,
     signature_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let public_key =
@@ -414,8 +404,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519GenKeyPair(
     _env: JNIEnv,
     _class: JClass,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
@@ -443,8 +432,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Deriv
     _env: JNIEnv,
     _class: JClass,
     private_key_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -488,8 +476,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Sign(
     _class: JClass,
     private_key_jstring: JString,
     msg_hash_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key =
@@ -530,8 +517,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Verif
     public_key_jstring: JString,
     msg_hash_jstring: JString,
     signature_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let public_key =

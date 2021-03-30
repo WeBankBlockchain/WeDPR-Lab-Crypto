@@ -14,8 +14,7 @@ use wedpr_third_party_fisco_bcos;
 pub unsafe extern "C" fn wedpr_fb_alt_bn128_g1_add(
     raw_pairing_data: &CInputBuffer,
     output_point: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
     let pairing = c_read_raw_pointer(raw_pairing_data);
@@ -35,8 +34,7 @@ pub unsafe extern "C" fn wedpr_fb_alt_bn128_g1_add(
 pub unsafe extern "C" fn wedpr_fb_alt_bn128_g1_mul(
     raw_pairing_data: &CInputBuffer,
     output_point: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
     let pairing = c_read_raw_pointer(raw_pairing_data);
@@ -56,8 +54,7 @@ pub unsafe extern "C" fn wedpr_fb_alt_bn128_g1_mul(
 pub unsafe extern "C" fn wedpr_fb_alt_bn128_pairing_product(
     raw_pairing_data: &CInputBuffer,
     output_point: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
     let pairing = c_read_raw_pointer(raw_pairing_data);

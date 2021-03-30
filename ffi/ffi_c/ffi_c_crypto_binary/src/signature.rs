@@ -38,8 +38,7 @@ const SM2_SIGNATURE_DATA_LENGTH: usize = 64;
 pub unsafe extern "C" fn wedpr_secp256k1_gen_key_pair(
     output_public_key: &mut COutputBuffer,
     output_private_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
@@ -65,8 +64,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_gen_key_pair(
 pub unsafe extern "C" fn wedpr_secp256k1_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
@@ -90,8 +88,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_sign(
     raw_private_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     output_signature: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(
         output_signature,
         SECP256K1_SIGNATURE_DATA_LENGTH
@@ -117,8 +114,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_verify(
     raw_public_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     raw_signature: &CInputBuffer,
-) -> i8
-{
+) -> i8 {
     let public_key = c_read_raw_pointer(raw_public_key);
     let message_hash = c_read_raw_pointer(&raw_message_hash);
     let signature = c_read_raw_pointer(&raw_signature);
@@ -141,8 +137,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
     raw_message_hash: &CInputBuffer,
     raw_signature: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
@@ -177,8 +172,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
 pub unsafe extern "C" fn wedpr_sm2_gen_key_pair(
     output_public_key: &mut COutputBuffer,
     output_private_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
@@ -204,8 +198,7 @@ pub unsafe extern "C" fn wedpr_sm2_gen_key_pair(
 pub unsafe extern "C" fn wedpr_sm2_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
@@ -229,8 +222,7 @@ pub unsafe extern "C" fn wedpr_sm2_sign(
     raw_private_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     output_signature: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_signature, SM2_SIGNATURE_DATA_LENGTH);
     let private_key = c_read_raw_pointer(raw_private_key);
     let message_hash = c_read_raw_pointer(&raw_message_hash);
@@ -254,8 +246,7 @@ pub unsafe extern "C" fn wedpr_sm2_sign_fast(
     raw_public_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     output_signature: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_signature, SM2_SIGNATURE_DATA_LENGTH);
     let private_key = c_read_raw_pointer(raw_private_key);
     let public_key = c_read_raw_pointer(raw_public_key);
@@ -281,8 +272,7 @@ pub unsafe extern "C" fn wedpr_sm2_verify(
     raw_public_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     raw_signature: &CInputBuffer,
-) -> i8
-{
+) -> i8 {
     let public_key = c_read_raw_pointer(raw_public_key);
     let message_hash = c_read_raw_pointer(&raw_message_hash);
     let signature = c_read_raw_pointer(&raw_signature);
@@ -305,8 +295,7 @@ pub unsafe extern "C" fn wedpr_sm2_verify(
 pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
     output_public_key: &mut COutputBuffer,
     output_private_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
     if output_public_key.len == PUBLIC_KEY_SIZE_WITH_PREFIX {
         c_write_raw_pointer(&pk, output_public_key);
@@ -326,8 +315,7 @@ pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
 pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let sk = c_read_raw_pointer(raw_private_key);
 
     let result = SIGNATURE_ED25519.derive_public_key(&sk);
@@ -347,8 +335,7 @@ pub unsafe extern "C" fn wedpr_ed25519_sign(
     raw_private_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     output_signature: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let private_key = c_read_raw_pointer(raw_private_key);
     let message_hash = c_read_raw_pointer(&raw_message_hash);
 
@@ -370,8 +357,7 @@ pub unsafe extern "C" fn wedpr_ed25519_verify(
     raw_public_key: &CInputBuffer,
     raw_message_hash: &CInputBuffer,
     raw_signature: &CInputBuffer,
-) -> i8
-{
+) -> i8 {
     let public_key = c_read_raw_pointer(raw_public_key);
     let message_hash = c_read_raw_pointer(&raw_message_hash);
     let signature = c_read_raw_pointer(&raw_signature);
