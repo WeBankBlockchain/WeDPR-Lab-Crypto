@@ -29,8 +29,8 @@ lazy_static = "1.4.0"
 libc = "0.2.60"
 protobuf = "2.22.1"
 wedpr_ffi_c_common = "1.0.0"
-wedpr_ffi_common = { path = "../../ffi_common/" }
-wedpr_ffi_macros = { path = "../../ffi_macros/" }
+wedpr_ffi_common = "1.1.0"
+wedpr_ffi_macros = "1.1.0"
 wedpr_l_crypto_block_cipher_aes = { path = "../../../crypto/block_cipher/aes", optional = true }
 wedpr_l_crypto_block_cipher_sm4 = { path = "../../../crypto/block_cipher/sm4", optional = true }
 wedpr_l_crypto_ecies_secp256k1 = { path = "../../../crypto/ecies/secp256k1", optional = true }
@@ -45,7 +45,7 @@ wedpr_l_crypto_signature_sm2 = { path = "../../../crypto/signature/sm2", optiona
 wedpr_l_crypto_vrf_curve25519 = { path = "../../../crypto/vrf/curve25519", optional = true }
 wedpr_l_macros = "1.0.0"
 wedpr_l_protos = { path = "../../../protos" }
-wedpr_l_utils = { path = "../../../common/utils" }
+wedpr_l_utils = "1.1.0"
 # This is required to generate C/C++ header files.
 [build-dependencies]
 cbindgen = "0.9.0"

@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_signature_secp256k1"
-version = "1.0.1"
+version = "1.1.0"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -13,4 +13,4 @@ lazy_static = "1.4.0"
 rand = "0.6"
 secp256k1 = { version = "0.19.0", features = [ "recovery", "rand" ] }
 wedpr_l_macros = "1.0.0"
-wedpr_l_utils = { path = "../../../common/utils" }
+wedpr_l_utils = "1.1.0"
