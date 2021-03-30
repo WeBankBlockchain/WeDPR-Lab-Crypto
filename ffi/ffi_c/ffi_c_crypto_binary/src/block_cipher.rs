@@ -27,8 +27,7 @@ pub unsafe extern "C" fn wedpr_aes256_encrypt(
     raw_key: &CInputBuffer,
     raw_iv: &CInputBuffer,
     output_ciphertext: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let plaintext = c_read_raw_pointer(raw_plaintext);
     let key = c_read_raw_pointer(&raw_key);
     let iv = c_read_raw_pointer(&raw_iv);
@@ -53,8 +52,7 @@ pub unsafe extern "C" fn wedpr_aes256_decrypt(
     raw_key: &CInputBuffer,
     raw_iv: &CInputBuffer,
     output_plaintext: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let ciphertext = c_read_raw_pointer(raw_ciphertext);
     let key = c_read_raw_pointer(&raw_key);
     let iv = c_read_raw_pointer(&raw_iv);
@@ -81,8 +79,7 @@ pub unsafe extern "C" fn wedpr_sm4_encrypt(
     raw_key: &CInputBuffer,
     raw_iv: &CInputBuffer,
     output_ciphertext: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let plaintext = c_read_raw_pointer(raw_plaintext);
     let key = c_read_raw_pointer(&raw_key);
     let iv = c_read_raw_pointer(&raw_iv);
@@ -107,8 +104,7 @@ pub unsafe extern "C" fn wedpr_sm4_decrypt(
     raw_key: &CInputBuffer,
     raw_iv: &CInputBuffer,
     output_plaintext: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let ciphertext = c_read_raw_pointer(raw_ciphertext);
     let key = c_read_raw_pointer(&raw_key);
     let iv = c_read_raw_pointer(&raw_iv);

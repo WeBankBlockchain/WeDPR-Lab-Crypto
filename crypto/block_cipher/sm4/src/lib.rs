@@ -24,8 +24,7 @@ impl BlockCipher for WedprBlockCipherSm4 {
         message: &T,
         key: &T,
         iv: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let cipher = match Sm4Cbc::new_var(key.as_ref(), iv.as_ref()) {
             Ok(v) => v,
             Err(_) => return Err(WedprError::FormatError),
@@ -48,8 +47,7 @@ impl BlockCipher for WedprBlockCipherSm4 {
         ciphertext: &T,
         key: &T,
         iv: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let cipher = match Sm4Cbc::new_var(key.as_ref(), iv.as_ref()) {
             Ok(v) => v,
             Err(_) => return Err(WedprError::FormatError),

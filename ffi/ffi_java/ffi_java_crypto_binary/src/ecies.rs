@@ -36,8 +36,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     _class: JClass,
     public_key_jbyte_array: jbyteArray,
     message_hash_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let public_key = java_safe_jbytes_to_bytes!(
@@ -85,8 +84,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     _class: JClass,
     private_key_jbyte_array: jbyteArray,
     ciphertext_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let private_key = java_safe_jbytes_to_bytes!(

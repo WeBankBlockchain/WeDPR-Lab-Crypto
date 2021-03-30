@@ -20,8 +20,7 @@ use wedpr_l_utils::traits::Vrf;
 pub unsafe extern "C" fn wedpr_curve25519_vrf_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let private_key = c_read_raw_pointer(raw_private_key);
 
     let public_key = WedprCurve25519Vrf::derive_public_key(&private_key);
@@ -36,8 +35,7 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_prove_utf8(
     raw_private_key: &CInputBuffer,
     raw_utf8_message: &CInputBuffer,
     output_proof: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let private_key = c_read_raw_pointer(raw_private_key);
     let message = c_read_raw_pointer(raw_utf8_message);
 
@@ -59,8 +57,7 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_prove_fast_utf8(
     raw_public_key: &CInputBuffer,
     raw_utf8_message: &CInputBuffer,
     output_proof: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let private_key = c_read_raw_pointer(raw_private_key);
     let public_key = c_read_raw_pointer(raw_public_key);
     let message = c_read_raw_pointer(raw_utf8_message);
@@ -84,8 +81,7 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_verify_utf8(
     raw_public_key: &CInputBuffer,
     raw_utf8_message: &CInputBuffer,
     raw_proof: &CInputBuffer,
-) -> i8
-{
+) -> i8 {
     let proof_bytes = c_read_raw_pointer(raw_proof);
     let public_key = c_read_raw_pointer(raw_public_key);
     let message = c_read_raw_pointer(raw_utf8_message);
@@ -115,8 +111,7 @@ pub unsafe extern "C" fn wedpr_curve25519_vrf_verify_utf8(
 pub unsafe extern "C" fn wedpr_curve25519_vrf_proof_to_hash(
     raw_proof: &CInputBuffer,
     output_hash: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let proof_bytes = c_read_raw_pointer(raw_proof);
     let proof = match WedprCurve25519Vrf::decode_proof(&proof_bytes) {
         Ok(v) => v,

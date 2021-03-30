@@ -46,8 +46,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256Has
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
@@ -68,8 +67,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3Hash(
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes =
@@ -91,8 +89,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ripemd160Has
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes =
@@ -114,8 +111,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sha3Hash(
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes =
@@ -137,8 +133,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_blake2bHash(
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes =

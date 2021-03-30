@@ -24,8 +24,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_ecies_encrypt(
     raw_public_key: &CInputBuffer,
     raw_plaintext: &CInputBuffer,
     output_ciphertext: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let public_key = c_read_raw_pointer(raw_public_key);
     let plaintext = c_read_raw_pointer(&raw_plaintext);
 
@@ -47,8 +46,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_ecies_decrypt(
     raw_private_key: &CInputBuffer,
     raw_ciphertext: &CInputBuffer,
     output_plaintext: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     let private_key = c_read_raw_pointer(raw_private_key);
     let ciphertext = c_read_raw_pointer(raw_ciphertext);
 

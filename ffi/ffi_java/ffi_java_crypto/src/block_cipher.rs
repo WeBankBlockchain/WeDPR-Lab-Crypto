@@ -47,8 +47,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Encryp
     encoded_message_jstring: JString,
     encoded_key_jstring: JString,
     encoded_iv_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes = java_safe_jstring_to_bytes!(
@@ -98,8 +97,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Decryp
     encoded_encrypted_data_jstring: JString,
     encoded_key_jstring: JString,
     encoded_iv_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let encrypted_data = java_safe_jstring_to_bytes!(
@@ -148,8 +146,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Encrypt(
     encoded_message_jstring: JString,
     encoded_key_jstring: JString,
     encoded_iv_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let message_bytes = java_safe_jstring_to_bytes!(
@@ -196,8 +193,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Decrypt(
     encoded_encrypted_data_jstring: JString,
     encoded_key_jstring: JString,
     encoded_iv_jstring: JString,
-) -> jobject
-{
+) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
     let encrypted_data = java_safe_jstring_to_bytes!(

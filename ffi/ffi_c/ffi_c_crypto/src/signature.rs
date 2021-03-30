@@ -90,8 +90,7 @@ pub extern "C" fn wedpr_secp256k1_derive_public_key(
 pub extern "C" fn wedpr_secp256k1_sign(
     encoded_private_key: *const c_char,
     encoded_message_hash: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
         let message_hash =
@@ -116,8 +115,7 @@ pub extern "C" fn wedpr_secp256k1_verify(
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
-) -> i8
-{
+) -> i8 {
     let result = panic::catch_unwind(|| {
         let public_key = c_safe_c_char_pointer_to_bytes_with_error_value!(
             encoded_public_key,
@@ -147,8 +145,7 @@ pub extern "C" fn wedpr_secp256k1_verify(
 pub extern "C" fn wedpr_secp256k1_recover_public_key(
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let message_hash =
             c_safe_c_char_pointer_to_bytes!(encoded_message_hash);
@@ -219,8 +216,7 @@ pub extern "C" fn wedpr_sm2_derive_public_key(
 pub extern "C" fn wedpr_sm2_sign(
     encoded_private_key: *const c_char,
     encoded_message_hash: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
         let message_hash =
@@ -244,8 +240,7 @@ pub extern "C" fn wedpr_sm2_sign_fast(
     encoded_private_key: *const c_char,
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
         let public_key = c_safe_c_char_pointer_to_bytes!(encoded_public_key);
@@ -274,8 +269,7 @@ pub extern "C" fn wedpr_sm2_verify(
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
-) -> i8
-{
+) -> i8 {
     let result = panic::catch_unwind(|| {
         let public_key = c_safe_c_char_pointer_to_bytes_with_error_value!(
             encoded_public_key,
@@ -352,8 +346,7 @@ pub extern "C" fn wedpr_ed25519_derive_public_key(
 pub extern "C" fn wedpr_ed25519_sign(
     encoded_private_key: *const c_char,
     encoded_message_hash: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
         let message_hash =
@@ -378,8 +371,7 @@ pub extern "C" fn wedpr_ed25519_verify(
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
-) -> i8
-{
+) -> i8 {
     let result = panic::catch_unwind(|| {
         let public_key = c_safe_c_char_pointer_to_bytes_with_error_value!(
             encoded_public_key,

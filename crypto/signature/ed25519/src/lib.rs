@@ -18,8 +18,7 @@ impl Signature for WedprEd25519 {
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let secret_key: SecretKey =
             match SecretKey::from_bytes(&private_key.as_ref()) {
                 Ok(v) => v,
@@ -38,8 +37,7 @@ impl Signature for WedprEd25519 {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool
-    {
+    ) -> bool {
         let public_key_parser: PublicKey =
             match PublicKey::from_bytes(&public_key.as_ref()) {
                 Ok(v) => v,
@@ -74,8 +72,7 @@ impl WedprEd25519 {
     pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let secret_key: SecretKey =
             match SecretKey::from_bytes(&private_key.as_ref()) {
                 Ok(v) => v,

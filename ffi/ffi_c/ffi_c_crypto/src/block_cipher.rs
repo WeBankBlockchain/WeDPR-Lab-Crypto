@@ -32,8 +32,7 @@ pub extern "C" fn wedpr_aes256_encrypt(
     encoded_plaintext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let plaintext = c_safe_c_char_pointer_to_bytes!(encoded_plaintext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
@@ -64,8 +63,7 @@ pub extern "C" fn wedpr_aes256_decrypt(
     encoded_ciphertext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let ciphertext = c_safe_c_char_pointer_to_bytes!(encoded_ciphertext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
@@ -96,8 +94,7 @@ pub extern "C" fn wedpr_sm4_encrypt(
     encoded_plaintext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let plaintext = c_safe_c_char_pointer_to_bytes!(encoded_plaintext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
@@ -126,8 +123,7 @@ pub extern "C" fn wedpr_sm4_decrypt(
     encoded_ciphertext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let ciphertext = c_safe_c_char_pointer_to_bytes!(encoded_ciphertext);
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);

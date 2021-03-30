@@ -35,8 +35,7 @@ const HASH_256_DATA_SIZE: usize = 32;
 pub unsafe extern "C" fn wedpr_keccak256_hash(
     raw_message: &CInputBuffer,
     output_hash: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
 
     // Note: Since encode_message is an object passed in by C/C++, it should
@@ -57,8 +56,7 @@ pub unsafe extern "C" fn wedpr_keccak256_hash(
 pub unsafe extern "C" fn wedpr_sm3_hash(
     raw_message: &CInputBuffer,
     output_hash: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
@@ -78,8 +76,7 @@ pub unsafe extern "C" fn wedpr_sm3_hash(
 pub unsafe extern "C" fn wedpr_ripemd160_hash(
     raw_message: &CInputBuffer,
     output_hash: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
@@ -99,8 +96,7 @@ pub unsafe extern "C" fn wedpr_ripemd160_hash(
 pub unsafe extern "C" fn wedpr_sha3_hash(
     raw_message: &CInputBuffer,
     output_hash: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
@@ -120,8 +116,7 @@ pub unsafe extern "C" fn wedpr_sha3_hash(
 pub unsafe extern "C" fn wedpr_blake2b_hash(
     message_input: &CInputBuffer,
     output_hash: &mut COutputBuffer,
-) -> i8
-{
+) -> i8 {
     c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released

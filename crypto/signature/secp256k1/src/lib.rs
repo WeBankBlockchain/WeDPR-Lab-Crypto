@@ -36,8 +36,7 @@ impl Signature for WedprSecp256k1Recover {
         &self,
         private_key: &T,
         msg_hash: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {
@@ -70,8 +69,7 @@ impl Signature for WedprSecp256k1Recover {
         public_key: &T,
         msg_hash: &T,
         signature: &T,
-    ) -> bool
-    {
+    ) -> bool {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let recover_public_key =
             match self.recover_public_key(msg_hash, signature) {
@@ -122,8 +120,7 @@ impl WedprSecp256k1Recover {
         self,
         msg_hash: &T,
         signature: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let msg_hash_obj = match Message::from_slice(&msg_hash.as_ref()) {
             Ok(v) => v,
@@ -174,8 +171,7 @@ impl WedprSecp256k1Recover {
     pub fn derive_public_key<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
-    ) -> Result<Vec<u8>, WedprError>
-    {
+    ) -> Result<Vec<u8>, WedprError> {
         let secret_key = match SecretKey::from_slice(&private_key.as_ref()) {
             Ok(v) => v,
             Err(_) => {

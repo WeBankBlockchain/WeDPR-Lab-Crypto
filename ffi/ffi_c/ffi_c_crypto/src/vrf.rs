@@ -44,8 +44,7 @@ pub extern "C" fn wedpr_curve25519_vrf_derive_public_key(
 pub extern "C" fn wedpr_curve25519_vrf_prove_utf8(
     encoded_private_key: *const c_char,
     utf8_message: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
         let message = c_safe_c_char_pointer_to_bytes_utf8!(utf8_message);
@@ -67,8 +66,7 @@ pub extern "C" fn wedpr_curve25519_vrf_prove_fast_utf8(
     encoded_private_key: *const c_char,
     encoded_public_key: *const c_char,
     utf8_message: *const c_char,
-) -> *mut c_char
-{
+) -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
         let public_key = c_safe_c_char_pointer_to_bytes!(encoded_public_key);
@@ -95,8 +93,7 @@ pub extern "C" fn wedpr_curve25519_vrf_verify_utf8(
     encoded_public_key: *const c_char,
     utf8_message: *const c_char,
     encoded_proof: *const c_char,
-) -> i8
-{
+) -> i8 {
     let result = panic::catch_unwind(|| {
         let public_key = c_safe_c_char_pointer_to_bytes_with_error_value!(
             encoded_public_key,
