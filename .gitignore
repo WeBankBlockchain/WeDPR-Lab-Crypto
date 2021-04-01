@@ -14,5 +14,4 @@
 .idea/*
 *.iml
 *.tar.gz
-**/*.h
 
