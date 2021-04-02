@@ -395,6 +395,46 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
     result_jobject.into_inner()
 }
 
+#[cfg(feature = "wedpr_f_signature_sm2")]
+#[no_mangle]
+/// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->sm2ComputeE'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2ComputeE(
+    _env: JNIEnv,
+    _class: JClass,
+    public_key_jstring: JString,
+    msg_hash_jstring: JString,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+    let public_key =
+        java_safe_jstring_to_bytes!(_env, result_jobject, public_key_jstring);
+    let msg_hash =
+        java_safe_jstring_to_bytes!(_env, result_jobject, msg_hash_jstring);
+
+    let result = match SIGNATURE_SM2.compute_e(&public_key, &msg_hash) {
+        Ok(v) => v,
+        Err(_) => {
+            return java_set_error_field_and_extract_jobject(
+                &_env,
+                &result_jobject,
+                &format!(
+                    "sm2 compute_e, msg_hash={}",
+                    bytes_to_string(&msg_hash)
+                ),
+            )
+        },
+    };
+
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&result),
+        "hash"
+    );
+    result_jobject.into_inner()
+}
+
 // ED25519 implementation.
 
 #[cfg(feature = "wedpr_f_signature_ed25519")]

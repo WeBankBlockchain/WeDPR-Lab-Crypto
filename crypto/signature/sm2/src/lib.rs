@@ -17,6 +17,8 @@ lazy_static! {
     static ref SM2_CTX: SigCtx = SigCtx::new();
 }
 
+const SM2_STANDARD_ID: &str = "1234567812345678";
+
 /// Implements FISCO-BCOS-compatible SM2 as a Signature instance.
 #[derive(Default, Debug, Clone)]
 pub struct WedprSm2p256v1 {}
@@ -109,6 +111,22 @@ impl WedprSm2p256v1 {
         let public_key = SM2_CTX.pk_from_sk(&secret_key);
         Ok(SM2_CTX.serialize_pubkey(&public_key, false))
     }
+
+    pub fn compute_e<T: ?Sized + AsRef<[u8]>>(
+        &self,
+        public_key: &T,
+        message: &T,
+    ) -> Result<Vec<u8>, WedprError> {
+        let public_key_point = match SM2_CTX.load_pubkey(&public_key.as_ref()) {
+            Ok(v) => v,
+            Err(_) => {
+                return Err(WedprError::FormatError);
+            },
+        };
+        Ok(SM2_CTX
+            .hash(SM2_STANDARD_ID, &public_key_point, message.as_ref())
+            .to_vec())
+    }
 }
 
 #[cfg(test)]
@@ -148,5 +166,7 @@ mod tests {
             true,
             sm2_sign.verify(&public_key, &msg_hash.to_vec(), &signature_fast)
         );
+
+        // let expect_e = sm2_sign.compute_e(&public_key, &msg_hash.to_vec());
     }
 }
