@@ -21,6 +21,8 @@ struct COutputBuffer
     uintptr_t len;
 };
 
+const int8_t WEDPR_ERROR = -1;
+const int8_t WEDPR_SUCCESS = 0;
 }  // extern "C"
 
 #endif

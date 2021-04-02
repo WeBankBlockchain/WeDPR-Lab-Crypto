@@ -27,6 +27,8 @@ const PUBLIC_KEY_SIZE_WITHOUT_PREFIX: usize = 64;
 const PUBLIC_KEY_SIZE_WITH_PREFIX: usize = 65;
 const PRIVATE_KEY_SIZE: usize = 32;
 
+const ED25519_PUBLIC_KEY_SIZE_WITHOUT_PREFIX: usize = 32;
+
 const SECP256K1_SIGNATURE_DATA_LENGTH: usize = 65;
 const SM2_SIGNATURE_DATA_LENGTH: usize = 64;
 
@@ -317,18 +319,11 @@ pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
 ) -> i8 {
     c_check_enough_buffer_size!(
         output_public_key,
-        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+        ED25519_PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
     c_check_exact_buffer_size!(output_private_key, PRIVATE_KEY_SIZE);
     let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
-    if output_public_key.len >= PUBLIC_KEY_SIZE_WITH_PREFIX {
-        c_write_raw_pointer(&pk, output_public_key);
-    } else {
-        c_write_raw_pointer(
-            &pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX],
-            output_public_key,
-        );
-    }
+    c_write_raw_pointer(&pk, output_public_key);
     c_write_raw_pointer(&sk, output_private_key);
     SUCCESS
 }
@@ -342,7 +337,7 @@ pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
 ) -> i8 {
     c_check_enough_buffer_size!(
         output_public_key,
-        PUBLIC_KEY_SIZE_WITHOUT_PREFIX
+        ED25519_PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
     let sk = c_read_raw_pointer(raw_private_key);
 
@@ -352,14 +347,7 @@ pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
-    if output_public_key.len >= PUBLIC_KEY_SIZE_WITH_PREFIX {
-        c_write_raw_pointer(&pk, output_public_key);
-    } else {
-        c_write_raw_pointer(
-            &pk[1..PUBLIC_KEY_SIZE_WITH_PREFIX],
-            output_public_key,
-        );
-    }
+    c_write_raw_pointer(&pk, output_public_key);
 
     SUCCESS
 }
