@@ -172,7 +172,8 @@ pub fn verify_sum_relationship_in_batch(
     let mut m5_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
         // 32 bit random scalar
-        let blinding_factor = Scalar::from(get_random_u32());
+        // let blinding_factor = Scalar::from(get_random_u32());
+        // let blinding_factor = Scalar::one();
         let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
         let m2 = bytes_to_scalar(proof_list[i].get_m2())?;
         let m3 = bytes_to_scalar(proof_list[i].get_m3())?;
@@ -193,19 +194,42 @@ pub fn verify_sum_relationship_in_batch(
         hash_vec.append(&mut point_to_bytes(&c3_point));
         hash_vec.append(&mut point_to_bytes(value_basepoint));
         let check = hash_to_scalar(&hash_vec);
-        let c_factor = blinding_factor * check;
-        m1_expected += blinding_factor * m1;
-        m2_expected += blinding_factor * m2;
-        m3_expected += blinding_factor * m3;
-        m4_expected += blinding_factor * m4;
-        m5_expected += blinding_factor * m5;
-        t1_sum_expected += blinding_factor * t1_p;
-        t2_sum_expected += blinding_factor * t2_p;
-        t3_sum_expected += blinding_factor * t3_p;
+        // let c_factor = blinding_factor * check;
+        // m1_expected += blinding_factor * m1;
+        // m2_expected += blinding_factor * m2;
+        // m3_expected += blinding_factor * m3;
+        // m4_expected += blinding_factor * m4;
+        // m5_expected += blinding_factor * m5;
+        // t1_sum_expected += blinding_factor * t1_p;
+        // t2_sum_expected += blinding_factor * t2_p;
+        // t3_sum_expected += blinding_factor * t3_p;
+        // c1_c_expected += c_factor * c1_point;
+        // c2_c_expected += c_factor * c2_point;
+        // c3_c_expected += c_factor * c3_point;
+
+        let c_factor = check;
+        m1_expected += m1;
+        m2_expected += m2;
+        m3_expected += m3;
+        m4_expected += m4;
+        m5_expected += m5;
+        t1_sum_expected += t1_p;
+        t2_sum_expected += t2_p;
+        t3_sum_expected += t3_p;
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
         c3_c_expected += c_factor * c3_point;
     }
+
+    // let t1_compute_sum_final = m1_expected * value_basepoint
+    //     + m2_expected * blinding_basepoint
+    //     + c1_c_expected;
+    // let t2_compute_sum_final = m3_expected * value_basepoint
+    //     + m4_expected * blinding_basepoint
+    //     + c2_c_expected;
+    // let t3_compute_sum_final = (m1_expected + m3_expected) * value_basepoint
+    //     + m5_expected * blinding_basepoint
+    //     + c3_c_expected;
 
     let t1_compute_sum_final = m1_expected * value_basepoint
         + m2_expected * blinding_basepoint
