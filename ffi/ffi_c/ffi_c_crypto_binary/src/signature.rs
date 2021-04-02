@@ -39,13 +39,14 @@ pub unsafe extern "C" fn wedpr_secp256k1_gen_key_pair(
     output_public_key: &mut COutputBuffer,
     output_private_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
     c_check_exact_buffer_size!(output_private_key, PRIVATE_KEY_SIZE);
 
     let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
+    // FISCO BCOS public key length is either 64 or 65 bytes.
     if output_public_key.len >= PUBLIC_KEY_SIZE_WITH_PREFIX {
         c_write_raw_pointer(&pk, output_public_key);
     } else {
@@ -65,7 +66,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
@@ -77,6 +78,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_derive_public_key(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
+    // FISCO BCOS public key length is either 64 or 65 bytes.
     if output_public_key.len >= PUBLIC_KEY_SIZE_WITH_PREFIX {
         c_write_raw_pointer(&pk, output_public_key);
     } else {
@@ -96,7 +98,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_sign(
     raw_message_hash: &CInputBuffer,
     output_signature: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_signature,
         SECP256K1_SIGNATURE_DATA_LENGTH
     );
@@ -145,7 +147,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
     raw_signature: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
@@ -160,6 +162,7 @@ pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
+    // FISCO BCOS public key length is either 64 or 65 bytes.
     if output_public_key.len >= PUBLIC_KEY_SIZE_WITH_PREFIX {
         c_write_raw_pointer(&pk, output_public_key);
     } else {
@@ -180,13 +183,14 @@ pub unsafe extern "C" fn wedpr_sm2_gen_key_pair(
     output_public_key: &mut COutputBuffer,
     output_private_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
     c_check_exact_buffer_size!(output_private_key, PRIVATE_KEY_SIZE);
 
     let (pk, sk) = SIGNATURE_SM2.generate_keypair();
+    // FISCO BCOS public key length is either 64 or 65 bytes.
     if output_public_key.len >= PUBLIC_KEY_SIZE_WITH_PREFIX {
         c_write_raw_pointer(&pk, output_public_key);
     } else {
@@ -206,7 +210,7 @@ pub unsafe extern "C" fn wedpr_sm2_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
@@ -311,7 +315,7 @@ pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair(
     output_public_key: &mut COutputBuffer,
     output_private_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );
@@ -336,7 +340,7 @@ pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
     raw_private_key: &CInputBuffer,
     output_public_key: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(
+    c_check_enough_buffer_size!(
         output_public_key,
         PUBLIC_KEY_SIZE_WITHOUT_PREFIX
     );

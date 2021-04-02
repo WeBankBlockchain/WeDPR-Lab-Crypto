@@ -58,7 +58,17 @@ macro_rules! java_safe_bytes_to_jbyte_array {
 #[macro_export]
 macro_rules! c_check_exact_buffer_size {
     ($c_pointer:expr, $c_pointer_expected_length:expr) => {
-        if $c_pointer.len < $c_pointer_expected_length {
+        if $c_pointer.len != $c_pointer_expected_length {
+            return FAILURE;
+        }
+    };
+}
+
+/// Check whether a C buffer pointer has the expected buffer size.
+#[macro_export]
+macro_rules! c_check_enough_buffer_size {
+    ($c_pointer:expr, $c_pointer_min_length:expr) => {
+        if $c_pointer.len < $c_pointer_min_length {
             return FAILURE;
         }
     };

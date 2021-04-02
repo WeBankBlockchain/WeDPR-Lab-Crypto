@@ -406,7 +406,7 @@ pub fn verify_product_relationship_in_batch(
     let mut m4_expected: Scalar = Scalar::zero();
     let mut m5_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
-        // 32 bit random scalar
+        // 8 bit random scalar
         let random_scalar = get_random_u8();
         let blinding_factor = Scalar::from(random_scalar);
         let m1 = bytes_to_scalar(proof_list[i].get_m1())?;

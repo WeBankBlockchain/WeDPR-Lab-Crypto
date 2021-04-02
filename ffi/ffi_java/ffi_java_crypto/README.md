@@ -98,7 +98,7 @@ public class NativeInterface {
 
     public static native CryptoResult sm2Verify(String pubKey, String message, String signature);
     
-    public static native CryptoResult sm2ComputeE(String pubKey, String sm2ComputeE);
+    public static native CryptoResult sm2ComputeHashE(String pubKey, String sm2ComputeE);
 
     public static native CryptoResult curve25519VrfProveUtf8(String privateKey, String utf8Message);
 
