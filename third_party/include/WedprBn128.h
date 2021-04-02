@@ -1,6 +1,6 @@
 #ifndef _WEDPR_BN128_H_
 #define _WEDPR_BN128_H_
-#include "WeDPRUtilities.h"
+#include "WedprUtilities.h"
 
 extern "C" {
 
@@ -15,4 +15,5 @@ int8_t wedpr_fb_alt_bn128_pairing_product(
     const CInputBuffer* raw_pairing_data, COutputBuffer* output_point);
 
 }  // extern "C"
+
 #endif
