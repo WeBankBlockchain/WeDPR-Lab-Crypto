@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_signature_sm2"
-version = "1.1.0"
+version = "1.1.1"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -10,6 +10,6 @@ description = "Library of WeDPR shared Siganture Function implement by sm2."
 
 [dependencies]
 lazy_static = "1.4.0"
-wedpr_l_libsm = "0.3.2"
+wedpr_l_libsm = "0.3.4"
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.1.0"

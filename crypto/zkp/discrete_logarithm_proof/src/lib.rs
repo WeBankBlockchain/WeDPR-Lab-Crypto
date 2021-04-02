@@ -6,11 +6,12 @@ use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
 use wedpr_l_crypto_zkp_utils::{
-    bytes_to_point, bytes_to_scalar, get_random_scalar, get_random_u32,
+    bytes_to_point, bytes_to_scalar, get_random_scalar,
     hash_to_scalar, point_to_bytes, scalar_to_bytes,
 };
 use wedpr_l_protos::generated::zkp::{BalanceProof, EqualityProof};
 use wedpr_l_utils::error::WedprError;
+use rand::Rng;
 
 /// Proves three commitments satisfying a sum relationship, i.e.
 /// the values embedded in them satisfying c1_value + c2_value = c3_value.
@@ -171,8 +172,9 @@ pub fn verify_sum_relationship_in_batch(
     let mut m4_expected: Scalar = Scalar::zero();
     let mut m5_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
-        // 32 bit random scalar
-        // let blinding_factor = Scalar::from(get_random_u32());
+        // 8 bit random scalar
+        let random_scalar = get_random_u8();
+        let blinding_factor = Scalar::from(random_scalar);
         // let blinding_factor = Scalar::one();
         let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
         let m2 = bytes_to_scalar(proof_list[i].get_m2())?;
@@ -194,42 +196,19 @@ pub fn verify_sum_relationship_in_batch(
         hash_vec.append(&mut point_to_bytes(&c3_point));
         hash_vec.append(&mut point_to_bytes(value_basepoint));
         let check = hash_to_scalar(&hash_vec);
-        // let c_factor = blinding_factor * check;
-        // m1_expected += blinding_factor * m1;
-        // m2_expected += blinding_factor * m2;
-        // m3_expected += blinding_factor * m3;
-        // m4_expected += blinding_factor * m4;
-        // m5_expected += blinding_factor * m5;
-        // t1_sum_expected += blinding_factor * t1_p;
-        // t2_sum_expected += blinding_factor * t2_p;
-        // t3_sum_expected += blinding_factor * t3_p;
-        // c1_c_expected += c_factor * c1_point;
-        // c2_c_expected += c_factor * c2_point;
-        // c3_c_expected += c_factor * c3_point;
-
-        let c_factor = check;
-        m1_expected += m1;
-        m2_expected += m2;
-        m3_expected += m3;
-        m4_expected += m4;
-        m5_expected += m5;
-        t1_sum_expected += t1_p;
-        t2_sum_expected += t2_p;
-        t3_sum_expected += t3_p;
+        let c_factor = blinding_factor * check;
+        m1_expected += blinding_factor * m1;
+        m2_expected += blinding_factor * m2;
+        m3_expected += blinding_factor * m3;
+        m4_expected += blinding_factor * m4;
+        m5_expected += blinding_factor * m5;
+        t1_sum_expected += small_scalar_point_mul(random_scalar, t1_p);
+        t2_sum_expected += small_scalar_point_mul(random_scalar, t2_p);
+        t3_sum_expected += small_scalar_point_mul(random_scalar, t3_p);
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
         c3_c_expected += c_factor * c3_point;
     }
-
-    // let t1_compute_sum_final = m1_expected * value_basepoint
-    //     + m2_expected * blinding_basepoint
-    //     + c1_c_expected;
-    // let t2_compute_sum_final = m3_expected * value_basepoint
-    //     + m4_expected * blinding_basepoint
-    //     + c2_c_expected;
-    // let t3_compute_sum_final = (m1_expected + m3_expected) * value_basepoint
-    //     + m5_expected * blinding_basepoint
-    //     + c3_c_expected;
 
     let t1_compute_sum_final = m1_expected * value_basepoint
         + m2_expected * blinding_basepoint
@@ -428,7 +407,8 @@ pub fn verify_product_relationship_in_batch(
     let mut m5_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
         // 32 bit random scalar
-        let blinding_factor = Scalar::from(get_random_u32());
+        let random_scalar = get_random_u8();
+        let blinding_factor = Scalar::from(random_scalar);
         let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
         let m2 = bytes_to_scalar(proof_list[i].get_m2())?;
         let m3 = bytes_to_scalar(proof_list[i].get_m3())?;
@@ -456,9 +436,9 @@ pub fn verify_product_relationship_in_batch(
         m3_expected += blinding_factor * m3;
         m4_expected += blinding_factor * m4;
         m5_expected += blinding_factor * m5;
-        t1_sum_expected += blinding_factor * t1_p;
-        t2_sum_expected += blinding_factor * t2_p;
-        t3_sum_expected += blinding_factor * t3_p;
+        t1_sum_expected += small_scalar_point_mul(random_scalar, t1_p);
+        t2_sum_expected += small_scalar_point_mul(random_scalar, t2_p);
+        t3_sum_expected += small_scalar_point_mul(random_scalar, t3_p);
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
         c3_c_expected += c_factor * c3_point;
@@ -583,8 +563,9 @@ pub fn verify_equality_relationship_proof_in_batch(
     let mut c2_c_expected: RistrettoPoint = Default::default();
     let mut m1_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
-        // 32 bit random scalar
-        let blinding_factor = Scalar::from(get_random_u32());
+        // 8 bit random scalar
+        let random_scalar = get_random_u8();
+        let blinding_factor = Scalar::from(random_scalar);
         let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
         let t1_p = bytes_to_point(proof_list[i].get_t1())?;
         let t2_p = bytes_to_point(proof_list[i].get_t2())?;
@@ -602,8 +583,8 @@ pub fn verify_equality_relationship_proof_in_batch(
         m1_expected += blinding_factor * m1;
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
-        t1_sum_expected += blinding_factor * t1_p;
-        t2_sum_expected += blinding_factor * t2_p;
+        t1_sum_expected += small_scalar_point_mul(random_scalar, t1_p);
+        t2_sum_expected += small_scalar_point_mul(random_scalar, t2_p);
     }
     let t1_compute_sum_final = m1_expected * basepoint1 + c1_c_expected;
     let t2_compute_sum_final = m1_expected * basepoint2 + c2_c_expected;
@@ -613,6 +594,27 @@ pub fn verify_equality_relationship_proof_in_batch(
         return Ok(true);
     }
     Ok(false)
+}
+
+fn small_scalar_point_mul(scalar: u8, point: RistrettoPoint) -> RistrettoPoint {
+    let mut rbyte = scalar;
+    let mut base_point = point;
+    let mut result_point = RistrettoPoint::default();
+
+    while rbyte != 0 {
+        if rbyte & 1u8 == 1 {
+            result_point = result_point + base_point;
+        }
+        base_point += base_point;
+        rbyte >>= 1;
+    }
+    result_point
+}
+
+pub fn get_random_u8() -> u8 {
+    let mut rng = rand::thread_rng();
+    let blinding: u8 = rng.gen();
+    blinding
 }
 
 #[cfg(test)]
@@ -977,5 +979,17 @@ mod tests {
             )
             .unwrap()
         );
+    }
+
+    #[test]
+    fn test_fast_small_scalar_point() {
+        for i in 0..255u8 {
+            let scalar = i;
+            let point = *BASEPOINT_G1;
+            let point_get = small_scalar_point_mul(scalar, point);
+            let expect_point = Scalar::from(scalar) * point;
+            assert_eq!(point_to_bytes(&point_get), point_to_bytes(&expect_point));
+        }
+
     }
 }
