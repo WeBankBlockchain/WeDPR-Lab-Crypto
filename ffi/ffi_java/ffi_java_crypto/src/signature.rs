@@ -398,8 +398,8 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// Java interface for
-/// 'com.webank.wedpr.crypto.NativeInterface->sm2ComputeE'.
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2ComputeE(
+/// 'com.webank.wedpr.crypto.NativeInterface->sm2ComputeHashE'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2ComputeHashE(
     _env: JNIEnv,
     _class: JClass,
     public_key_jstring: JString,
@@ -412,7 +412,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2ComputeE(
     let msg_hash =
         java_safe_jstring_to_bytes!(_env, result_jobject, msg_hash_jstring);
 
-    let result = match SIGNATURE_SM2.compute_e(&public_key, &msg_hash) {
+    let result = match SIGNATURE_SM2.compute_hash_e(&public_key, &msg_hash) {
         Ok(v) => v,
         Err(_) => {
             return java_set_error_field_and_extract_jobject(

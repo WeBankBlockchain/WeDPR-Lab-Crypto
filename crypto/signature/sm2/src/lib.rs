@@ -112,7 +112,8 @@ impl WedprSm2p256v1 {
         Ok(SM2_CTX.serialize_pubkey(&public_key, false))
     }
 
-    pub fn compute_e<T: ?Sized + AsRef<[u8]>>(
+    /// Computes GM standard e value, which is the hash of message and ID, EC parameters and public key.
+    pub fn compute_hash_e<T: ?Sized + AsRef<[u8]>>(
         &self,
         public_key: &T,
         message: &T,
@@ -166,7 +167,5 @@ mod tests {
             true,
             sm2_sign.verify(&public_key, &msg_hash.to_vec(), &signature_fast)
         );
-
-        // let expect_e = sm2_sign.compute_e(&public_key, &msg_hash.to_vec());
     }
 }
