@@ -6,6 +6,9 @@
 #include <cstdlib>
 #include <new>
 #include <ostream>
+
+extern "C" {
+
 struct CInputBuffer
 {
     const char* data;
@@ -17,4 +20,7 @@ struct COutputBuffer
     char* data;
     uintptr_t len;
 };
+
+}  // extern "C"
+
 #endif

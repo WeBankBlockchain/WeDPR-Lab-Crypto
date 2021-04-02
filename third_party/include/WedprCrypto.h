@@ -1,6 +1,6 @@
 #ifndef _WEDPR_CRYPTO_H_
 #define _WEDPR_CRYPTO_H_
-#include "WeDPRUtilities.h"
+#include "WedprUtilities.h"
 
 extern "C" {
 
