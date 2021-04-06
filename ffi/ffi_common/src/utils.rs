@@ -201,6 +201,7 @@ pub unsafe fn c_write_raw_pointer<T: ?Sized + AsRef<[u8]>>(
         c_output_buffer.len,
     );
     data_slice.copy_from_slice(&rust_bytes.as_ref());
+    c_output_buffer.len = rust_bytes.as_ref().len();
     // TODO: Find a better way other than std::mem::forget.
     std::mem::forget(data_slice);
 }
