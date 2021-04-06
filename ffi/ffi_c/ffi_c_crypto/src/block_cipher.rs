@@ -4,7 +4,7 @@
 
 use wedpr_l_utils::traits::BlockCipher;
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 use crate::config::BLOCK_CIPHER_AES256;
 
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
@@ -25,7 +25,7 @@ use wedpr_ffi_common_hex::utils::{
 
 // AES256 implementation.
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 #[no_mangle]
 /// C interface for 'wedpr_aes256_encrypt'.
 pub extern "C" fn wedpr_aes256_encrypt(
@@ -56,7 +56,7 @@ pub extern "C" fn wedpr_aes256_encrypt(
     c_safe_return!(result)
 }
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 #[no_mangle]
 /// C interface for 'wedpr_aes256_decrypt'.
 pub extern "C" fn wedpr_aes256_decrypt(
@@ -87,7 +87,7 @@ pub extern "C" fn wedpr_aes256_decrypt(
 
 // SM4 implementation.
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_sm4")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
 #[no_mangle]
 /// C interface for 'wedpr_sm4_encrypt'.
 pub extern "C" fn wedpr_sm4_encrypt(
@@ -116,7 +116,7 @@ pub extern "C" fn wedpr_sm4_encrypt(
     c_safe_return!(result)
 }
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_sm4")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
 #[no_mangle]
 /// C interface for 'wedpr_sm4_decrypt'.
 pub extern "C" fn wedpr_sm4_decrypt(

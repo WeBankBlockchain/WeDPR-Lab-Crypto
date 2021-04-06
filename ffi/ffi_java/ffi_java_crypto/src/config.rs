@@ -84,10 +84,10 @@ lazy_static! {
 
 // Block cipher section.
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 use wedpr_l_crypto_block_cipher_aes::WedprBlockCipherAes256;
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 lazy_static! {
     pub static ref BLOCK_CIPHER_AES256: WedprBlockCipherAes256 =
         WedprBlockCipherAes256::default();

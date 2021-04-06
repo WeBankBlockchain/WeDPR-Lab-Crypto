@@ -3,7 +3,7 @@
 //! Block cipher function wrappers.
 
 #![cfg(all(
-    feature = "wedpr_l_crypto_block_cipher_aes",
+    feature = "wedpr_f_crypto_block_cipher_aes",
     feature = "wedpr_f_crypto_block_cipher_sm4"
 ))]
 
@@ -11,7 +11,7 @@ use wedpr_l_utils::traits::BlockCipher;
 
 use crate::get_result_jobject;
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 use crate::config::BLOCK_CIPHER_AES256;
 
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
@@ -31,7 +31,7 @@ use wedpr_ffi_common::utils::{
 
 // AES 256 implementation.
 
-#[cfg(feature = "wedpr_l_crypto_block_cipher_aes")]
+#[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->aes256Encrypt'.
