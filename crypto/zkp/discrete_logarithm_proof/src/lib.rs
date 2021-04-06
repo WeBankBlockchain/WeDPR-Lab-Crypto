@@ -5,13 +5,13 @@
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
+use rand::Rng;
 use wedpr_l_crypto_zkp_utils::{
-    bytes_to_point, bytes_to_scalar, get_random_scalar,
-    hash_to_scalar, point_to_bytes, scalar_to_bytes,
+    bytes_to_point, bytes_to_scalar, get_random_scalar, hash_to_scalar,
+    point_to_bytes, scalar_to_bytes,
 };
 use wedpr_l_protos::generated::zkp::{BalanceProof, EqualityProof};
 use wedpr_l_utils::error::WedprError;
-use rand::Rng;
 
 /// Proves three commitments satisfying a sum relationship, i.e.
 /// the values embedded in them satisfying c1_value + c2_value = c3_value.
@@ -988,8 +988,10 @@ mod tests {
             let point = *BASEPOINT_G1;
             let point_get = small_scalar_point_mul(scalar, point);
             let expect_point = Scalar::from(scalar) * point;
-            assert_eq!(point_to_bytes(&point_get), point_to_bytes(&expect_point));
+            assert_eq!(
+                point_to_bytes(&point_get),
+                point_to_bytes(&expect_point)
+            );
         }
-
     }
 }
