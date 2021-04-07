@@ -4,7 +4,8 @@
 
 #![cfg(all(
     feature = "wedpr_f_signature_secp256k1",
-    feature = "wedpr_f_signature_sm2"
+    feature = "wedpr_f_signature_sm2",
+    feature = "wedpr_f_signature_ed25519"
 ))]
 
 use wedpr_l_utils::traits::Signature;

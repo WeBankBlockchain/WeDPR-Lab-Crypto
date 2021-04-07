@@ -2,7 +2,13 @@
 
 //! Hash function wrappers.
 
-#![cfg(all(feature = "wedpr_f_hash_keccak256", feature = "wedpr_f_hash_sm3"))]
+#![cfg(all(
+    feature = "wedpr_f_hash_keccak256",
+    feature = "wedpr_f_hash_sm3",
+    feature = "wedpr_f_hash_sha3",
+    feature = "wedpr_f_hash_ripemd160",
+    feature = "wedpr_f_hash_blake2b"
+))]
 
 use wedpr_l_utils::traits::Hash;
 

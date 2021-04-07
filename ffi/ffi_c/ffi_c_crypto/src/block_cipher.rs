@@ -2,6 +2,11 @@
 
 //! Block Cipher function wrappers.
 
+#![cfg(all(
+    feature = "wedpr_f_crypto_block_cipher_aes",
+    feature = "wedpr_f_crypto_block_cipher_sm4"
+))]
+
 use wedpr_l_utils::traits::BlockCipher;
 
 #[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
