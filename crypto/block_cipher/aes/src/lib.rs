@@ -102,12 +102,12 @@ mod tests {
         let decrypted_msg = aes256.decrypt(&ciphertext, &key, &iv).unwrap();
         assert_eq!(decrypted_msg, msg);
 
-        let key_empty = vec![0u8; 32];
-        let key_iv = vec![0u8; 16];
-        let ciphertext_empty =
-            aes256.encrypt(&msg.to_vec(), &key_empty, &key_iv).unwrap();
+        let empty_key = vec![0u8; KEY_SIZE];
+        let empty_iv = vec![0u8; BLOCK_SIZE];
+        let empty_ciphertext =
+            aes256.encrypt(&msg.to_vec(), &empty_key, &empty_iv).unwrap();
         let decrypted_msg_empty = aes256
-            .decrypt(&ciphertext_empty, &key_empty, &key_iv)
+            .decrypt(&empty_ciphertext, &empty_key, &empty_iv)
             .unwrap();
         assert_eq!(decrypted_msg_empty, msg);
     }

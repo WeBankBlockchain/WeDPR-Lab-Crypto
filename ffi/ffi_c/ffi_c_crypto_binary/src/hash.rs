@@ -42,7 +42,7 @@ pub unsafe extern "C" fn wedpr_keccak256_hash(
     raw_message: &CInputBuffer,
     output_hash: &mut COutputBuffer,
 ) -> i8 {
-    // c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
 
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released

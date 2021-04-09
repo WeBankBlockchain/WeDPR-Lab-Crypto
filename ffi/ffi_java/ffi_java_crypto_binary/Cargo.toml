@@ -21,7 +21,7 @@ wedpr_f_crypto_block_cipher_aes = [ "wedpr_l_crypto_block_cipher_aes" ]
 wedpr_f_crypto_block_cipher_sm4 = [ "wedpr_l_crypto_block_cipher_sm4" ]
 
 [lib]
-name = "wedpr_ffi_java_crypto_binary"
+name = "ffi_java_crypto_binary"
 crate-type = [ "cdylib", "staticlib" ]
 
 [dependencies]
