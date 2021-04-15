@@ -2,7 +2,7 @@
 
 //! Hash function wrappers.
 
-#![cfg(all(
+#![cfg(any(
     feature = "wedpr_f_hash_keccak256",
     feature = "wedpr_f_hash_sm3",
     feature = "wedpr_f_hash_ripemd160",
