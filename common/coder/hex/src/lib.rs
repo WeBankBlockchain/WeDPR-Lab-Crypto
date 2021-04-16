@@ -34,11 +34,11 @@ mod tests {
     #[test]
     fn test_hex() {
         let hex = WedprHex::default();
-        let str = "5c74d17c6a";
+        let str = "eed91cd0d20db578d8616867edb9678df9787e81da3e92d08a38f23aacdb0003";
         // let str_bytes = "5c74d17c6a".as_bytes();
         // let str_re = String::from_utf8(str_bytes.to_vec());
         let bytes = hex.decode(&str).unwrap();
-        // println!("bytes = {:?}", )
+        // println!("bytes = {:?}", bytes);
         let recovered_str = hex.encode(&bytes);
         assert_eq!(str, recovered_str);
     }

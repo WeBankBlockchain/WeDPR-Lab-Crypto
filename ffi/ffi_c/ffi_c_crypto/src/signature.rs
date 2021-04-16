@@ -2,7 +2,7 @@
 
 //! Signature function wrappers.
 
-#![cfg(amy(
+#![cfg(any(
     feature = "wedpr_f_signature_secp256k1",
     feature = "wedpr_f_signature_sm2",
     feature = "wedpr_f_signature_ed25519"

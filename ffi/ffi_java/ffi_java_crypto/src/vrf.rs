@@ -259,7 +259,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
 #[cfg(feature = "wedpr_f_vrf_curve25519")]
 #[no_mangle]
 /// Java interface for
-/// 'com.webank.wedpr.crypto.NativeInterface->curve25519VrfIsValidPubKey'.
+/// 'com.webank.wedpr.crypto.NativeInterface->curve25519VrfIsValidPublicKey'.
 pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519VrfIsValidPublicKey(
     _env: JNIEnv,
     _class: JClass,
