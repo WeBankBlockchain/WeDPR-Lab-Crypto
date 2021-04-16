@@ -110,7 +110,7 @@ public class NativeInterface {
 
     public static native CryptoResult curve25519VrfProofToHash(String proof);
 
-    public static native CryptoResult curve25519VrfIsValidPubKey(String publicKey);
+    public static native CryptoResult curve25519VrfIsValidPublicKey(String publicKey);
 }
 ```
 
