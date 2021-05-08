@@ -104,8 +104,9 @@ mod tests {
 
         let empty_key = vec![0u8; KEY_SIZE];
         let empty_iv = vec![0u8; BLOCK_SIZE];
-        let empty_ciphertext =
-            aes256.encrypt(&msg.to_vec(), &empty_key, &empty_iv).unwrap();
+        let empty_ciphertext = aes256
+            .encrypt(&msg.to_vec(), &empty_key, &empty_iv)
+            .unwrap();
         let decrypted_msg_empty = aes256
             .decrypt(&empty_ciphertext, &empty_key, &empty_iv)
             .unwrap();
