@@ -26,7 +26,9 @@ members = [
     "ffi/ffi_common",
     "ffi/ffi_java/ffi_java_crypto",
     "ffi/ffi_java/ffi_java_crypto_binary",
+    "ffi/ffi_java/ffi_java_fisco_bcos_sdk",
     "ffi/ffi_macros",
     "protos",
     "third_party/fisco_bcos",
+    "third_party/fisco_bcos_java_sdk",
 ]
