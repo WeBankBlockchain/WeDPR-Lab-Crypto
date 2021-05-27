@@ -18,6 +18,9 @@ message BalanceProof {
     bytes m3 = 6;
     bytes m4 = 7;
     bytes m5 = 8;
+    bytes m6 = 9;
+    bytes check1 = 10;
+    bytes check2 = 11;
 }
 
 // ZKP data to verify the equality relationship among value commitments.

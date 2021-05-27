@@ -13,7 +13,8 @@ extern crate wedpr_ffi_macros;
 
 pub mod vrf;
 
-const RESULT_JAVA_SDK_CLASS_NAME: &str = "com/webank/fisco/bcos/wedpr/sdk/SdkResult";
+const RESULT_JAVA_SDK_CLASS_NAME: &str =
+    "com/webank/fisco/bcos/wedpr/sdk/SdkResult";
 
 use jni::{objects::JObject, JNIEnv};
 use wedpr_ffi_common::utils::java_new_jobject;
