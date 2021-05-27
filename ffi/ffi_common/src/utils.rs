@@ -2,6 +2,8 @@
 
 //! Common utility functions for FFI.
 
+#![cfg(not(tarpaulin_include))]
+
 #[cfg(all(feature = "wedpr_f_base64", feature = "wedpr_f_hex"))]
 compile_error!(
     "Feature wedpr_f_base64 and wedpr_f_hex can not be enabled at same time!"

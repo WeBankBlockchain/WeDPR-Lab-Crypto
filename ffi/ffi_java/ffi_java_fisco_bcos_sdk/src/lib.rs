@@ -4,6 +4,7 @@
 //! targeting Java-compatible architectures (including Android), with fast
 //! binary interfaces.
 
+#![cfg(not(tarpaulin_include))]
 extern crate jni;
 #[allow(unused_imports)]
 #[macro_use]

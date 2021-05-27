@@ -2,6 +2,7 @@
 
 //! Signature function wrappers.
 
+#![cfg(not(tarpaulin_include))]
 #![cfg(any(
     feature = "wedpr_f_signature_secp256k1",
     feature = "wedpr_f_signature_sm2",

@@ -1,5 +1,7 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
+#![cfg(not(tarpaulin_include))]
+
 //! Library of FFI of wedpr_third_party_fisco_bcos_java_sdk wrapper functions,
 //! targeting Java-compatible architectures (including Android), with fast
 //! binary interfaces.

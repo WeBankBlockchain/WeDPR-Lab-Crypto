@@ -4,6 +4,7 @@
 
 // ECIES section.
 
+#![cfg(not(tarpaulin_include))]
 #[cfg(feature = "wedpr_f_ecies_secp256k1")]
 use wedpr_l_crypto_ecies_secp256k1::WedprSecp256k1Ecies;
 

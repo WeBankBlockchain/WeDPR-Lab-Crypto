@@ -1,5 +1,7 @@
 // Field setting section.
 
+#![cfg(not(tarpaulin_include))]
+
 /// Sets a field of bytes type, and returns an error object if failed.
 #[macro_export]
 macro_rules! java_safe_set_byte_array_field {

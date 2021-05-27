@@ -2,6 +2,7 @@
 
 //! Block cipher function wrappers.
 
+#![cfg(not(tarpaulin_include))]
 #![cfg(any(
     feature = "wedpr_f_crypto_block_cipher_aes",
     feature = "wedpr_f_crypto_block_cipher_sm4"
