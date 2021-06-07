@@ -1,0 +1,23 @@
+[package]
+name = "base_ot"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+curve25519-dalek = { version = "1", features = [ "serde" ] }
+wedpr_l_crypto_zkp_utils = { path = "../../zkp/utils" }
+wedpr_l_crypto_hash_sha3 = { version = "1.0.0" }
+lazy_static = "1.4.0"
+wedpr_l_protos = { path = "../../../protos"}
+wedpr_l_utils = "1.1.0"
+sha3 = "0.8.2"
+
+[dev-dependencies]
+criterion = "0.3"
+rand = "0.6.0"
+
+[[bench]]
+name = "base_ot"
+harness = false

@@ -27,7 +27,7 @@ fn generate_proto_for_all() {
         .includes(&["."])
         // List all used proto files here.
         // You can remove any proto files that are not used by your project.
-        .inputs(&["crypto/zkp.proto", "crypto/common.proto"])
+        .inputs(&["crypto/zkp.proto", "crypto/common.proto", "crypto/ot.proto"])
         .customize(Customize {
             ..Default::default()
         })
