@@ -30,6 +30,10 @@ fn create_base_ot_helper(c: &mut Criterion, message_count: u64, str_len: u64) {
         sender_data.get_pair()[sender_data.get_pair().len() / 2].get_id();
     let true_message =
         sender_data.get_pair()[sender_data.get_pair().len() / 2].get_message();
+    // let choose_id =
+    //     sender_data.get_pair()[0].get_id();
+    // let true_message =
+    //     sender_data.get_pair()[0].get_message();
     c.bench_function(&label, move |b| {
         b.iter(|| {
             let (r_secret, r_public) = receiver_init(choose_id);
@@ -56,6 +60,22 @@ fn create_base_ot_10000_10(c: &mut Criterion) {
     create_base_ot_helper(c, 10000, 10);
 }
 
+fn create_base_ot_300_10(c: &mut Criterion) {
+    create_base_ot_helper(c, 300, 10);
+}
+
+fn create_base_ot_3000_10(c: &mut Criterion) {
+    create_base_ot_helper(c, 3000, 10);
+}
+
+fn create_base_ot_30000_10(c: &mut Criterion) {
+    create_base_ot_helper(c, 30000, 10);
+}
+
+fn create_base_ot_300000_10(c: &mut Criterion) {
+    create_base_ot_helper(c, 300000, 10);
+}
+
 criterion_group! {
     name = init_base_ot_test;
     config = Criterion::default().sample_size(10);
@@ -64,6 +84,10 @@ create_base_ot_10_10,
 create_base_ot_100_10,
 create_base_ot_1000_10,
 create_base_ot_10000_10,
+    create_base_ot_300_10,
+    create_base_ot_3000_10,
+    create_base_ot_30000_10,
+    // create_base_ot_300000_10,
 }
 
 criterion_main!(init_base_ot_test);

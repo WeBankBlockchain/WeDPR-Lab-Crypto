@@ -1,7 +1,9 @@
 #[macro_use]
 extern crate lazy_static;
 
-use curve25519_dalek::scalar::Scalar;
+use curve25519_dalek::{
+    ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
+};
 use sha3::Sha3_512;
 use wedpr_l_crypto_hash_sha3::WedprSha3_256;
 use wedpr_l_crypto_zkp_utils::{
@@ -23,9 +25,12 @@ pub fn receiver_init(id: &[u8]) -> (ReceiverSecret, ReceiverPublic) {
     let blinding_a = get_random_scalar();
     let blinding_b = get_random_scalar();
     let c_id = blinding_a * blinding_b;
-    let point_x = blinding_a * *BASEPOINT_G1;
-    let point_y = blinding_b * *BASEPOINT_G1;
-    let point_z = (c_id - id_scalar) * *BASEPOINT_G1;
+    let point_x =
+        RistrettoPoint::multiscalar_mul(&[blinding_a], &[*BASEPOINT_G1]);
+    let point_y =
+        RistrettoPoint::multiscalar_mul(&[blinding_b], &[*BASEPOINT_G1]);
+    let point_z =
+        RistrettoPoint::multiscalar_mul(&[c_id - id_scalar], &[*BASEPOINT_G1]);
     (
         ReceiverSecret {
             scalar_a: scalar_to_bytes(&blinding_a),
@@ -54,13 +59,18 @@ pub fn sender_init(
     for data_pair in data.get_pair() {
         let blinding_r = get_random_scalar();
         let blinding_s = get_random_scalar();
-        let point_w = blinding_s * point_x + blinding_r * *BASEPOINT_G1;
+        let point_w =
+            RistrettoPoint::multiscalar_mul(&[blinding_s, blinding_r], &[
+                point_x,
+                *BASEPOINT_G1,
+            ]);
         let message = data_pair.get_message();
         let id = data_pair.get_id();
         let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
-        let point_key = blinding_s * point_z
-            + blinding_s * id_scalar * *BASEPOINT_G1
-            + blinding_r * point_y;
+        let point_key = RistrettoPoint::multiscalar_mul(
+            &[blinding_s, blinding_s * id_scalar, blinding_r],
+            &[point_z, *BASEPOINT_G1, point_y],
+        );
         let mut bytes_key = point_to_bytes(&point_key);
         while message.len() > bytes_key.len() {
             for key_bytes in bytes_key.clone() {
@@ -96,7 +106,8 @@ pub fn receiver_decrypt(
         // }
         let point_w = bytes_to_point(pair.get_point_w())?;
         let encrypt_message = pair.get_encrypt_message();
-        let point_key = blinding_b * point_w;
+        let point_key =
+            RistrettoPoint::multiscalar_mul(&[blinding_b], &[point_w]);
         let mut bytes_key = point_to_bytes(&point_key);
         while encrypt_message.len() > bytes_key.len() {
             for key_bytes in bytes_key.clone() {
