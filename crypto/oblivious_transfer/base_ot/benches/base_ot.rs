@@ -1,9 +1,60 @@
 #[macro_use]
 extern crate criterion;
-use base_ot::{receiver_decrypt, receiver_init, sender_init};
+use base_ot::{
+    receiver_decrypt, receiver_decrypt_k_out_of_n, receiver_init,
+    receiver_init_k_out_of_n, sender_init, sender_init_k_out_of_n,
+};
 use criterion::Criterion;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
-use wedpr_l_protos::generated::ot::{SenderData, SenderDataPair};
+use wedpr_l_protos::generated::ot::{IdList, SenderData, SenderDataPair};
+
+fn create_base_ot_k_out_of_n_helper(
+    c: &mut Criterion,
+    k_choose_count: u64,
+    n_message_count: u64,
+    str_len: u64,
+) {
+    let label = format!(
+        "create_base_ot_k_out_of_n_helper, k_choose_count = {}, \
+         n_message_count = {}, str_len = {}",
+        k_choose_count, n_message_count, str_len
+    );
+    let mut sender_data = SenderData::default();
+    let mut expect: Vec<Vec<u8>> = vec![];
+    for _ in 0..n_message_count {
+        let random_id: String =
+            thread_rng().sample_iter(&Alphanumeric).take(18).collect();
+        let random_message: String = thread_rng()
+            .sample_iter(&Alphanumeric)
+            .take(str_len as usize)
+            .collect();
+        sender_data.mut_pair().push(SenderDataPair {
+            id: random_id.as_bytes().to_vec(),
+            message: random_message.as_bytes().to_vec(),
+            unknown_fields: Default::default(),
+            cached_size: Default::default(),
+        })
+    }
+    let mut choose_id_list = IdList::default();
+    for i in 0..k_choose_count {
+        choose_id_list
+            .mut_id()
+            .push(sender_data.get_pair()[i as usize].get_id().to_vec());
+        expect.push(sender_data.get_pair()[i as usize].get_message().to_vec())
+    }
+    let use_data = sender_data.clone();
+    c.bench_function(&label, move |b| {
+        b.iter(|| {
+            let (r_secret, r_public) =
+                receiver_init_k_out_of_n(&choose_id_list);
+            let s_public =
+                sender_init_k_out_of_n(&use_data, &r_public).unwrap();
+            let message =
+                receiver_decrypt_k_out_of_n(&r_secret, &s_public).unwrap();
+            assert_eq!(message, expect);
+        })
+    });
+}
 
 fn create_base_ot_helper(c: &mut Criterion, message_count: u64, str_len: u64) {
     let label = format!(
@@ -76,17 +127,42 @@ fn create_base_ot_300000_10(c: &mut Criterion) {
     create_base_ot_helper(c, 300000, 10);
 }
 
+fn create_base_ot_k_out_of_n_1_300_10(c: &mut Criterion) {
+    create_base_ot_k_out_of_n_helper(c, 1, 300, 10);
+}
+
+fn create_base_ot_k_out_of_n_3_300_10(c: &mut Criterion) {
+    create_base_ot_k_out_of_n_helper(c, 3, 300, 10);
+}
+
+fn create_base_ot_k_out_of_n_15_300_10(c: &mut Criterion) {
+    create_base_ot_k_out_of_n_helper(c, 15, 300, 10);
+}
+
+fn create_base_ot_k_out_of_n_30_300_10(c: &mut Criterion) {
+    create_base_ot_k_out_of_n_helper(c, 30, 300, 10);
+}
+
+fn create_base_ot_k_out_of_n_60_300_10(c: &mut Criterion) {
+    create_base_ot_k_out_of_n_helper(c, 60, 300, 10);
+}
+
 criterion_group! {
     name = init_base_ot_test;
     config = Criterion::default().sample_size(10);
 targets =
-create_base_ot_10_10,
-create_base_ot_100_10,
-create_base_ot_1000_10,
-create_base_ot_10000_10,
-    create_base_ot_300_10,
-    create_base_ot_3000_10,
-    create_base_ot_30000_10,
+// create_base_ot_10_10,
+// create_base_ot_100_10,
+// create_base_ot_1000_10,
+// create_base_ot_10000_10,
+//     create_base_ot_300_10,
+//     create_base_ot_3000_10,
+//     create_base_ot_30000_10,
+    create_base_ot_k_out_of_n_1_300_10,
+    create_base_ot_k_out_of_n_3_300_10,
+    create_base_ot_k_out_of_n_15_300_10,
+    create_base_ot_k_out_of_n_30_300_10,
+    create_base_ot_k_out_of_n_60_300_10,
     // create_base_ot_300000_10,
 }
 
