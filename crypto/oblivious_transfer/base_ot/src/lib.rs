@@ -17,6 +17,8 @@ use wedpr_l_protos::generated::ot::{
 use wedpr_l_utils::{error::WedprError, traits::Hash};
 // use rayon::prelude::*;
 
+pub mod one_out_of_two;
+
 lazy_static! {
     pub static ref HASH_SHA3_256: WedprSha3_256 = WedprSha3_256::default();
 }

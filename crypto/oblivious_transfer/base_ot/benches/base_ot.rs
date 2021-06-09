@@ -1,12 +1,51 @@
 #[macro_use]
 extern crate criterion;
 use base_ot::{
+    one_out_of_two::{
+        receiver_decrypt_1_out_of_2, receiver_init_1_out_of_2,
+        sender_init_1_out_of_2, DataOneOutOfTwo,
+    },
     receiver_decrypt, receiver_decrypt_k_out_of_n, receiver_init,
     receiver_init_k_out_of_n, sender_init, sender_init_k_out_of_n,
 };
 use criterion::Criterion;
 use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use wedpr_l_protos::generated::ot::{IdList, SenderData, SenderDataPair};
+
+fn create_base_ot_1_out_of_2_helper(c: &mut Criterion, str_len: u64) {
+    let label =
+        format!("create_base_ot_1_out_of_2_helper, str_len = {}", str_len);
+    let random_message0: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(str_len as usize)
+        .collect();
+    let random_message1: String = thread_rng()
+        .sample_iter(&Alphanumeric)
+        .take(str_len as usize)
+        .collect();
+    let data = DataOneOutOfTwo {
+        data0: random_message0.as_bytes().to_vec(),
+        data1: random_message1.as_bytes().to_vec(),
+    };
+
+    let choice = false;
+    let true_message = random_message0.as_bytes().to_vec();
+
+    c.bench_function(&label, move |b| {
+        b.iter(|| {
+            let (blinding_b, point_x, point_y, point_z) =
+                receiver_init_1_out_of_2(choice);
+            let sender_public =
+                sender_init_1_out_of_2(&data, &point_x, &point_y, &point_z);
+            let decrypt_message = receiver_decrypt_1_out_of_2(
+                choice,
+                &blinding_b,
+                &sender_public,
+            );
+            assert_eq!(decrypt_message, true_message);
+        })
+    });
+}
 
 fn create_base_ot_k_out_of_n_helper(
     c: &mut Criterion,
@@ -147,17 +186,22 @@ fn create_base_ot_k_out_of_n_60_300_10(c: &mut Criterion) {
     create_base_ot_k_out_of_n_helper(c, 60, 300, 10);
 }
 
+fn create_base_ot_1_out_of_2_10(c: &mut Criterion) {
+    create_base_ot_1_out_of_2_helper(c, 10);
+}
+
 criterion_group! {
     name = init_base_ot_test;
     config = Criterion::default().sample_size(10);
 targets =
-// create_base_ot_10_10,
-// create_base_ot_100_10,
-// create_base_ot_1000_10,
-// create_base_ot_10000_10,
-//     create_base_ot_300_10,
-//     create_base_ot_3000_10,
-//     create_base_ot_30000_10,
+    create_base_ot_1_out_of_2_10,
+create_base_ot_10_10,
+create_base_ot_100_10,
+create_base_ot_1000_10,
+create_base_ot_10000_10,
+    create_base_ot_300_10,
+    create_base_ot_3000_10,
+    create_base_ot_30000_10,
     create_base_ot_k_out_of_n_1_300_10,
     create_base_ot_k_out_of_n_3_300_10,
     create_base_ot_k_out_of_n_15_300_10,
