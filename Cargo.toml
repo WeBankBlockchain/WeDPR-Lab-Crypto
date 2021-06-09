@@ -13,6 +13,7 @@ members = [
     "crypto/hash/sha3",
     "crypto/hash/sm3",
     "crypto/oblivious_transfer/base_ot",
+    "crypto/oblivious_transfer/base_ot_mod",
     "crypto/signature/ed25519",
     "crypto/signature/secp256k1",
     "crypto/signature/sm2",

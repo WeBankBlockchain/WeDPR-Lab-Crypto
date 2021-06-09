@@ -19,7 +19,9 @@ extern crate lazy_static;
 mod config;
 use config::HASH;
 use rand::Rng;
-use sha3::Sha3_512;
+use rand_core::OsRng;
+// use sha3::Sha3_512;
+use sha2::Sha512;
 use std::convert::TryInto;
 use wedpr_l_utils::{error::WedprError, traits::Hash};
 
@@ -28,7 +30,7 @@ lazy_static! {
     pub static ref BASEPOINT_G1: RistrettoPoint = RISTRETTO_BASEPOINT_POINT;
     /// Another base point used by various crypto algorithms.
     pub static ref BASEPOINT_G2: RistrettoPoint =
-        RistrettoPoint::hash_from_bytes::<Sha3_512>(
+        RistrettoPoint::hash_from_bytes::<Sha512>(
             RISTRETTO_BASEPOINT_COMPRESSED.as_bytes()
         );
 }
@@ -38,7 +40,9 @@ const RISTRETTO_POINT_SIZE_IN_BYTES: usize = 32;
 
 /// Gets a random Scalar.
 pub fn get_random_scalar() -> Scalar {
-    Scalar::random(&mut rand::thread_rng())
+    let mut csprng = OsRng;
+    Scalar::random(&mut csprng)
+    // Scalar::random(&mut rand::thread_rng())
 }
 
 /// Converts an arbitrary string to Scalar.

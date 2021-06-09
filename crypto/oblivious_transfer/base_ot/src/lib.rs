@@ -4,7 +4,7 @@ extern crate lazy_static;
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
-use sha3::Sha3_512;
+use sha2::Sha512;
 use wedpr_l_crypto_hash_sha3::WedprSha3_256;
 use wedpr_l_crypto_zkp_utils::{
     bytes_to_point, bytes_to_scalar, get_random_scalar, point_to_bytes,
@@ -18,6 +18,7 @@ use wedpr_l_utils::{error::WedprError, traits::Hash};
 // use rayon::prelude::*;
 
 pub mod one_out_of_two;
+// pub mod utils;
 
 lazy_static! {
     pub static ref HASH_SHA3_256: WedprSha3_256 = WedprSha3_256::default();
@@ -37,7 +38,7 @@ pub fn receiver_init_k_out_of_n(
     r_public.set_point_x(point_to_bytes(&point_x));
     r_public.set_point_y(point_to_bytes(&point_y));
     for id in id_list.get_id() {
-        let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
+        let id_scalar = Scalar::hash_from_bytes::<Sha512>(id);
         let point_z = RistrettoPoint::multiscalar_mul(&[c_id - id_scalar], &[
             *BASEPOINT_G1,
         ]);
@@ -73,7 +74,7 @@ pub fn sender_init_k_out_of_n(
             ]);
         let message = data_pair.get_message();
         let id = data_pair.get_id();
-        let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
+        let id_scalar = Scalar::hash_from_bytes::<Sha512>(id);
         pair.set_figure_print(HASH_SHA3_256.hash(message));
         pair.set_point_w(point_to_bytes(&point_w));
         for k_point_z in r_public.get_point_z() {
@@ -137,7 +138,7 @@ pub fn receiver_decrypt_k_out_of_n(
 }
 
 pub fn receiver_init(id: &[u8]) -> (ReceiverSecret, ReceiverPublic) {
-    let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
+    let id_scalar = Scalar::hash_from_bytes::<Sha512>(id);
     let blinding_a = get_random_scalar();
     let blinding_b = get_random_scalar();
     let c_id = blinding_a * blinding_b;
@@ -182,7 +183,7 @@ pub fn sender_init(
             ]);
         let message = data_pair.get_message();
         let id = data_pair.get_id();
-        let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
+        let id_scalar = Scalar::hash_from_bytes::<Sha512>(id);
         let point_key = RistrettoPoint::multiscalar_mul(
             &[blinding_s, blinding_s * id_scalar, blinding_r],
             &[point_z, *BASEPOINT_G1, point_y],

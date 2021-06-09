@@ -6,13 +6,14 @@ edition = "2018"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-curve25519-dalek = { version = "1", features = [ "serde" ] }
+curve25519-dalek = { version = "3", features = [ "serde" ] }
 wedpr_l_crypto_zkp_utils = { path = "../../zkp/utils" }
 wedpr_l_crypto_hash_sha3 = { version = "1.0.0" }
 lazy_static = "1.4.0"
 wedpr_l_protos = { path = "../../../protos"}
 wedpr_l_utils = "1.1.0"
-sha3 = "0.8.2"
+sha2 = "0.9"
+rand = "0.6"
 #rayon = "1.5"
 
 [dev-dependencies]

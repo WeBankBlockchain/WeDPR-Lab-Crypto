@@ -1,0 +1,12 @@
+[package]
+name = "base_ot_mod"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+num-integer = "0.1.44"
+rand = "0.8"
+num-bigint = { version = "0.4", features = ["rand"] }
+lazy_static = "1.4.0"
