@@ -26,6 +26,9 @@ int8_t wedpr_keccak256_hash(const CInputBuffer* raw_message, COutputBuffer* outp
 /// C interface for 'wedpr_sm3_hash'.
 int8_t wedpr_sm3_hash(const CInputBuffer* raw_message, COutputBuffer* output_hash);
 
+/// C interface for 'wedpr_sha256_hash'.
+int8_t wedpr_sha256_hash(const CInputBuffer* raw_message, COutputBuffer* output_hash);
+
 /// C interface for 'wedpr_ripemd160_hash'.
 int8_t wedpr_ripemd160_hash(const CInputBuffer* raw_message, COutputBuffer* output_hash);
 

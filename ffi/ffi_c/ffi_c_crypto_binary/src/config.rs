@@ -58,6 +58,14 @@ lazy_static! {
     pub static ref HASH_SM3: WedprSm3 = WedprSm3::default();
 }
 
+#[cfg(feature = "wedpr_f_hash_sha2")]
+use wedpr_l_crypto_hash_sha2::WedprSha2_256;
+
+#[cfg(feature = "wedpr_f_hash_sha2")]
+lazy_static! {
+    pub static ref HASH_SHA2_256: WedprSha2_256 = WedprSha2_256::default();
+}
+
 #[cfg(feature = "wedpr_f_hash_sha3")]
 use wedpr_l_crypto_hash_sha3::WedprSha3_256;
 
