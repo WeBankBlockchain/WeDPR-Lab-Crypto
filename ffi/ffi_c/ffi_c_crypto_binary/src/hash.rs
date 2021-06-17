@@ -6,6 +6,7 @@
     feature = "wedpr_f_hash_keccak256",
     feature = "wedpr_f_hash_sm3",
     feature = "wedpr_f_hash_sha3",
+    feature = "wedpr_f_hash_sha256",
     feature = "wedpr_f_hash_ripemd160",
     feature = "wedpr_f_hash_blake2b"
 ))]
@@ -17,6 +18,9 @@ use crate::config::HASH_KECCAK256;
 
 #[cfg(feature = "wedpr_f_hash_sm3")]
 use crate::config::HASH_SM3;
+
+#[cfg(feature = "wedpr_f_hash_sha2")]
+use crate::config::HASH_SHA2_256;
 
 #[cfg(feature = "wedpr_f_hash_sha3")]
 use crate::config::HASH_SHA3_256;
@@ -74,7 +78,28 @@ pub unsafe extern "C" fn wedpr_sm3_hash(
     SUCCESS
 }
 
+// SHA-256 implementation.
+
+#[cfg(feature = "wedpr_f_hash_sha2")]
+#[no_mangle]
+/// C interface for 'wedpr_sha256_hash'.
+pub unsafe extern "C" fn wedpr_sha256_hash(
+    raw_message: &CInputBuffer,
+    output_hash: &mut COutputBuffer,
+) -> i8 {
+    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    // Note: Since encode_message is an object passed in by C/C++, it should
+    // not be released
+    let message = c_read_raw_pointer(raw_message);
+
+    let hash_data = HASH_SHA2_256.hash(&message);
+    std::mem::forget(message);
+    c_write_raw_pointer(&hash_data, output_hash);
+    SUCCESS
+}
+
 // RIPEMD160 implementation.
+const RIPEMD160_DATA_SIZE: usize = 20;
 
 #[cfg(feature = "wedpr_f_hash_ripemd160")]
 #[no_mangle]
@@ -83,7 +108,7 @@ pub unsafe extern "C" fn wedpr_ripemd160_hash(
     raw_message: &CInputBuffer,
     output_hash: &mut COutputBuffer,
 ) -> i8 {
-    c_check_exact_buffer_size!(output_hash, HASH_256_DATA_SIZE);
+    c_check_exact_buffer_size!(output_hash, RIPEMD160_DATA_SIZE);
     // Note: Since encode_message is an object passed in by C/C++, it should
     // not be released
     let message = c_read_raw_pointer(raw_message);
