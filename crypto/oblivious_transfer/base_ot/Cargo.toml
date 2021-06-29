@@ -1,5 +1,5 @@
 [package]
-name = "base_ot"
+name = "wedpr_l_crypto_ot_base_ot"
 version = "0.1.0"
 edition = "2018"
 
@@ -14,6 +14,7 @@ wedpr_l_protos = { path = "../../../protos"}
 wedpr_l_utils = "1.1.0"
 sha2 = "0.9"
 rand = "0.6"
+rand_core = { version = "0.5", features = ["getrandom"]}
 #rayon = "1.5"
 
 [dev-dependencies]

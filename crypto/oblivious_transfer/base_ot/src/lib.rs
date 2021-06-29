@@ -18,6 +18,7 @@ use wedpr_l_utils::{error::WedprError, traits::Hash};
 // use rayon::prelude::*;
 
 pub mod one_out_of_two;
+// pub mod one_out_of_n;
 // pub mod utils;
 
 lazy_static! {
