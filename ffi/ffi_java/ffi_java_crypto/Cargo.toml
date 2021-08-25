@@ -35,7 +35,7 @@ wedpr_ffi_macros = "1.1.0"
 wedpr_l_crypto_block_cipher_aes = { version = "1.0.0", optional = true }
 wedpr_l_crypto_block_cipher_sm4 = { version = "1.0.0", optional = true }
 
-wedpr_l_crypto_ecies_secp256k1 = { version = "1.1.0", optional = true }
+wedpr_l_crypto_ecies_secp256k1 = { path = "../../../crypto/ecies/secp256k1", optional = true }
 wedpr_l_crypto_hash_blake2b = { version = "1.0.0", optional = true }
 wedpr_l_crypto_hash_keccak256 = { version = "1.1.0", optional = true }
 wedpr_l_crypto_hash_ripemd160 = { version = "1.0.0", optional = true }
