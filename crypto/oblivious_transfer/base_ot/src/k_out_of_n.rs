@@ -1,7 +1,9 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 //! K/N Oblivious transfer (OT) functions.
-
+/// Sender has n data records, the format of each record is (id, message),
+/// K/N Oblivious transfer (OT) can help receiver to get k messages using k
+/// ids one time but does't disclose receiver's k ids, and help sender keep the other n-1 messages privacy.
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
@@ -21,6 +23,11 @@ lazy_static! {
     pub static ref HASH_SHA3_256: WedprSha3_256 = WedprSha3_256::default();
 }
 
+// Generates a request based on receiver's id list and private key, where the
+// id list contains k messages' id receiver want to inquery, the
+// private key used to get the message inquired is kept secretly by the
+// receiver, and the request contains three public keys being sent to sender to
+// encrypt the his messages.
 pub fn receiver_init_k_out_of_n(
     id_list: &IdList,
 ) -> (ReceiverSecret, ReceiverPublicKOutOfN) {
@@ -52,6 +59,15 @@ pub fn receiver_init_k_out_of_n(
     )
 }
 
+// Computes sender's public responce(n pairs data for n messages), where each
+// pair contains a symmetric ciphertext, a asymmetric ciphertext and a hash for
+// each message(n messages in total).
+// - The symmetric ciphertext is computed by encrypting the message using the symmetric
+// key randomly generated for this message.
+// - The asymmetric ciphertext is computed by encrypting the symmetric
+// key using three public keys from receiver.
+// - The hash is hash of the symmetric key, in order to help the receiver identify
+// whether a certain message is the message he inquired.
 pub fn sender_init_k_out_of_n(
     data: &SenderData,
     r_public: &ReceiverPublicKOutOfN,
@@ -98,6 +114,17 @@ pub fn sender_init_k_out_of_n(
     Ok(sender_public)
 }
 
+// Recovers k messages receiver inquired, specifically for each pair data from
+// sender, receiver
+// step1. uses receiver's private key to decrypt the asymmetric
+// ciphertext to obtain the symmetric key.
+// step2.
+// calculates the hash of the symmetric key and compare it with the received
+// hash. If it matches, specify that the corresponding symmetric ciphertext is
+// the ciphertext of message inquired, otherwise, perform the calculation of the
+// next pair data.
+// step3. uses the symmetric key in step1 to decrypt the
+// symmetric ciphertext identified in step2 to obtain the message inquired.
 pub fn receiver_decrypt_k_out_of_n(
     secret: &ReceiverSecret,
     sender_public: &SenderPublic,
@@ -270,86 +297,5 @@ mod tests {
         expect.push("wedpr test2".as_bytes().to_vec());
         expect.push("wedpr test3".as_bytes().to_vec());
         assert_eq!(message, expect);
-    }
-
-    #[test]
-    fn test_base_ot() {
-        let choose_id = "10086".as_bytes();
-        let mut sender_data = SenderData::default();
-        for (id, message) in vec![
-            ("10000".as_bytes(), "wedpr test1".as_bytes()),
-            ("10086".as_bytes(), "wedpr test2".as_bytes()),
-            ("10010".as_bytes(), "wedpr test3".as_bytes()),
-        ] {
-            sender_data.mut_pair().push(SenderDataPair {
-                id: id.to_vec(),
-                message: message.to_vec(),
-                unknown_fields: Default::default(),
-                cached_size: Default::default(),
-            })
-        }
-        let (r_secret, r_public) = receiver_init(choose_id);
-        let s_public = sender_init(&sender_data, &r_public).unwrap();
-        let message = receiver_decrypt(&r_secret, &s_public).unwrap();
-        assert_eq!(message, "wedpr test2".as_bytes());
-    }
-
-    #[test]
-    fn test_base_ot_long() {
-        let choose_id = "10086".as_bytes();
-        let mut sender_data = SenderData::default();
-        for (id, message) in vec![
-            (
-                "10000".as_bytes(),
-                "1-WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，\
-                 进一步提升系统安全性的透明度，提供更透明、\
-                 更可信的隐私保护效果。\
-                 WeDPR-Lab就是这一系列开源的核心算法组件的集合"
-                    .as_bytes(),
-            ),
-            (
-                "10086".as_bytes(),
-                "2-WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，\
-                 进一步提升系统安全性的透明度，提供更透明、\
-                 更可信的隐私保护效果。\
-                 WeDPR-Lab就是这一系列开源的核心算法组件的集合"
-                    .as_bytes(),
-            ),
-            (
-                "10010".as_bytes(),
-                "3-WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，\
-                 进一步提升系统安全性的透明度，提供更透明、\
-                 更可信的隐私保护效果。\
-                 WeDPR-Lab就是这一系列开源的核心算法组件的集合"
-                    .as_bytes(),
-            ),
-        ] {
-            sender_data.mut_pair().push(SenderDataPair {
-                id: id.to_vec(),
-                message: message.to_vec(),
-                unknown_fields: Default::default(),
-                cached_size: Default::default(),
-            })
-        }
-        let (r_secret, r_public) = receiver_init(choose_id);
-        let s_public = sender_init(&sender_data, &r_public).unwrap();
-        let message = receiver_decrypt(&r_secret, &s_public).unwrap();
-        // receiver_decrypt(&r_secret, choose_id, &s_public).unwrap();
-        let message_str = String::from_utf8(message.clone()).unwrap();
-        // println!("message = {}", message_str);
-        assert_eq!(
-            message_str,
-            "2-WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，\
-             进一步提升系统安全性的透明度，提供更透明、更可信的隐私保护效果。\
-             WeDPR-Lab就是这一系列开源的核心算法组件的集合"
-                .to_string()
-        );
-        assert_eq!(
-            message,
-            "2-WeDPR全面拥抱开放，将陆续开源一系列核心算法组件，\
-             进一步提升系统安全性的透明度，提供更透明、更可信的隐私保护效果。\
-             WeDPR-Lab就是这一系列开源的核心算法组件的集合"
-                .as_bytes()
-        );
     }
 }

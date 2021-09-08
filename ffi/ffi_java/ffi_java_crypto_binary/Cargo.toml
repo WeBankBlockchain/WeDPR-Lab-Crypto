@@ -45,6 +45,6 @@ wedpr_l_crypto_vrf_curve25519 = { path = "../../../crypto/vrf/curve25519", optio
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.1.0"
 
-[target.'cfg(target_os = "android")'.dependencies]
-jni = { version = "0.13.1", default-features = false }
-openssl-sys = { version = "0.9.55", features = [ "vendored" ] }
+#[target.'cfg(target_os = "android")'.dependencies]
+#jni = { version = "0.13.1", default-features = false }
+#openssl-sys = { version = "0.9.55", features = [ "vendored" ] }

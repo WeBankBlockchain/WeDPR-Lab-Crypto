@@ -6,4 +6,5 @@
 extern crate lazy_static;
 
 pub mod k_out_of_n;
+pub mod one_out_of_n;
 pub mod one_out_of_two;

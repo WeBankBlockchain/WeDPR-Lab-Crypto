@@ -44,9 +44,7 @@ impl ReceiverSecret {
         ::std::default::Default::default()
     }
 
-    // bytes scalar_a = 1;
-
-
+    // Bytes scalar_a = 1;
     pub fn get_scalar_a(&self) -> &[u8] {
         &self.scalar_a
     }
@@ -70,7 +68,7 @@ impl ReceiverSecret {
         ::std::mem::replace(&mut self.scalar_a, ::std::vec::Vec::new())
     }
 
-    // bytes scalar_b = 2;
+    // Bytes scalar_b = 2;
 
 
     pub fn get_scalar_b(&self) -> &[u8] {
