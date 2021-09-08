@@ -10,6 +10,7 @@ members = [
     "crypto/hash/blake2b",
     "crypto/hash/keccak256",
     "crypto/hash/ripemd160",
+    "crypto/hash/sha2",
     "crypto/hash/sha3",
     "crypto/hash/sm3",
     "crypto/oblivious_transfer/base_ot",
