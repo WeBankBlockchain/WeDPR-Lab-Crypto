@@ -1,7 +1,7 @@
 #[macro_use]
 extern crate criterion;
 use base_ot::{
-    1_out_of_2::{
+    one_out_of_two::{
         receiver_decrypt_1_out_of_2, receiver_init_1_out_of_2,
         sender_init_1_out_of_2, DataOneOutOfTwo,
     },

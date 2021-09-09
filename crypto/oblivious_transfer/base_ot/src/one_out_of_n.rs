@@ -2,8 +2,9 @@
 
 //! 1/N Oblivious transfer (OT) functions.
 /// Sender has n data records, the format of each record is (id, message),
-/// K/N Oblivious transfer (OT) can help receiver to get one message using a
-/// id but does't disclose receiver's id and help sender keep the other n-1 messages privacy.
+/// K/N Oblivious transfer (OT) can help receiver to get one message using
+/// a id but does't disclose receiver's id and help sender keep the other
+/// n-1 messages privacy.
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
@@ -13,8 +14,8 @@ use wedpr_l_crypto_zkp_utils::{
     bytes_to_point, bytes_to_scalar, get_random_scalar, point_to_bytes,
     scalar_to_bytes, BASEPOINT_G1,
 };
-use wedpr_l_protos::generated::ot::{ReceiverPublic, ReceiverSecret, SenderData,
-    SenderPublic, SenderPublicPair,
+use wedpr_l_protos::generated::ot::{
+    ReceiverPublic, ReceiverSecret, SenderData, SenderPublic, SenderPublicPair,
 };
 use wedpr_l_utils::{error::WedprError, traits::Hash};
 
@@ -22,10 +23,10 @@ lazy_static! {
     pub static ref HASH_SHA3_256: WedprSha3_256 = WedprSha3_256::default();
 }
 
-// Generates the private key and three public keys based on the id receiver inquired, where the
-// private key used to get the message inquired is kept secretly by the
-// receiver, the public key will be sent to sender to encrypt the his
-// messages.
+// Generates the private key and three public keys based on the id receiver
+// inquired, where the private key used to get the message inquired is kept
+// secretly by the receiver, the public key will be sent to sender to encrypt
+// the his messages.
 pub fn receiver_init(id: &[u8]) -> (ReceiverSecret, ReceiverPublic) {
     let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
     let blinding_a = get_random_scalar();
@@ -57,11 +58,13 @@ pub fn receiver_init(id: &[u8]) -> (ReceiverSecret, ReceiverPublic) {
 // Computes sender's public responce(n pairs data for n messages), where each
 // pair contains a symmetric ciphertext, a asymmetric ciphertext and a hash for
 // each message(n messages in total).
-// - The symmetric ciphertext is computed by encrypting the message using the symmetric
+// - The symmetric ciphertext is computed by encrypting the message using the
+//   symmetric
 // key randomly generated for this message.
 // - The asymmetric ciphertext is computed by encrypting the symmetric
 // key using three public keys from receiver.
-// - The hash is hash of the symmetric key, in order to help the receiver identify
+// - The hash is hash of the symmetric key, in order to help the receiver
+//   identify
 // whether a certain message is the message he inquired.
 pub fn sender_init(
     data: &SenderData,
@@ -112,10 +115,10 @@ pub fn sender_init(
 // sender, receiver
 // step1. uses receiver's private key to decrypt the asymmetric
 // ciphertext to obtain the symmetric key.
-// step2. calculates the hash of the symmetric key and compare it with the received
-// hash. If it matches, specify that the corresponding symmetric ciphertext is
-// the ciphertext of message inquired, otherwise, perform the calculation of the
-// next pair data.
+// step2. calculates the hash of the symmetric key and compare it with the
+// received hash. If it matches, specify that the corresponding symmetric
+// ciphertext is the ciphertext of message inquired, otherwise, perform the
+// calculation of the next pair data.
 // step3. uses the symmetric key in step1 to decrypt the
 // symmetric ciphertext identified in step2 to obtain the message inquired.
 pub fn receiver_decrypt(

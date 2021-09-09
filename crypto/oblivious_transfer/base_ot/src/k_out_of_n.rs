@@ -3,7 +3,8 @@
 //! K/N Oblivious transfer (OT) functions.
 /// Sender has n data records, the format of each record is (id, message),
 /// K/N Oblivious transfer (OT) can help receiver to get k messages using k
-/// ids one time but does't disclose receiver's k ids, and help sender keep the other n-1 messages privacy.
+/// ids one time but does't disclose receiver's k ids, and help sender keep
+/// the other n-1 messages privacy.
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
@@ -62,11 +63,13 @@ pub fn receiver_init_k_out_of_n(
 // Computes sender's public responce(n pairs data for n messages), where each
 // pair contains a symmetric ciphertext, a asymmetric ciphertext and a hash for
 // each message(n messages in total).
-// - The symmetric ciphertext is computed by encrypting the message using the symmetric
+// - The symmetric ciphertext is computed by encrypting the message using the
+//   symmetric
 // key randomly generated for this message.
 // - The asymmetric ciphertext is computed by encrypting the symmetric
 // key using three public keys from receiver.
-// - The hash is hash of the symmetric key, in order to help the receiver identify
+// - The hash is hash of the symmetric key, in order to help the receiver
+//   identify
 // whether a certain message is the message he inquired.
 pub fn sender_init_k_out_of_n(
     data: &SenderData,

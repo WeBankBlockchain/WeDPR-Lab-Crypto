@@ -16,4 +16,4 @@ crate-type = [ "cdylib", "staticlib" ]
 jni = "0.13.0"
 wedpr_ffi_common = { version = "1.1.0" }
 wedpr_ffi_macros = "1.1.0"
-wedpr_third_party_fisco_bcos_java_sdk = { path = "../../../third_party/fisco_bcos_java_sdk"}
+wedpr_third_party_fisco_bcos_java_sdk = { path = "../../../third_party/fisco_bcos_java_sdk" }
