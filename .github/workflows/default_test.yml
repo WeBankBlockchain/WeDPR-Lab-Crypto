@@ -13,8 +13,8 @@ jobs:
       - uses: actions/checkout@v1
       - name: Nightly default
         run: rustup default nightly
-      - name: Generate proto
-        run: cd protos && cargo run && cd ../
+#      - name: Generate proto
+#        run: cd protos && cargo run && cd ../
       - name: Build
         run: cargo build --verbose
       - name: Run tests
