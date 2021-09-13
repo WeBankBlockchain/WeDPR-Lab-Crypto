@@ -7,49 +7,59 @@ option java_package = "com.webank.wedpr.crypto.proto";
 option java_multiple_files = true;
 
 // ot key pair containing a public key and a private key.
+
+// Private key of receiver.
 message ReceiverSecret {
     bytes scalar_a = 1;
     bytes scalar_b = 2;
 }
 
+// Public key of receiver for 1/n ot.
 message ReceiverPublic {
     bytes point_x = 1;
     bytes point_y = 2;
     bytes point_z = 3;
 }
 
+// Request of receiver for k/n ot.
 message ReceiverPublicKOutOfN {
     bytes point_x = 1;
     bytes point_y = 2;
     repeated bytes point_z = 3;
 }
 
+// Record of sender's messages with one out of n OT.
 message SenderPublicPair {
     bytes figure_print = 1;
     bytes point_w = 2;
     bytes encrypt_message = 3;
 }
 
+// Record of sender's messages with k out of n OT.
 message SenderPublicPairKOutOfN {
     bytes figure_print = 1;
     bytes point_w = 2;
     repeated bytes encrypt_message = 3;
 }
 
+// Ciphertext of sender's each message.
 message SenderPublic {
     repeated SenderPublicPair pair = 1;
     repeated SenderPublicPairKOutOfN pairKN = 2;
 }
 
+// Record of sender's message.
 message SenderDataPair {
     bytes id = 1;
     bytes message = 2;
 }
 
+// Record of sender's each message.
 message SenderData {
     repeated SenderDataPair pair = 1;
 }
 
+// List of ids to be inqueried.
 message IdList {
     repeated bytes id = 1;
 }

@@ -1,15 +1,18 @@
 #[macro_use]
 extern crate criterion;
-use base_ot::{
+use criterion::Criterion;
+use rand::{distributions::Alphanumeric, thread_rng, Rng};
+use wedpr_l_crypto_ot_base_ot::{
+    k_out_of_n::{
+        receiver_decrypt_k_out_of_n, receiver_init_k_out_of_n,
+        sender_init_k_out_of_n,
+    },
+    one_out_of_n::{receiver_decrypt, receiver_init, sender_init},
     one_out_of_two::{
         receiver_decrypt_1_out_of_2, receiver_init_1_out_of_2,
         sender_init_1_out_of_2, DataOneOutOfTwo,
     },
-    receiver_decrypt, receiver_decrypt_k_out_of_n, receiver_init,
-    receiver_init_k_out_of_n, sender_init, sender_init_k_out_of_n,
 };
-use criterion::Criterion;
-use rand::{distributions::Alphanumeric, thread_rng, Rng};
 use wedpr_l_protos::generated::ot::{IdList, SenderData, SenderDataPair};
 
 fn create_base_ot_1_out_of_2_helper(c: &mut Criterion, str_len: u64) {
@@ -162,10 +165,6 @@ fn create_base_ot_30000_10(c: &mut Criterion) {
     create_base_ot_helper(c, 30000, 10);
 }
 
-fn create_base_ot_300000_10(c: &mut Criterion) {
-    create_base_ot_helper(c, 300000, 10);
-}
-
 fn create_base_ot_k_out_of_n_1_300_10(c: &mut Criterion) {
     create_base_ot_k_out_of_n_helper(c, 1, 300, 10);
 }
@@ -207,7 +206,6 @@ create_base_ot_10000_10,
     create_base_ot_k_out_of_n_15_300_10,
     create_base_ot_k_out_of_n_30_300_10,
     create_base_ot_k_out_of_n_60_300_10,
-    // create_base_ot_300000_10,
 }
 
 criterion_main!(init_base_ot_test);

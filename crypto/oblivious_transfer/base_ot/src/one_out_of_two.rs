@@ -1,7 +1,10 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 //! 1/2 Oblivious transfer (OT) functions.
-
+/// Sender has two data records, the format of record is (index, message),
+/// index = 0 or 1, 1/2 Oblivious transfer (OT) can help receiver to get
+/// the messages he want to query but does't disclose receiver's choice and
+/// sender's another message.
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
@@ -27,6 +30,12 @@ pub struct EncryptOneOutOfTwo {
     pub encrypt1: EncryptPairOneOutOfTwo,
 }
 
+// Generates a query based on receiver's choice, where receiver's
+// choice is 0 or 1, separately means the index of sender's two messages.
+// Specificly, the query contains a private key and three public keys, the
+// private key used to get the message inquired is kept secretly by the
+// receiver, the public key will be sent to sender to encrypt the his two
+// messages.
 pub fn receiver_init_1_out_of_2(
     choice: bool,
 ) -> (Scalar, RistrettoPoint, RistrettoPoint, RistrettoPoint) {
@@ -48,6 +57,9 @@ pub fn receiver_init_1_out_of_2(
     (blinding_b, point_x, point_y, point_z)
 }
 
+// Computes two ciphertexts by using three public keys from receiver to
+// encrypt his two messages, where the ciphertexts will be sent to receiver to
+// decrypt the message he inquired.
 pub fn sender_init_1_out_of_2(
     data: &DataOneOutOfTwo,
     point_x: &RistrettoPoint,
@@ -107,6 +119,12 @@ pub fn sender_init_1_out_of_2(
     }
 }
 
+// Decrypts the two ciphertexts from sender to get message he inquired.
+// Since the public key is calculated using the receiver's choice, and the
+// private key has a binding relationship with the public key, the receiver can
+// use the private key to decrypt two ciphertexts respectively to get the
+// message he chose. For the ciphertext of another message, the receiver can
+// only get a string of random numbers after decryption.
 pub fn receiver_decrypt_1_out_of_2(
     choice: bool,
     blinding_b: &Scalar,
