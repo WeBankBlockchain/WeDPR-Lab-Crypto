@@ -16,8 +16,6 @@ jobs:
 #      - name: Generate proto
 #        run: cd protos && cargo run && cd ../
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --all --all-targets --verbose
       - name: Run tests
         run: cargo test --verbose
-      - name: Run benches
-        run: cargo bench --verbose

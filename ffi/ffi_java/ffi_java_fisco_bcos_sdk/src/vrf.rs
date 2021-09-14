@@ -21,7 +21,7 @@ use wedpr_third_party_fisco_bcos_java_sdk;
 
 #[no_mangle]
 /// Java interface for
-/// 'xxx.NativeInterface->curve25519VrfProveUtf8'.
+/// 'com.webank.fisco.bcos.wedpr.sdk.NativeInterface->curve25519VrfProveUtf8'.
 pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curve25519VrfProveUtf8(
     _env: JNIEnv,
     _class: JClass,
