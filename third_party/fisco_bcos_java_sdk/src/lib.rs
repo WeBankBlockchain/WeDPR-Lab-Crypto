@@ -163,7 +163,6 @@ mod tests {
 
         let encode = proof.encode();
         println!("encode = {}", encode);
-        // let decode = vrf_proof::decode(&encode).unwrap();
         let result = curve25519_vrf_verify(&y, alpha, &proof);
         println!("result = {}", result);
     }

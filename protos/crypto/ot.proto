@@ -1,4 +1,4 @@
-// Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
+// Copyright 2021 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 syntax = "proto3";
 
@@ -6,60 +6,42 @@ package com.webank.wedpr.crypto.proto;
 option java_package = "com.webank.wedpr.crypto.proto";
 option java_multiple_files = true;
 
-// ot key pair containing a public key and a private key.
-
-// Private key of receiver.
-message ReceiverSecret {
-    bytes scalar_a = 1;
+// Receiver's secret to decrypt the chosen messages during k-out-of-n OT.
+message ReceiverSecretKOutOfN {
     bytes scalar_b = 2;
 }
 
-// Public key of receiver for 1/n ot.
-message ReceiverPublic {
-    bytes point_x = 1;
-    bytes point_y = 2;
-    bytes point_z = 3;
-}
-
-// Request of receiver for k/n ot.
-message ReceiverPublicKOutOfN {
+// Receiver's commitment for the chosen messages during k-out-of-n OT.
+message ReceiverCommitmentKOutOfN {
     bytes point_x = 1;
     bytes point_y = 2;
     repeated bytes point_z = 3;
 }
 
-// Record of sender's messages with one out of n OT.
-message SenderPublicPair {
-    bytes figure_print = 1;
-    bytes point_w = 2;
-    bytes encrypt_message = 3;
+// Sender's ciphertext item for a single encrypted message of k-out-of-n OT.
+message OtCiphertextItemKOutOfN {
+    bytes fingerprint = 1;
+    bytes key_basepoint = 2;
+    repeated bytes encrypted_message = 3;
 }
 
-// Record of sender's messages with k out of n OT.
-message SenderPublicPairKOutOfN {
-    bytes figure_print = 1;
-    bytes point_w = 2;
-    repeated bytes encrypt_message = 3;
+// Sender's ciphertext collection of k-out-of-n OT.
+message OtCiphertextsKOutOfN {
+    repeated OtCiphertextItemKOutOfN ciphertext = 1;
 }
 
-// Ciphertext of sender's each message.
-message SenderPublic {
-    repeated SenderPublicPair pair = 1;
-    repeated SenderPublicPairKOutOfN pairKN = 2;
-}
-
-// Record of sender's message.
-message SenderDataPair {
+// Pair of id and message bytes.
+message BytesToBytesPair {
     bytes id = 1;
     bytes message = 2;
 }
 
-// Record of sender's each message.
-message SenderData {
-    repeated SenderDataPair pair = 1;
+// Dict of id and message bytes.
+message DataDict {
+    repeated BytesToBytesPair pair = 1;
 }
 
-// List of ids to be inqueried.
+// List of ids.
 message IdList {
     repeated bytes id = 1;
 }

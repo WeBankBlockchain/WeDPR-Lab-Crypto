@@ -5,6 +5,5 @@
 #[macro_use]
 extern crate lazy_static;
 
-pub mod k_out_of_n;
-pub mod one_out_of_n;
-pub mod one_out_of_two;
+pub mod ot_kv;
+pub mod ot_message;
