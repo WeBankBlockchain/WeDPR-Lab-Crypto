@@ -1,5 +1,7 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
+#![cfg(not(tarpaulin_include))]
+
 //! Library of FFI of wedpr_third_party_fisco_bcos_java_sdk wrapper functions,
 //! targeting Java-compatible architectures (including Android), with fast
 //! binary interfaces.
@@ -10,14 +12,16 @@ use jni::{
     sys::jobject,
     JNIEnv,
 };
-use wedpr_ffi_common::utils::{java_set_error_field_and_extract_jobject, java_jstring_to_string};
+use wedpr_ffi_common::utils::{
+    java_jstring_to_string, java_set_error_field_and_extract_jobject,
+};
 use wedpr_third_party_fisco_bcos_java_sdk;
 
 // Curve25519 implementation.
 
 #[no_mangle]
 /// Java interface for
-/// 'xxx.NativeInterface->curve25519VrfProveUtf8'.
+/// 'com.webank.fisco.bcos.wedpr.sdk.NativeInterface->curve25519VrfProveUtf8'.
 pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curve25519VrfProveUtf8(
     _env: JNIEnv,
     _class: JClass,
@@ -120,7 +124,8 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
 
 #[no_mangle]
 /// Java interface for
-/// 'com.webank.fisco.bcos.wedpr.sdk.NativeInterface->curve25519VrfDerivePublicKey'.
+/// 'com.webank.fisco.bcos.wedpr.sdk.
+/// NativeInterface->curve25519VrfDerivePublicKey'.
 pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curve25519VrfDerivePublicKey(
     _env: JNIEnv,
     _class: JClass,
@@ -194,7 +199,8 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
 
 #[no_mangle]
 /// Java interface for
-/// 'com.webank.fisco.bcos.wedpr.sdk.NativeInterface->curve25519VrfIsValidPublicKey'.
+/// 'com.webank.fisco.bcos.wedpr.sdk.
+/// NativeInterface->curve25519VrfIsValidPublicKey'.
 pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curve25519VrfIsValidPublicKey(
     _env: JNIEnv,
     _class: JClass,

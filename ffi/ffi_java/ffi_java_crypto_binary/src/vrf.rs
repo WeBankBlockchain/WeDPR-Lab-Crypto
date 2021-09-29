@@ -1,5 +1,7 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
+#![cfg(not(tarpaulin_include))]
+
 //! VRF function wrappers.
 
 #![cfg(feature = "wedpr_f_vrf_curve25519")]

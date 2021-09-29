@@ -1,15 +1,18 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 //! FISCO BCOS Java Sdk specific functions.
+#![allow(non_camel_case_types)]
 
 use curve25519_dalek::{ristretto::RistrettoPoint, scalar::Scalar};
 use rand::thread_rng;
 use sha3::Sha3_512;
+use wedpr_l_common_coder_hex::WedprHex;
 use wedpr_l_crypto_hash_keccak256::{self, WedprKeccak256};
 use wedpr_l_crypto_zkp_utils::BASEPOINT_G1;
-use wedpr_l_utils::{error::WedprError, traits::Hash};
-use wedpr_l_common_coder_hex::WedprHex;
-use wedpr_l_utils::traits::Coder;
+use wedpr_l_utils::{
+    error::WedprError,
+    traits::{Coder, Hash},
+};
 
 mod tools;
 
@@ -160,7 +163,6 @@ mod tests {
 
         let encode = proof.encode();
         println!("encode = {}", encode);
-        let decode = vrf_proof::decode(&encode).unwrap();
         let result = curve25519_vrf_verify(&y, alpha, &proof);
         println!("result = {}", result);
     }

@@ -1,10 +1,13 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
+#![cfg(not(tarpaulin_include))]
+
 //! Library of shared utilities for FFI targeting C/C++
 //! compatible architectures (including iOS).
 
 /// Patch code to fix the missing 'backtrace_*' related functions errors during
 /// cross compilation. Do not modify them if you are not sure.
+
 #[allow(non_camel_case_types)]
 pub mod backtrace_patch {
     extern crate libc;

@@ -13,6 +13,471 @@ use wedpr_l_crypto_zkp_utils::{
 use wedpr_l_protos::generated::zkp::{BalanceProof, EqualityProof};
 use wedpr_l_utils::error::WedprError;
 
+/// Proves three commitments satisfying either or equality relationships, i.e.
+/// the values embedded in c1_point = c1_value * c_basepoint + c1_blinding *
+/// blinding_basepoint c2_point = c2_value * c_basepoint + c2_blinding *
+/// blinding_basepoint c3_point = c3_blinding * blinding_basepoint
+/// where c1_value = c2_value or 0,
+/// It returns a proof for the above equality relationship.
+pub fn prove_either_equality_relationship_proof(
+    c1_value: u64,
+    c2_value: u64,
+    c1_blinding: &Scalar,
+    c2_blinding: &Scalar,
+    c3_blinding: &Scalar,
+    c_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> BalanceProof {
+    let blinding_a = get_random_scalar();
+    let blinding_b = get_random_scalar();
+    let blinding_c = get_random_scalar();
+    let blinding_d = get_random_scalar();
+    let blinding_e = get_random_scalar();
+    let blinding_f = get_random_scalar();
+    let blinding_w = get_random_scalar();
+    let c1_point = RistrettoPoint::multiscalar_mul(
+        &[Scalar::from(c1_value), *c1_blinding],
+        &[*c_basepoint, *blinding_basepoint],
+    );
+    let c2_point = RistrettoPoint::multiscalar_mul(
+        &[Scalar::from(c2_value), *c2_blinding],
+        &[*c_basepoint, *blinding_basepoint],
+    );
+    let c3_point = c3_blinding * blinding_basepoint;
+
+    let (check1, check2, m1, m2, m3, m4, m5, m6) = if c1_value == c2_value {
+        let t1_p =
+            RistrettoPoint::multiscalar_mul(&[blinding_a, blinding_b], &[
+                *c_basepoint,
+                *blinding_basepoint,
+            ]);
+        let t2_p =
+            RistrettoPoint::multiscalar_mul(&[blinding_a, blinding_c], &[
+                *c_basepoint,
+                *blinding_basepoint,
+            ]);
+        let t3_p = RistrettoPoint::multiscalar_mul(
+            &[blinding_w, blinding_d, blinding_e],
+            &[c3_point, *c_basepoint, *blinding_basepoint],
+        );
+        let t4_p = RistrettoPoint::multiscalar_mul(
+            &[blinding_w, blinding_d, blinding_f],
+            &[c1_point, *c_basepoint, *blinding_basepoint],
+        );
+
+        let mut hash_vec = Vec::new();
+        hash_vec.append(&mut point_to_bytes(&t1_p));
+        hash_vec.append(&mut point_to_bytes(&t2_p));
+        hash_vec.append(&mut point_to_bytes(&t3_p));
+        hash_vec.append(&mut point_to_bytes(&t4_p));
+        hash_vec.append(&mut point_to_bytes(&c1_point));
+        hash_vec.append(&mut point_to_bytes(&c2_point));
+        hash_vec.append(&mut point_to_bytes(&c3_point));
+        hash_vec.append(&mut point_to_bytes(c_basepoint));
+        hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+
+        let check = hash_to_scalar(&hash_vec) - blinding_w;
+        (
+            check,
+            blinding_w,
+            blinding_a - (check * Scalar::from(c2_value)),
+            blinding_b - (check * c2_blinding),
+            blinding_c - (check * c1_blinding),
+            blinding_d,
+            blinding_e,
+            blinding_f,
+        )
+    } else if c1_value == 0 {
+        let t1_p = RistrettoPoint::multiscalar_mul(
+            &[blinding_w, blinding_a, blinding_b],
+            &[c2_point, *c_basepoint, *blinding_basepoint],
+        );
+        let t2_p = RistrettoPoint::multiscalar_mul(
+            &[blinding_w, blinding_a, blinding_c],
+            &[c1_point, *c_basepoint, *blinding_basepoint],
+        );
+        let t3_p =
+            RistrettoPoint::multiscalar_mul(&[blinding_d, blinding_e], &[
+                *c_basepoint,
+                *blinding_basepoint,
+            ]);
+        let t4_p =
+            RistrettoPoint::multiscalar_mul(&[blinding_d, blinding_f], &[
+                *c_basepoint,
+                *blinding_basepoint,
+            ]);
+
+        let mut hash_vec = Vec::new();
+        hash_vec.append(&mut point_to_bytes(&t1_p));
+        hash_vec.append(&mut point_to_bytes(&t2_p));
+        hash_vec.append(&mut point_to_bytes(&t3_p));
+        hash_vec.append(&mut point_to_bytes(&t4_p));
+        hash_vec.append(&mut point_to_bytes(&c1_point));
+        hash_vec.append(&mut point_to_bytes(&c2_point));
+        hash_vec.append(&mut point_to_bytes(&c3_point));
+        hash_vec.append(&mut point_to_bytes(c_basepoint));
+        hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+
+        let check = hash_to_scalar(&hash_vec) - blinding_w;
+        (
+            blinding_w,
+            check,
+            blinding_a,
+            blinding_b,
+            blinding_c,
+            blinding_d,
+            blinding_e - (check * c3_blinding),
+            blinding_f - (check * c1_blinding),
+        )
+    } else {
+        return BalanceProof::new();
+    };
+
+    let mut proof = BalanceProof::new();
+    proof.set_check1(scalar_to_bytes(&check1));
+    proof.set_check2(scalar_to_bytes(&check2));
+    proof.set_m1(scalar_to_bytes(&m1));
+    proof.set_m2(scalar_to_bytes(&m2));
+    proof.set_m3(scalar_to_bytes(&m3));
+    proof.set_m4(scalar_to_bytes(&m4));
+    proof.set_m5(scalar_to_bytes(&m5));
+    proof.set_m6(scalar_to_bytes(&m6));
+    proof
+}
+
+/// Verifies owner know a commitment's secret value c_value and c_blinding, i.e.
+/// the values embedded in c_point = c_value * c_basepoint + c_blinding *
+/// blinding_basepoint
+pub fn verify_either_equality_relationship_proof(
+    c1_point: &RistrettoPoint,
+    c2_point: &RistrettoPoint,
+    c3_point: &RistrettoPoint,
+    proof: &BalanceProof,
+    c_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    let check1 = bytes_to_scalar(proof.get_check1())?;
+    let check2 = bytes_to_scalar(proof.get_check2())?;
+    let m1 = bytes_to_scalar(proof.get_m1())?;
+    let m2 = bytes_to_scalar(proof.get_m2())?;
+    let m3 = bytes_to_scalar(proof.get_m3())?;
+    let m4 = bytes_to_scalar(proof.get_m4())?;
+    let m5 = bytes_to_scalar(proof.get_m5())?;
+    let m6 = bytes_to_scalar(proof.get_m6())?;
+
+    let t1_v = RistrettoPoint::multiscalar_mul(&[check1, m1, m2], &[
+        *c2_point,
+        *c_basepoint,
+        *blinding_basepoint,
+    ]);
+    let t2_v = RistrettoPoint::multiscalar_mul(&[check1, m1, m3], &[
+        *c1_point,
+        *c_basepoint,
+        *blinding_basepoint,
+    ]);
+    let t3_v = RistrettoPoint::multiscalar_mul(&[check2, m4, m5], &[
+        *c3_point,
+        *c_basepoint,
+        *blinding_basepoint,
+    ]);
+    let t4_v = RistrettoPoint::multiscalar_mul(&[check2, m4, m6], &[
+        *c1_point,
+        *c_basepoint,
+        *blinding_basepoint,
+    ]);
+
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_v));
+    hash_vec.append(&mut point_to_bytes(&t2_v));
+    hash_vec.append(&mut point_to_bytes(&t3_v));
+    hash_vec.append(&mut point_to_bytes(&t4_v));
+    hash_vec.append(&mut point_to_bytes(&c1_point));
+    hash_vec.append(&mut point_to_bytes(&c2_point));
+    hash_vec.append(&mut point_to_bytes(&c3_point));
+    hash_vec.append(&mut point_to_bytes(c_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+    let check = hash_to_scalar(&hash_vec);
+
+    if check == (check1 + check2) {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+/// Proves owner know a commitment's secret value c_value and c_blinding, i.e.
+/// the values embedded in c_point = c_value * c_basepoint + c_blinding *
+/// blinding_basepoint It returns a proof for the above balance relationship.
+pub fn prove_knowledge_proof(
+    c_value: u64,
+    c_blinding: &Scalar,
+    c_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> BalanceProof {
+    let blinding_a = get_random_scalar();
+    let blinding_b = get_random_scalar();
+    let t1_p = RistrettoPoint::multiscalar_mul(&[blinding_a, blinding_b], &[
+        *c_basepoint,
+        *blinding_basepoint,
+    ]);
+    let c_scalar_value = Scalar::from(c_value);
+    let c_point =
+        RistrettoPoint::multiscalar_mul(&[c_scalar_value, *c_blinding], &[
+            *c_basepoint,
+            *blinding_basepoint,
+        ]);
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_p));
+    hash_vec.append(&mut point_to_bytes(&c_point));
+    hash_vec.append(&mut point_to_bytes(c_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+
+    let check = hash_to_scalar(&hash_vec);
+    let m1 = blinding_a - (check * c_scalar_value);
+    let m2 = blinding_b - (check * c_blinding);
+    let mut proof = BalanceProof::new();
+    proof.set_t1(point_to_bytes(&t1_p));
+    proof.set_m1(scalar_to_bytes(&m1));
+    proof.set_m2(scalar_to_bytes(&m2));
+    proof
+}
+
+/// Verifies owner know a commitment's secret value c_value and c_blinding, i.e.
+/// the values embedded in c_point = c_value * c_basepoint + c_blinding *
+/// blinding_basepoint
+pub fn verify_knowledge_proof(
+    c_point: &RistrettoPoint,
+    proof: &BalanceProof,
+    c_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    let t1_p = bytes_to_point(proof.get_t1())?;
+    let m1 = bytes_to_scalar(proof.get_m1())?;
+    let m2 = bytes_to_scalar(proof.get_m2())?;
+
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_p));
+    hash_vec.append(&mut point_to_bytes(&c_point));
+    hash_vec.append(&mut point_to_bytes(c_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+    let check = hash_to_scalar(&hash_vec);
+    let t1_v = RistrettoPoint::multiscalar_mul(&[check, m1, m2], &[
+        *c_point,
+        *c_basepoint,
+        *blinding_basepoint,
+    ]);
+
+    if t1_v == t1_p {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+/// Verifies all commitment pairs satisfying knowledge relationships,
+/// where each commitment pair contains one commitment points,
+/// c_point = c_point_list[i],
+/// the values embedded in c_point = c_value * c_basepoint + c_blinding *
+/// blinding_basepoint
+pub fn verify_knowledge_proof_in_batch(
+    c_point_list: &Vec<RistrettoPoint>,
+    proof_list: &Vec<BalanceProof>,
+    c_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    if c_point_list.len() != proof_list.len() {
+        return Err(WedprError::FormatError);
+    }
+    let mut t1_sum_expected: RistrettoPoint = Default::default();
+    let mut c1_c_expected: RistrettoPoint = Default::default();
+    let mut m1_expected: Scalar = Scalar::zero();
+    let mut m2_expected: Scalar = Scalar::zero();
+
+    for i in 0..c_point_list.len() {
+        // 8 bit random scalar
+        let random_scalar = get_random_u8();
+        let blinding_factor = Scalar::from(random_scalar);
+        let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
+        let m2 = bytes_to_scalar(proof_list[i].get_m2())?;
+        let t1_p = bytes_to_point(proof_list[i].get_t1())?;
+        let c_point = c_point_list[i];
+
+        let mut hash_vec = Vec::new();
+        hash_vec.append(&mut point_to_bytes(&t1_p));
+        hash_vec.append(&mut point_to_bytes(&c_point));
+        hash_vec.append(&mut point_to_bytes(c_basepoint));
+        hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+        let check = hash_to_scalar(&hash_vec);
+
+        let c_factor = blinding_factor * check;
+        m1_expected += blinding_factor * m1;
+        m2_expected += blinding_factor * m2;
+        t1_sum_expected += small_scalar_point_mul(random_scalar, t1_p);
+        c1_c_expected += c_factor * c_point;
+    }
+    let t1_compute_sum_final = m1_expected * c_basepoint
+        + m2_expected * blinding_basepoint
+        + c1_c_expected;
+
+    if t1_compute_sum_final == t1_sum_expected {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+/// Proves two commitments satisfying an equality relationship, i.e.
+/// the values embedded in c1_point and c2_point satisfying c1_blinding =
+/// c2_blinding, where c1_point = c1_value * c1_basepoint + c1_blinding *
+/// blinding_basepoint, c2_point = c2_blinding * c2_basepoint. It returns a
+/// proof for the above equality relationship.
+pub fn prove_format_proof(
+    c1_value: u64,
+    c_blinding: &Scalar,
+    c1_basepoint: &RistrettoPoint,
+    c2_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> BalanceProof {
+    let blinding_a = get_random_scalar();
+    let blinding_b = get_random_scalar();
+    let t1_p = RistrettoPoint::multiscalar_mul(&[blinding_a, blinding_b], &[
+        *c1_basepoint,
+        *blinding_basepoint,
+    ]);
+    let t2_p = c2_basepoint * blinding_b;
+    let c1_scalar_value = Scalar::from(c1_value);
+    let c1_point =
+        RistrettoPoint::multiscalar_mul(&[c1_scalar_value, *c_blinding], &[
+            *c1_basepoint,
+            *blinding_basepoint,
+        ]);
+    let c2_point = c_blinding * c2_basepoint;
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_p));
+    hash_vec.append(&mut point_to_bytes(&t2_p));
+    hash_vec.append(&mut point_to_bytes(&c1_point));
+    hash_vec.append(&mut point_to_bytes(&c2_point));
+    hash_vec.append(&mut point_to_bytes(c1_basepoint));
+    hash_vec.append(&mut point_to_bytes(c2_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+
+    let check = hash_to_scalar(&hash_vec);
+    let m1 = blinding_a - (check * c1_scalar_value);
+    let m2 = blinding_b - (check * c_blinding);
+    let mut proof = BalanceProof::new();
+    proof.set_t1(point_to_bytes(&t1_p));
+    proof.set_t2(point_to_bytes(&t2_p));
+    proof.set_m1(scalar_to_bytes(&m1));
+    proof.set_m2(scalar_to_bytes(&m2));
+    proof
+}
+
+/// Verifies two commitments satisfying an equality relationship, i.e.
+/// the values embedded in c1_point and c2_point satisfying c1_blinding =
+/// c2_blinding, where c1_point = c1_value * c1_basepoint + c1_blinding *
+/// blinding_basepoint, c2_point = c2_blinding * c2_basepoint.
+pub fn verify_format_proof(
+    c1_point: &RistrettoPoint,
+    c2_point: &RistrettoPoint,
+    proof: &BalanceProof,
+    c1_basepoint: &RistrettoPoint,
+    c2_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    let t1_p = bytes_to_point(proof.get_t1())?;
+    let t2_p = bytes_to_point(proof.get_t2())?;
+    let m1 = bytes_to_scalar(proof.get_m1())?;
+    let m2 = bytes_to_scalar(proof.get_m2())?;
+
+    let mut hash_vec = Vec::new();
+    hash_vec.append(&mut point_to_bytes(&t1_p));
+    hash_vec.append(&mut point_to_bytes(&t2_p));
+    hash_vec.append(&mut point_to_bytes(&c1_point));
+    hash_vec.append(&mut point_to_bytes(&c2_point));
+    hash_vec.append(&mut point_to_bytes(c1_basepoint));
+    hash_vec.append(&mut point_to_bytes(c2_basepoint));
+    hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+    let check = hash_to_scalar(&hash_vec);
+    let t1_v = RistrettoPoint::multiscalar_mul(&[check, m1, m2], &[
+        *c1_point,
+        *c1_basepoint,
+        *blinding_basepoint,
+    ]);
+    let t2_v = RistrettoPoint::multiscalar_mul(&[check, m2], &[
+        *c2_point,
+        *c2_basepoint,
+    ]);
+
+    if t1_v == t1_p && t2_v == t2_p {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
+/// Verifies all commitment pairs satisfying equality relationships,
+/// where each commitment pair contains two commitment points,
+/// c1_point = c1_point_list[i], c2_point = c2_point_list[i],
+/// and the values embedded in c1_point, c2_point satisfying
+/// c1_blinding = c2_blinding.
+pub fn verify_format_proof_in_batch(
+    c1_point_list: &Vec<RistrettoPoint>,
+    c2_point_list: &Vec<RistrettoPoint>,
+    proof_list: &Vec<BalanceProof>,
+    c1_basepoint: &RistrettoPoint,
+    c2_basepoint: &RistrettoPoint,
+    blinding_basepoint: &RistrettoPoint,
+) -> Result<bool, WedprError> {
+    if c1_point_list.len() != c1_point_list.len()
+        || c1_point_list.len() != proof_list.len()
+    {
+        return Err(WedprError::FormatError);
+    }
+    let mut t1_sum_expected: RistrettoPoint = Default::default();
+    let mut t2_sum_expected: RistrettoPoint = Default::default();
+    let mut c1_c_expected: RistrettoPoint = Default::default();
+    let mut c2_c_expected: RistrettoPoint = Default::default();
+    let mut m1_expected: Scalar = Scalar::zero();
+    let mut m2_expected: Scalar = Scalar::zero();
+
+    for i in 0..c1_point_list.len() {
+        // 8 bit random scalar
+        let random_scalar = get_random_u8();
+        let blinding_factor = Scalar::from(random_scalar);
+        let m1 = bytes_to_scalar(proof_list[i].get_m1())?;
+        let m2 = bytes_to_scalar(proof_list[i].get_m2())?;
+        let t1_p = bytes_to_point(proof_list[i].get_t1())?;
+        let t2_p = bytes_to_point(proof_list[i].get_t2())?;
+        let c1_point = c1_point_list[i];
+        let c2_point = c2_point_list[i];
+
+        let mut hash_vec = Vec::new();
+        hash_vec.append(&mut point_to_bytes(&t1_p));
+        hash_vec.append(&mut point_to_bytes(&t2_p));
+        hash_vec.append(&mut point_to_bytes(&c1_point));
+        hash_vec.append(&mut point_to_bytes(&c2_point));
+        hash_vec.append(&mut point_to_bytes(c1_basepoint));
+        hash_vec.append(&mut point_to_bytes(c2_basepoint));
+        hash_vec.append(&mut point_to_bytes(blinding_basepoint));
+        let check = hash_to_scalar(&hash_vec);
+
+        let c_factor = blinding_factor * check;
+        m1_expected += blinding_factor * m1;
+        m2_expected += blinding_factor * m2;
+        t1_sum_expected += small_scalar_point_mul(random_scalar, t1_p);
+        t2_sum_expected += small_scalar_point_mul(random_scalar, t2_p);
+        c1_c_expected += c_factor * c1_point;
+        c2_c_expected += c_factor * c2_point;
+    }
+    let t1_compute_sum_final = m1_expected * c1_basepoint
+        + m2_expected * blinding_basepoint
+        + c1_c_expected;
+    let t2_compute_sum_final = m2_expected * c2_basepoint + c2_c_expected;
+
+    if t1_compute_sum_final == t1_sum_expected
+        && t2_compute_sum_final == t2_sum_expected
+    {
+        return Ok(true);
+    }
+    Ok(false)
+}
+
 /// Proves three commitments satisfying a sum relationship, i.e.
 /// the values embedded in them satisfying c1_value + c2_value = c3_value.
 /// c3_value is not in the argument list, and will be directly computed from
@@ -620,9 +1085,226 @@ pub fn get_random_u8() -> u8 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use wedpr_l_crypto_zkp_utils::{BASEPOINT_G1, BASEPOINT_G2};
+    use wedpr_l_crypto_zkp_utils::{
+        get_random_u32, BASEPOINT_G1, BASEPOINT_G2,
+    };
 
     const BATCH_SIZE: usize = 10;
+
+    #[test]
+    fn test_either_equality() {
+        let c1_value = 100u64;
+        let c1_blinding = get_random_scalar();
+        let c2_blinding = get_random_scalar();
+        let c3_blinding = get_random_scalar();
+        let c2_value = c1_value;
+        let c_basepoint = *BASEPOINT_G1;
+        let blinding_basepoint = *BASEPOINT_G2;
+        let c1_point = RistrettoPoint::multiscalar_mul(
+            &[Scalar::from(c1_value), c1_blinding],
+            &[c_basepoint, blinding_basepoint],
+        );
+        let c2_point = RistrettoPoint::multiscalar_mul(
+            &[Scalar::from(c2_value), c2_blinding],
+            &[c_basepoint, blinding_basepoint],
+        );
+        let c3_point =
+            RistrettoPoint::multiscalar_mul(&[Scalar::zero(), c3_blinding], &[
+                c_basepoint,
+                blinding_basepoint,
+            ]);
+
+        let proof = prove_either_equality_relationship_proof(
+            c1_value,
+            c2_value,
+            &c1_blinding,
+            &c2_blinding,
+            &c3_blinding,
+            &c_basepoint,
+            &blinding_basepoint,
+        );
+        assert_eq!(
+            true,
+            verify_either_equality_relationship_proof(
+                &c1_point,
+                &c2_point,
+                &c3_point,
+                &proof,
+                &c_basepoint,
+                &blinding_basepoint,
+            )
+            .unwrap()
+        );
+
+        let zero_c1_point = c1_blinding * blinding_basepoint;
+
+        let proof_zero = prove_either_equality_relationship_proof(
+            0,
+            c2_value,
+            &c1_blinding,
+            &c2_blinding,
+            &c3_blinding,
+            &c_basepoint,
+            &blinding_basepoint,
+        );
+        assert_eq!(
+            true,
+            verify_either_equality_relationship_proof(
+                &zero_c1_point,
+                &c2_point,
+                &c3_point,
+                &proof_zero,
+                &c_basepoint,
+                &blinding_basepoint,
+            )
+            .unwrap()
+        );
+
+        let invalid_c1_point = RistrettoPoint::multiscalar_mul(
+            &[Scalar::from(101u64), c1_blinding],
+            &[c_basepoint, blinding_basepoint],
+        );
+
+        assert_eq!(
+            false,
+            verify_either_equality_relationship_proof(
+                &invalid_c1_point,
+                &c2_point,
+                &c3_point,
+                &proof,
+                &c_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_knowledge_proof_in_batch() {
+        let mut proofs: Vec<BalanceProof> = vec![];
+        let mut c1_points: Vec<RistrettoPoint> = vec![];
+        let c1_basepoint = *BASEPOINT_G1;
+        let blinding_basepoint = *BASEPOINT_G2 * get_random_scalar();
+        for _ in 0..BATCH_SIZE {
+            let c1_value = get_random_u32() as u64;
+            let c1_blinding = get_random_scalar();
+
+            let proof = prove_knowledge_proof(
+                c1_value,
+                &c1_blinding,
+                &c1_basepoint,
+                &blinding_basepoint,
+            );
+            let c1_point = RistrettoPoint::multiscalar_mul(
+                &[Scalar::from(c1_value), c1_blinding],
+                &[c1_basepoint, blinding_basepoint],
+            );
+
+            assert_eq!(
+                true,
+                verify_knowledge_proof(
+                    &c1_point,
+                    &proof,
+                    &c1_basepoint,
+                    &blinding_basepoint
+                )
+                .unwrap()
+            );
+            proofs.push(proof);
+            c1_points.push(c1_point);
+        }
+        assert_eq!(
+            true,
+            verify_knowledge_proof_in_batch(
+                &c1_points,
+                &proofs,
+                &c1_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+        // Setting the wrong point should cause proof verification failure.
+        c1_points[BATCH_SIZE - 2] = c1_points[BATCH_SIZE - 1];
+        assert_eq!(
+            false,
+            verify_knowledge_proof_in_batch(
+                &c1_points,
+                &proofs,
+                &c1_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+    }
+
+    #[test]
+    fn test_format_proof_in_batch() {
+        let mut proofs: Vec<BalanceProof> = vec![];
+        let mut c1_points: Vec<RistrettoPoint> = vec![];
+        let mut c2_points: Vec<RistrettoPoint> = vec![];
+        let c1_basepoint = *BASEPOINT_G1;
+        let c2_basepoint = *BASEPOINT_G2;
+        let blinding_basepoint = *BASEPOINT_G2 * get_random_scalar();
+        for _ in 0..BATCH_SIZE {
+            let c1_value = get_random_u32() as u64;
+            let c1_blinding = get_random_scalar();
+
+            let proof = prove_format_proof(
+                c1_value,
+                &c1_blinding,
+                &c1_basepoint,
+                &c2_basepoint,
+                &blinding_basepoint,
+            );
+            let c1_point = RistrettoPoint::multiscalar_mul(
+                &[Scalar::from(c1_value), c1_blinding],
+                &[c1_basepoint, blinding_basepoint],
+            );
+            let c2_point = c1_blinding * c2_basepoint;
+
+            assert_eq!(
+                true,
+                verify_format_proof(
+                    &c1_point,
+                    &c2_point,
+                    &proof,
+                    &c1_basepoint,
+                    &c2_basepoint,
+                    &blinding_basepoint
+                )
+                .unwrap()
+            );
+            proofs.push(proof);
+            c1_points.push(c1_point);
+            c2_points.push(c2_point);
+        }
+        assert_eq!(
+            true,
+            verify_format_proof_in_batch(
+                &c1_points,
+                &c2_points,
+                &proofs,
+                &c1_basepoint,
+                &c2_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+        // Setting the wrong point should cause proof verification failure.
+        c1_points[BATCH_SIZE - 2] = c2_points[BATCH_SIZE - 1];
+        assert_eq!(
+            false,
+            verify_format_proof_in_batch(
+                &c1_points,
+                &c2_points,
+                &proofs,
+                &c1_basepoint,
+                &c2_basepoint,
+                &blinding_basepoint
+            )
+            .unwrap()
+        );
+    }
 
     #[test]
     fn test_sum_relationship_proof() {

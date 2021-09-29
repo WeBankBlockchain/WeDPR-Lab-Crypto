@@ -1,3 +1,5 @@
+// Copyright 2021 WeDPR Lab Project Authors. Licensed under Apache-2.0.
+
 #[macro_use]
 extern crate criterion;
 use criterion::Criterion;

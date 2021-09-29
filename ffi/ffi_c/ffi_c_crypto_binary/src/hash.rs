@@ -2,6 +2,7 @@
 
 //! Hash function wrappers.
 
+#![cfg(not(tarpaulin_include))]
 #![cfg(any(
     feature = "wedpr_f_hash_keccak256",
     feature = "wedpr_f_hash_sm3",

@@ -3,6 +3,7 @@
 //! Library of FFI of wedpr_crypto wrapper functions, targeting C/C++
 //! compatible architectures (including iOS), with fast binary interfaces.
 
+#![cfg(not(tarpaulin_include))]
 #[macro_use]
 extern crate wedpr_ffi_macros;
 

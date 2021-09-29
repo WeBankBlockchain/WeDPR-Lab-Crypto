@@ -1,5 +1,7 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
+#![cfg(not(tarpaulin_include))]
+
 //! Shared config for wedpr_ffi_java_crypto.
 
 // ECIES section.

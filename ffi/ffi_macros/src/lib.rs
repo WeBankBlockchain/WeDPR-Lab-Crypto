@@ -6,6 +6,7 @@
 
 // Type conversion section.
 
+#![cfg(not(tarpaulin_include))]
 pub mod binary;
 
 // TODO: Extract Proto-related macros to proto.rs.

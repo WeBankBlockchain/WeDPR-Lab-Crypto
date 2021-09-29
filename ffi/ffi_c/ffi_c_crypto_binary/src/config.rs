@@ -2,6 +2,8 @@
 
 //! Shared config for wedpr_ffi_c_crypto.
 
+#![cfg(not(tarpaulin_include))]
+
 // ECIES section.
 
 #[cfg(feature = "wedpr_f_ecies_secp256k1")]

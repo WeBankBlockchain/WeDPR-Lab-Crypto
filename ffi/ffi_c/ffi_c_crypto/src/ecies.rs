@@ -2,6 +2,7 @@
 
 //! ECIES function wrappers.
 
+#![cfg(not(tarpaulin_include))]
 #![cfg(feature = "wedpr_f_ecies_secp256k1")]
 
 use wedpr_l_utils::traits::Ecies;

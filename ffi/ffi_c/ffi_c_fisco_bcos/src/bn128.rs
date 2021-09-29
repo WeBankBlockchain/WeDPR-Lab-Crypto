@@ -2,6 +2,8 @@
 
 //! BN128 curve function wrappers.
 
+#![cfg(not(tarpaulin_include))]
+
 use wedpr_ffi_common::utils::{
     c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
     FAILURE, SUCCESS,

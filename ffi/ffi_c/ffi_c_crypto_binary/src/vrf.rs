@@ -2,6 +2,7 @@
 
 //! VRF function wrappers.
 
+#![cfg(not(tarpaulin_include))]
 #![cfg(feature = "wedpr_f_vrf_curve25519")]
 
 use wedpr_ffi_common::utils::{

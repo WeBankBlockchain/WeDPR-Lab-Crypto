@@ -13,6 +13,6 @@ curve25519-dalek = { version = "1", features = [ "serde" ] }
 rand = "0.6"
 sha3 = "0.8.2"
 wedpr_l_crypto_hash_keccak256 = "1.1.0"
-wedpr_l_crypto_zkp_utils = "1.1.0"
+wedpr_l_crypto_zkp_utils = "1.2.0"
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.1.0"

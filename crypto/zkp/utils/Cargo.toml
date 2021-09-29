@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_zkp_utils"
-version = "1.1.0"
+version = "1.2.0"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -12,7 +12,8 @@ description = "Library of WeDPR shared zkp function utils."
 curve25519-dalek = { version = "1", features = [ "serde" ] }
 lazy_static = "1.4.0"
 rand = "0.6"
-sha3 = "0.8.0"
+rand_core = { version = "0.5", features = ["getrandom"] }
+sha3 = "0.8"
 wedpr_l_crypto_hash_keccak256 = "1.1.0"
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.1.0"
