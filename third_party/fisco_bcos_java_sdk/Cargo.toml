@@ -11,7 +11,7 @@ description = "Library of WeDPR specific utilities for FISCO BCOS Java Sdk."
 [dependencies]
 curve25519-dalek = { version = "1", features = ["serde"] }
 wedpr_l_utils = "1.1.0"
-wedpr_l_crypto_zkp_utils = "1.1.0"
+wedpr_l_crypto_zkp_utils = { path = "../../crypto/zkp/utils"}
 rand = "0.6"
 wedpr_l_common_coder_hex = { path = "../../common/coder/hex"}
 sha3 = "0.8.2"

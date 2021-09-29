@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_zkp_range_proof"
-version = "1.1.0"
+version = "1.2.0"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -12,6 +12,6 @@ description = "Library of WeDPR shared zkp Function implement range proof."
 bulletproofs = { package = "wedpr_l_bulletproofs", version = "1.0.5" }
 curve25519-dalek = { version = "1", features = [ "serde" ] }
 merlin = "1"
-wedpr_l_crypto_zkp_utils = { path = "../utils"}
+wedpr_l_crypto_zkp_utils = "1.2.0"
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.1.0"
