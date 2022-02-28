@@ -9,7 +9,7 @@ description = "Library of WeDPR specific utilities for FISCO BCOS Java Sdk."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-curve25519-dalek = { version = "1", features = ["serde"] }
+curve25519-dalek = { version = "1.0", features = ["serde"] }
 wedpr_l_utils = "1.1.0"
 wedpr_l_crypto_zkp_utils = { path = "../../crypto/zkp/utils"}
 rand = "0.6"

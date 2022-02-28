@@ -9,7 +9,7 @@ description = "Library of WeDPR shared zkp function utils."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-curve25519-dalek = { version = "1", features = [ "serde" ] }
+curve25519-dalek = { version = "1.0", features = [ "serde" ] }
 lazy_static = "1.4.0"
 rand = "0.6"
 rand_core = { version = "0.5", features = ["getrandom"] }

@@ -10,6 +10,7 @@ description = "Library of WeDPR shared Siganture Function implement by ed25519."
 
 [dependencies]
 ed25519-dalek = { version = "1.0.1" }
+ed25519 = "1.0.3"
 lazy_static = "1.4.0"
 rand = "0.7"
 
