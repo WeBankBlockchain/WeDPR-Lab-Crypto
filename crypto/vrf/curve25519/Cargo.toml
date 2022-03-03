@@ -9,7 +9,7 @@ description = "Library of WeDPR shared VRF Function implement by curve25519."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-curve25519-dalek = { version = "1", features = [ "serde" ] }
+curve25519-dalek = { version = "1.0", features = [ "serde" ] }
 rand = "0.6"
 sha3 = "0.8.2"
 wedpr_l_crypto_hash_keccak256 = "1.1.0"
