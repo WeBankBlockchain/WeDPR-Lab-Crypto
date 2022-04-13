@@ -17,7 +17,7 @@ lto = false
 lto = false
 
 [dependencies]
-libc = "0.2.71"
+libc = "0.2.119"
 wedpr_macros = { path = "../../macros/"}
 ffi_macros = { path = "../ffi_macros/"}
 crypto = {path = "../../crypto/"}
