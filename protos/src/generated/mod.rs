@@ -2,4 +2,3 @@
 
 pub mod common;
 pub mod ot;
-pub mod zkp;
