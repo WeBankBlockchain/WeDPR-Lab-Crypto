@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_ot_base_ot"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2018"
 license = "Apache-2.0"
 description = "Library of WeDPR shared zkp Function implement base ot."
@@ -9,10 +9,9 @@ description = "Library of WeDPR shared zkp Function implement base ot."
 
 [dependencies]
 curve25519-dalek = { version = "1.0", features = [ "serde" ] }
-wedpr_l_crypto_zkp_utils = "1.2.0"
+wedpr_l_crypto_zkp_utils = { version = "1.3.0", path = "../../zkp/utils"}
 wedpr_l_crypto_hash_sha3 = { version = "1.0.0" }
 lazy_static = "1.4.0"
-wedpr_l_protos = "1.2.0"
 wedpr_l_utils = "1.1.0"
 sha3 = "0.8"
 rand = "0.6"

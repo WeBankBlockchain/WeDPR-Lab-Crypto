@@ -130,16 +130,7 @@ pub fn prove_either_equality_relationship_proof(
             blinding_f - (check * c1_blinding),
         )
     } else {
-        return BalanceProof {
-            check1: Scalar::zero(),
-            check2: Scalar::zero(),
-            m1: Scalar::zero(),
-            m2: Scalar::zero(),
-            m3: Scalar::zero(),
-            m4: Scalar::zero(),
-            m5: Scalar::zero(),
-            m6: Scalar::zero(),
-        };
+        return BalanceProof::default();
     };
     return BalanceProof {
         check1: check1,
