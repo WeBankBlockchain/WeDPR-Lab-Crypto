@@ -1,0 +1,25 @@
+[package]
+name = "wedpr_ffi_c_zkp"
+version = "1.0.0"
+authors = [ "WeDPR <wedpr@webank.com>" ]
+edition = "2018"
+
+[features]
+default = ["wedpr_f_zkp_proof"]
+wedpr_f_zkp_proof = ["wedpr_l_crypto_zkp_discrete_logarithm_proof"]
+
+[lib]
+name = "ffi_c_zkp"
+crate-type = [ "cdylib", "staticlib" ]
+
+[dependencies]
+libc = "0.2.60"
+wedpr_l_utils = "1.1.0"
+wedpr_ffi_common = { path = "../../ffi_common" }
+wedpr_ffi_macros = { path = "../../ffi_macros" }
+wedpr_l_crypto_zkp_utils = {version = "1.3.0", path = "../../../crypto/zkp/utils/"}
+wedpr_l_crypto_zkp_discrete_logarithm_proof = { version = "1.3.0", path = "../../../crypto/zkp/discrete_logarithm_proof/", optional = true}
+
+# This is required to generate C/C++ header files.
+[build-dependencies]
+cbindgen = "0.9.0"
