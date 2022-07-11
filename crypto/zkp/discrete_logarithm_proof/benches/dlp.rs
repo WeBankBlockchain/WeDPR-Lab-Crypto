@@ -11,8 +11,9 @@ use wedpr_l_crypto_zkp_discrete_logarithm_proof::{
     self, prove_sum_relationship, verify_sum_relationship,
     verify_sum_relationship_in_batch,
 };
-use wedpr_l_crypto_zkp_utils::{get_random_scalar, BASEPOINT_G1, BASEPOINT_G2};
-use wedpr_l_protos::generated::zkp::BalanceProof;
+use wedpr_l_crypto_zkp_utils::{
+    get_random_scalar, ArithmeticProof, BASEPOINT_G1, BASEPOINT_G2,
+};
 
 fn create_verify_sum_proof_helper(c: &mut Criterion) {
     let label = format!("create_verify_sum_proof_helper");
@@ -71,7 +72,7 @@ fn create_verify_sum_proof_in_batch_helper(
         "create_verify_sum_proof_in_batch_helper, batch_size is {}",
         batch_size
     );
-    let mut proofs: Vec<BalanceProof> = vec![];
+    let mut proofs: Vec<ArithmeticProof> = vec![];
     let mut c1_points: Vec<RistrettoPoint> = vec![];
     let mut c2_points: Vec<RistrettoPoint> = vec![];
     let mut c3_points: Vec<RistrettoPoint> = vec![];

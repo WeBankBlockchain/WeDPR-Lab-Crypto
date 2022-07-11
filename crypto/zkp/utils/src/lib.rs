@@ -36,6 +36,54 @@ lazy_static! {
 /// Serialized data size of a point.
 const RISTRETTO_POINT_SIZE_IN_BYTES: usize = 32;
 
+// ZKP data to verify the balance relationship among value commitments.
+// For example, given C(x), C(y), C(z), this proof data can be used to
+// verify whether x * y =? z.
+#[derive(Default, Debug, Clone)]
+pub struct BalanceProof {
+    pub check1: Scalar,
+    pub check2: Scalar,
+    pub m1: Scalar,
+    pub m2: Scalar,
+    pub m3: Scalar,
+    pub m4: Scalar,
+    pub m5: Scalar,
+    pub m6: Scalar,
+}
+#[derive(Default, Debug, Clone)]
+pub struct KnowledgeProof {
+    pub t1: RistrettoPoint,
+    pub m1: Scalar,
+    pub m2: Scalar,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct FormatProof {
+    pub t1: RistrettoPoint,
+    pub t2: RistrettoPoint,
+    pub m1: Scalar,
+    pub m2: Scalar,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct ArithmeticProof {
+    pub t1: RistrettoPoint,
+    pub t2: RistrettoPoint,
+    pub t3: RistrettoPoint,
+    pub m1: Scalar,
+    pub m2: Scalar,
+    pub m3: Scalar,
+    pub m4: Scalar,
+    pub m5: Scalar,
+}
+
+#[derive(Default, Debug, Clone)]
+pub struct EqualityProof {
+    pub m1: Scalar,
+    pub t1: RistrettoPoint,
+    pub t2: RistrettoPoint,
+}
+
 /// Gets a random Scalar.
 pub fn get_random_scalar() -> Scalar {
     Scalar::random(&mut rand::thread_rng())

@@ -22,19 +22,3 @@ pub fn bytes_to_proto<T: Message>(proto_bytes: &[u8]) -> Result<T, WedprError> {
         Err(_) => Err(WedprError::DecodeError),
     };
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use generated::zkp::BalanceProof;
-
-    #[test]
-    fn test_parser() {
-        let mut proof = BalanceProof::new();
-        proof.set_check1("test1".as_bytes().to_vec());
-        proof.set_check2("test2".as_bytes().to_vec());
-        let bytes = proto_to_bytes(&proof).unwrap();
-        let proof_parser = bytes_to_proto::<BalanceProof>(&bytes).unwrap();
-        assert_eq!(proof_parser, proof);
-    }
-}
