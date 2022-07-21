@@ -152,4 +152,4 @@ cargo build --features "一个或多个feature名" --no-default-features
 
 - 点亮我们的小星星(点击项目右上方Star按钮)
 - 提交代码(Pull Request)，参考我们的代码[贡献流程](./CONTRIBUTING.md)
-- [提问和提交BUG](https://github.com/WeBankBlockchain/WeDPR-Lab-Core/issues)
+- [提问和提交BUG](https://github.com/WeBankBlockchain/WeDPR-Lab-Crypto/issues)
