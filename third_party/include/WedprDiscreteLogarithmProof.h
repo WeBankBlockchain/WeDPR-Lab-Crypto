@@ -6,6 +6,13 @@ extern "C" {
 /**
  * C interface for 'wedpr_generate_prove_either_equality_relationship_proof'.
  */
+int8_t wedpr_aggregate_ristretto_point(const CInputBuffer *point_sum,
+                                       const CInputBuffer *point_share,
+                                       COutputBuffer* result);
+
+/**
+ * C interface for 'wedpr_generate_prove_either_equality_relationship_proof'.
+ */
 int8_t wedpr_generate_prove_either_equality_relationship_proof(uint64_t c1_value,
                                                                uint64_t c2_value,
                                                                const CInputBuffer *c1_blinding,

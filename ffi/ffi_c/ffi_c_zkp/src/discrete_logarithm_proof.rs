@@ -6,13 +6,17 @@ use crate::utils::{
     CFormatProof, CKnowledgeProof,
 };
 use wedpr_ffi_common::utils::{
-    c_read_raw_pointer, CInputBuffer, FAILURE, SUCCESS,
+    c_read_raw_pointer, CInputBuffer, COutputBuffer, FAILURE, SUCCESS,
 };
-use wedpr_l_crypto_zkp_utils::{bytes_to_point, bytes_to_scalar};
+use wedpr_l_crypto_zkp_utils::{
+    bytes_to_point, bytes_to_scalar, point_to_slice,
+};
+
+use wedpr_ffi_common::utils::c_write_data_to_pointer;
 
 #[cfg(feature = "wedpr_f_zkp_proof")]
 use wedpr_l_crypto_zkp_discrete_logarithm_proof::{
-    prove_either_equality_relationship_proof,
+    aggregate_ristretto_point, prove_either_equality_relationship_proof,
     prove_equality_relationship_proof, prove_format_proof,
     prove_knowledge_proof, prove_product_relationship, prove_sum_relationship,
     verify_either_equality_relationship_proof,
@@ -20,6 +24,42 @@ use wedpr_l_crypto_zkp_discrete_logarithm_proof::{
     verify_knowledge_proof, verify_product_relationship,
     verify_sum_relationship,
 };
+
+#[no_mangle]
+/// C interface for 'wedpr_aggregate_ristretto_point'.
+pub unsafe extern "C" fn wedpr_aggregate_ristretto_point(
+    point_sum_data: &CInputBuffer,
+    point_share_data: &CInputBuffer,
+    result_data: &mut COutputBuffer,
+) -> i8 {
+    // point_sum
+    let point_sum_result =
+        bytes_to_point(c_read_raw_pointer(&point_sum_data).as_slice());
+    let point_sum = match point_sum_result {
+        Ok(v) => v,
+        Err(_) => return FAILURE,
+    };
+
+    // point_share
+    let point_share_result =
+        bytes_to_point(c_read_raw_pointer(&point_share_data).as_slice());
+    let point_share = match point_share_result {
+        Ok(v) => v,
+        Err(_) => return FAILURE,
+    };
+    let sum_result = aggregate_ristretto_point(&point_sum, &point_share);
+    let sum = match sum_result {
+        Ok(v) => v,
+        Err(_) => return FAILURE,
+    };
+    // write the point_sum
+    c_write_data_to_pointer(
+        &point_to_slice(&sum),
+        result_data.data,
+        result_data.len,
+    );
+    SUCCESS
+}
 
 #[no_mangle]
 /// C interface for 'wedpr_generate_prove_either_equality_relationship_proof'.

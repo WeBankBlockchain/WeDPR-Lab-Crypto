@@ -13,6 +13,13 @@ use wedpr_l_crypto_zkp_utils::{
 
 use wedpr_l_utils::error::WedprError;
 
+pub fn aggregate_ristretto_point(
+    point_sum: &RistrettoPoint,
+    point_share: &RistrettoPoint,
+) -> Result<RistrettoPoint, WedprError> {
+    Ok(point_sum + point_share)
+}
+
 /// Proves three commitments satisfying either or equality relationships, i.e.
 /// the values embedded in c1_point = c1_value * c_basepoint + c1_blinding *
 /// blinding_basepoint c2_point = c2_value * c_basepoint + c2_blinding *
