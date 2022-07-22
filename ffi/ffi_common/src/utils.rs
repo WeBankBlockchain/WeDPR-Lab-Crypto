@@ -185,12 +185,11 @@ pub fn c_char_pointer_to_bytes(c_char_pointer: *const c_char) -> Vec<u8> {
 }
 
 /// Reads C raw pointer to Rust bytes.
-pub unsafe fn c_read_raw_data_pointer(c_input_data: *const c_char, c_input_len: usize) -> Vec<u8> {
-    Vec::from_raw_parts(
-        c_input_data as *mut u8,
-        c_input_len,
-        c_input_len,
-    )
+pub unsafe fn c_read_raw_data_pointer(
+    c_input_data: *const c_char,
+    c_input_len: usize,
+) -> Vec<u8> {
+    Vec::from_raw_parts(c_input_data as *mut u8, c_input_len, c_input_len)
 }
 
 pub unsafe fn c_read_raw_pointer(c_input_buffer: &CInputBuffer) -> Vec<u8> {
@@ -205,7 +204,7 @@ pub unsafe fn c_read_raw_pointer(c_input_buffer: &CInputBuffer) -> Vec<u8> {
 pub unsafe fn c_write_data_to_pointer<T: ?Sized + AsRef<[u8]>>(
     rust_bytes: &T,
     c_output_buffer: *mut c_char,
-    c_output_len: usize
+    c_output_len: usize,
 ) -> usize {
     let data_slice = std::slice::from_raw_parts_mut(
         c_output_buffer as *mut u8,
@@ -223,5 +222,9 @@ pub unsafe fn c_write_raw_pointer<T: ?Sized + AsRef<[u8]>>(
     rust_bytes: &T,
     c_output_buffer: &mut COutputBuffer,
 ) {
-    c_output_buffer.len = c_write_data_to_pointer(rust_bytes, c_output_buffer.data, c_output_buffer.len);
+    c_output_buffer.len = c_write_data_to_pointer(
+        rust_bytes,
+        c_output_buffer.data,
+        c_output_buffer.len,
+    );
 }

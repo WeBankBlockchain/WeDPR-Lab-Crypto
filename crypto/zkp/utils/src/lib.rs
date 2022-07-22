@@ -1,12 +1,8 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 //! Common utility functions for ZKP.
-
-use curve25519_dalek::constants::{
-    RISTRETTO_BASEPOINT_COMPRESSED, RISTRETTO_BASEPOINT_POINT,
-};
-
 use curve25519_dalek::{
+    constants::{RISTRETTO_BASEPOINT_COMPRESSED, RISTRETTO_BASEPOINT_POINT},
     ristretto::{CompressedRistretto, RistrettoPoint},
     scalar::Scalar,
 };
@@ -35,6 +31,20 @@ lazy_static! {
 
 /// Serialized data size of a point.
 const RISTRETTO_POINT_SIZE_IN_BYTES: usize = 32;
+const SCALAR_SIZE_IN_BYTE: usize = 32;
+
+/// A trait for serializing a value as raw data for insertion into PSBT
+/// key-value pairs.
+pub trait Serialize {
+    /// Serialize a value as raw data.
+    fn serialize(&self) -> Vec<u8>;
+}
+
+/// A trait for deserializing a value from raw data in PSBT key-value pairs.
+pub trait Deserialize: Sized {
+    /// Deserialize a value from raw data.
+    fn deserialize(bytes: &[u8]) -> Result<Self, WedprError>;
+}
 
 // ZKP data to verify the balance relationship among value commitments.
 // For example, given C(x), C(y), C(z), this proof data can be used to
@@ -50,11 +60,107 @@ pub struct BalanceProof {
     pub m5: Scalar,
     pub m6: Scalar,
 }
+
+impl Serialize for BalanceProof {
+    fn serialize(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(8 * SCALAR_SIZE_IN_BYTE);
+        buf.extend(&(scalar_to_bytes(&self.check1)));
+        buf.extend(&(scalar_to_bytes(&self.check2)));
+        buf.extend(&(scalar_to_bytes(&self.m1)));
+        buf.extend(&(scalar_to_bytes(&self.m2)));
+        buf.extend(&(scalar_to_bytes(&self.m3)));
+        buf.extend(&(scalar_to_bytes(&self.m4)));
+        buf.extend(&(scalar_to_bytes(&self.m5)));
+        buf.extend(&(scalar_to_bytes(&self.m6)));
+        buf
+    }
+}
+
+impl Deserialize for BalanceProof {
+    fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
+        if bytes.len() < 8 * SCALAR_SIZE_IN_BYTE {
+            return Err(WedprError::ArgumentError);
+        }
+        // decode check1
+        let mut offset = 0;
+        let check1 =
+            bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode check2
+        offset += SCALAR_SIZE_IN_BYTE;
+        let check2 =
+            bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m1
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m1 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m2
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m2 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m3
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m3 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m4
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m4 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m5
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m5 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m6
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m6 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        Ok(BalanceProof {
+            check1: check1,
+            check2: check2,
+            m1: m1,
+            m2: m2,
+            m3: m3,
+            m4: m4,
+            m5: m5,
+            m6: m6,
+        })
+    }
+}
 #[derive(Default, Debug, Clone)]
 pub struct KnowledgeProof {
     pub t1: RistrettoPoint,
     pub m1: Scalar,
     pub m2: Scalar,
+}
+
+impl Serialize for KnowledgeProof {
+    fn serialize(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(
+            2 * SCALAR_SIZE_IN_BYTE + RISTRETTO_POINT_SIZE_IN_BYTES,
+        );
+        buf.extend(&(point_to_bytes(&self.t1)));
+        buf.extend(&(scalar_to_bytes(&self.m1)));
+        buf.extend(&(scalar_to_bytes(&self.m2)));
+        buf
+    }
+}
+
+impl Deserialize for KnowledgeProof {
+    fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
+        if bytes.len() < 2 * SCALAR_SIZE_IN_BYTE + RISTRETTO_POINT_SIZE_IN_BYTES
+        {
+            return Err(WedprError::ArgumentError);
+        }
+        // decode t1
+        let mut offset = 0;
+        let t1 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode m1
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let m1 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m2
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m2 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        Ok(KnowledgeProof {
+            t1: t1,
+            m1: m1,
+            m2: m2,
+        })
+    }
 }
 
 #[derive(Default, Debug, Clone)]
@@ -63,6 +169,51 @@ pub struct FormatProof {
     pub t2: RistrettoPoint,
     pub m1: Scalar,
     pub m2: Scalar,
+}
+
+impl Serialize for FormatProof {
+    fn serialize(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(
+            2 * SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES,
+        );
+        buf.extend(&(point_to_bytes(&self.t1)));
+        buf.extend(&(point_to_bytes(&self.t2)));
+        buf.extend(&(scalar_to_bytes(&self.m1)));
+        buf.extend(&(scalar_to_bytes(&self.m2)));
+        buf
+    }
+}
+
+impl Deserialize for FormatProof {
+    fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
+        if bytes.len()
+            < 2 * SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES
+        {
+            return Err(WedprError::ArgumentError);
+        }
+        // decode t1
+        let mut offset = 0;
+        let t1 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode t2
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let t2 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode m1
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let m1 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m2
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m2 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        Ok(FormatProof {
+            t1: t1,
+            t2: t2,
+            m1: m1,
+            m2: m2,
+        })
+    }
 }
 
 #[derive(Default, Debug, Clone)]
@@ -77,11 +228,117 @@ pub struct ArithmeticProof {
     pub m5: Scalar,
 }
 
+impl Serialize for ArithmeticProof {
+    fn serialize(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(
+            5 * SCALAR_SIZE_IN_BYTE + 3 * RISTRETTO_POINT_SIZE_IN_BYTES,
+        );
+        buf.extend(&(point_to_bytes(&self.t1)));
+        buf.extend(&(point_to_bytes(&self.t2)));
+        buf.extend(&(point_to_bytes(&self.t3)));
+        buf.extend(&(scalar_to_bytes(&self.m1)));
+        buf.extend(&(scalar_to_bytes(&self.m2)));
+        buf.extend(&(scalar_to_bytes(&self.m3)));
+        buf.extend(&(scalar_to_bytes(&self.m4)));
+        buf.extend(&(scalar_to_bytes(&self.m5)));
+        buf
+    }
+}
+
+impl Deserialize for ArithmeticProof {
+    fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
+        if bytes.len()
+            < 5 * SCALAR_SIZE_IN_BYTE + 3 * RISTRETTO_POINT_SIZE_IN_BYTES
+        {
+            return Err(WedprError::ArgumentError);
+        }
+        // decode t1
+        let mut offset = 0;
+        let t1 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode t2
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let t2 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode t3
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let t3 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode m1
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let m1 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m2
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m2 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m3
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m3 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m4
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m4 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode m5
+        offset += SCALAR_SIZE_IN_BYTE;
+        let m5 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        Ok(ArithmeticProof {
+            t1: t1,
+            t2: t2,
+            t3: t3,
+            m1: m1,
+            m2: m2,
+            m3: m3,
+            m4: m4,
+            m5: m5,
+        })
+    }
+}
+
 #[derive(Default, Debug, Clone)]
 pub struct EqualityProof {
     pub m1: Scalar,
     pub t1: RistrettoPoint,
     pub t2: RistrettoPoint,
+}
+
+impl Serialize for EqualityProof {
+    fn serialize(&self) -> Vec<u8> {
+        let mut buf = Vec::with_capacity(
+            SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES,
+        );
+        buf.extend(&(scalar_to_bytes(&self.m1)));
+        buf.extend(&(point_to_bytes(&self.t1)));
+        buf.extend(&(point_to_bytes(&self.t2)));
+        buf
+    }
+}
+
+impl Deserialize for EqualityProof {
+    fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
+        if bytes.len() < SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES
+        {
+            return Err(WedprError::ArgumentError);
+        }
+        // decode m1
+        let mut offset = 0;
+        let m1 = bytes_to_scalar(&bytes[offset..offset + SCALAR_SIZE_IN_BYTE])?;
+        // decode t1
+        offset += SCALAR_SIZE_IN_BYTE;
+        let t1 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        // decode t2
+        offset += RISTRETTO_POINT_SIZE_IN_BYTES;
+        let t2 = bytes_to_point(
+            &bytes[offset..offset + RISTRETTO_POINT_SIZE_IN_BYTES],
+        )?;
+        Ok(EqualityProof {
+            m1: m1,
+            t1: t1,
+            t2: t2,
+        })
+    }
 }
 
 /// Gets a random Scalar.
