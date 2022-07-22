@@ -1,6 +1,7 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 //! Zero-knowledge proof (ZKP) functions based on DLP construction.
+extern crate hex;
 
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
@@ -1046,8 +1047,9 @@ pub fn get_random_u8() -> u8 {
 mod tests {
     use super::*;
     use wedpr_l_crypto_zkp_utils::{
-        get_random_u32, BASEPOINT_G1, BASEPOINT_G2,
+        get_random_u32, Serialize, BASEPOINT_G1, BASEPOINT_G2,
     };
+    use wedpr_l_macros::wedpr_println;
 
     const BATCH_SIZE: usize = 10;
 
@@ -1095,9 +1097,33 @@ mod tests {
             )
             .unwrap()
         );
+        wedpr_println!("#### verify_either_equality_relationship_proof:");
+        wedpr_println!(
+            "#c1_point: {:?}",
+            hex::encode(point_to_bytes(&c1_point))
+        );
+        wedpr_println!(
+            "#c2_point: {:?}",
+            hex::encode(point_to_bytes(&c2_point))
+        );
+        wedpr_println!(
+            "#c3_point: {:?}",
+            hex::encode(point_to_bytes(&c3_point))
+        );
 
+        wedpr_println!(
+            "#basepoint: {:?}",
+            hex::encode(point_to_bytes(&c_basepoint))
+        );
+        wedpr_println!(
+            "#blinding_basepoint: {:?}",
+            hex::encode(point_to_bytes(&blinding_basepoint))
+        );
+        wedpr_println!("#proof: {:?}", hex::encode(proof.serialize()));
+        wedpr_println!(
+            "#### verify_either_equality_relationship_proof print finish"
+        );
         let zero_c1_point = c1_blinding * blinding_basepoint;
-
         let proof_zero = prove_either_equality_relationship_proof(
             0,
             c2_value,
@@ -1106,6 +1132,35 @@ mod tests {
             &c3_blinding,
             &c_basepoint,
             &blinding_basepoint,
+        );
+        wedpr_println!(
+            "#### verify_either_equality_relationship_proof: case proof zero"
+        );
+        wedpr_println!(
+            "#c1_point: {:?}",
+            hex::encode(point_to_bytes(&zero_c1_point))
+        );
+        wedpr_println!(
+            "#c2_point: {:?}",
+            hex::encode(point_to_bytes(&c2_point))
+        );
+        wedpr_println!(
+            "#c3_point: {:?}",
+            hex::encode(point_to_bytes(&c3_point))
+        );
+
+        wedpr_println!(
+            "#basepoint: {:?}",
+            hex::encode(point_to_bytes(&c_basepoint))
+        );
+        wedpr_println!(
+            "#blinding_basepoint: {:?}",
+            hex::encode(point_to_bytes(&blinding_basepoint))
+        );
+        wedpr_println!("#proof: {:?}", hex::encode(proof_zero.serialize()));
+        wedpr_println!(
+            "#### verify_either_equality_relationship_proof: case proof zero \
+             print finish"
         );
         assert_eq!(
             true,
@@ -1160,6 +1215,21 @@ mod tests {
                 &[c1_basepoint, blinding_basepoint],
             );
 
+            wedpr_println!("#### verify_knowledge_proof: print begin");
+            wedpr_println!(
+                "#c1_point: {:?}",
+                hex::encode(&point_to_bytes(&c1_point))
+            );
+            wedpr_println!("#proof: {:?}", hex::encode(proof.serialize()));
+            wedpr_println!(
+                "#c1_basepoint: {:?}",
+                hex::encode(&point_to_bytes(&c1_basepoint))
+            );
+            wedpr_println!(
+                "#blinding_basepoint: {:?}",
+                hex::encode(&point_to_bytes(&blinding_basepoint))
+            );
+            wedpr_println!("#### verify_knowledge_proof: print end");
             assert_eq!(
                 true,
                 verify_knowledge_proof(
@@ -1221,7 +1291,29 @@ mod tests {
                 &[c1_basepoint, blinding_basepoint],
             );
             let c2_point = c1_blinding * c2_basepoint;
-
+            wedpr_println!("#### verify_format_proof: print begin");
+            wedpr_println!(
+                "#c1_point: {:?}",
+                hex::encode(&point_to_bytes(&c1_point))
+            );
+            wedpr_println!(
+                "#c2_point: {:?}",
+                hex::encode(&point_to_bytes(&c2_point))
+            );
+            wedpr_println!("#proof: {:?}", hex::encode(proof.serialize()));
+            wedpr_println!(
+                "#c1_basepoint: {:?}",
+                hex::encode(&point_to_bytes(&c1_basepoint))
+            );
+            wedpr_println!(
+                "#c2_basepoint: {:?}",
+                hex::encode(&point_to_bytes(&c2_basepoint))
+            );
+            wedpr_println!(
+                "#blinding_basepoint: {:?}",
+                hex::encode(&point_to_bytes(&blinding_basepoint))
+            );
+            wedpr_println!("#### verify_format_proof: print end");
             assert_eq!(
                 true,
                 verify_format_proof(
@@ -1298,7 +1390,6 @@ mod tests {
             &[Scalar::from(c1_value + c2_value), c3_blinding],
             &[value_basepoint, blinding_basepoint],
         );
-
         assert_eq!(
             true,
             verify_sum_relationship(
@@ -1311,6 +1402,29 @@ mod tests {
             )
             .unwrap()
         );
+        wedpr_println!("#### verify_sum_relationship: print begin");
+        wedpr_println!(
+            "#c1_point: {:?}",
+            hex::encode(&point_to_bytes(&c1_point))
+        );
+        wedpr_println!(
+            "#c2_point: {:?}",
+            hex::encode(&point_to_bytes(&c2_point))
+        );
+        wedpr_println!(
+            "#c3_point: {:?}",
+            hex::encode(&point_to_bytes(&c3_point))
+        );
+        wedpr_println!("#proof: {:?}", hex::encode(proof.serialize()));
+        wedpr_println!(
+            "#value_basepoint: {:?}",
+            hex::encode(&point_to_bytes(&value_basepoint))
+        );
+        wedpr_println!(
+            "#blinding_basepoint: {:?}",
+            hex::encode(&point_to_bytes(&blinding_basepoint))
+        );
+        wedpr_println!("#### verify_sum_relationship: print end");
     }
 
     #[test]
@@ -1430,6 +1544,29 @@ mod tests {
             &[value_basepoint, blinding_basepoint],
         );
 
+        wedpr_println!("#### verify_product_relationship: print begin");
+        wedpr_println!(
+            "#c1_point: {:?}",
+            hex::encode(&point_to_bytes(&c1_point))
+        );
+        wedpr_println!(
+            "#c2_point: {:?}",
+            hex::encode(&point_to_bytes(&c2_point))
+        );
+        wedpr_println!(
+            "#c3_point: {:?}",
+            hex::encode(&point_to_bytes(&c3_point))
+        );
+        wedpr_println!("#proof: {:?}", hex::encode(proof.serialize()));
+        wedpr_println!(
+            "#value_basepoint: {:?}",
+            hex::encode(&point_to_bytes(&value_basepoint))
+        );
+        wedpr_println!(
+            "#blinding_basepoint: {:?}",
+            hex::encode(&point_to_bytes(&blinding_basepoint))
+        );
+        wedpr_println!("#### verify_product_relationship: print end");
         assert_eq!(
             true,
             verify_product_relationship(
@@ -1541,6 +1678,25 @@ mod tests {
             &basepoint1,
             &basepoint2,
         );
+        wedpr_println!("#### verify_equality_relationship_proof: print begin");
+        wedpr_println!(
+            "#c1_point: {:?}",
+            hex::encode(&point_to_bytes(&c1_point))
+        );
+        wedpr_println!(
+            "#c2_point: {:?}",
+            hex::encode(&point_to_bytes(&c2_point))
+        );
+        wedpr_println!("#proof: {:?}", hex::encode(proof.serialize()));
+        wedpr_println!(
+            "#basepoint1: {:?}",
+            hex::encode(&point_to_bytes(&basepoint1))
+        );
+        wedpr_println!(
+            "#basepoint2: {:?}",
+            hex::encode(&point_to_bytes(&basepoint2))
+        );
+        wedpr_println!("#### verify_equality_relationship_proof: print end");
         assert_eq!(
             true,
             verify_equality_relationship_proof(

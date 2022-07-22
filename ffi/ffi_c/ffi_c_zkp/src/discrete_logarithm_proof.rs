@@ -1,16 +1,11 @@
 use crate::utils::{
-    c_input_buffer_to_point, read_c_arithmetic_proof, read_c_balance_proof,
-    read_c_equality_proof, read_c_format_proof, read_c_knowledge_proof,
-    write_arithmetic_proof, write_balance_proof, write_equality_proof,
-    write_format_proof, write_knowledger_proof, CArithmeticProof,
-    CBalanceProof, CEqualityProof, CFormatProof, CKnowledgeProof,
+    c_input_buffer_to_point, c_input_buffer_to_scalar, read_c_arithmetic_proof,
+    read_c_balance_proof, read_c_equality_proof, read_c_format_proof,
+    read_c_knowledge_proof, write_arithmetic_proof, write_balance_proof,
+    write_equality_proof, write_format_proof, write_knowledger_proof,
 };
-use wedpr_ffi_common::utils::{
-    c_read_raw_pointer, CInputBuffer, COutputBuffer, FAILURE, SUCCESS,
-};
-use wedpr_l_crypto_zkp_utils::{
-    bytes_to_point, bytes_to_scalar, point_to_slice,
-};
+use wedpr_ffi_common::utils::{CInputBuffer, COutputBuffer, FAILURE, SUCCESS};
+use wedpr_l_crypto_zkp_utils::point_to_slice;
 
 use wedpr_ffi_common::utils::c_write_data_to_pointer;
 
@@ -69,40 +64,36 @@ pub unsafe extern "C" fn wedpr_generate_prove_either_equality_relationship_proof
     c3_blinding: &CInputBuffer,
     c_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
-    c_balance_proof: &mut CBalanceProof,
+    c_balance_proof: &mut COutputBuffer,
 ) -> i8 {
     // c1_blinding
-    let c1_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(&c1_blinding).as_slice());
+    let c1_blinding_result = c_input_buffer_to_scalar(&c1_blinding);
     let c1_blinding_value = match c1_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_blinding
-    let c2_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(&c2_blinding).as_slice());
+    let c2_blinding_result = c_input_buffer_to_scalar(&c2_blinding);
     let c2_blinding_value = match c2_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
 
     // c3_blinding
-    let c3_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c3_blinding).as_slice());
+    let c3_blinding_result = c_input_buffer_to_scalar(c3_blinding);
     let c3_blinding_value = match c3_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c_basepoint
-    let c_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c_basepoint_data).as_slice());
+    let c_basepoint_result = c_input_buffer_to_point(c_basepoint_data);
     let c_basepoint = match c_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -127,27 +118,24 @@ pub unsafe extern "C" fn wedpr_verify_either_equality_relationship_proof(
     c1_point_data: &CInputBuffer,
     c2_point_data: &CInputBuffer,
     c3_point_data: &CInputBuffer,
-    proof: &CBalanceProof,
+    proof: &CInputBuffer,
     c_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
 ) -> i8 {
     // c1_point
-    let c1_point_result =
-        bytes_to_point(c_read_raw_pointer(c1_point_data).as_slice());
+    let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_point
-    let c2_point_result =
-        bytes_to_point(c_read_raw_pointer(c2_point_data).as_slice());
+    let c2_point_result = c_input_buffer_to_point(c2_point_data);
     let c2_point = match c2_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c3_point
-    let c3_point_result =
-        bytes_to_point(c_read_raw_pointer(c3_point_data).as_slice());
+    let c3_point_result = c_input_buffer_to_point(c3_point_data);
     let c3_point = match c3_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -159,15 +147,14 @@ pub unsafe extern "C" fn wedpr_verify_either_equality_relationship_proof(
         Err(_) => return FAILURE,
     };
     // c_basepoint
-    let c_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c_basepoint_data).as_slice());
+    let c_basepoint_result = c_input_buffer_to_point(c_basepoint_data);
     let c_basepoint = match c_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -197,26 +184,24 @@ pub unsafe extern "C" fn wedpr_generate_prove_knowledge_proof(
     c_blinding_data: &CInputBuffer,
     c_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
-    generated_proof: &mut CKnowledgeProof,
+    generated_proof: &mut COutputBuffer,
 ) -> i8 {
     // c_blinding
-    let c_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c_blinding_data).as_slice());
+    let c_blinding_result = c_input_buffer_to_scalar(c_blinding_data);
     let c_blinding_value = match c_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
 
     // c_basepoint
-    let c_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c_basepoint_data).as_slice());
+    let c_basepoint_result = c_input_buffer_to_point(c_basepoint_data);
     let c_basepoint = match c_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -236,13 +221,12 @@ pub unsafe extern "C" fn wedpr_generate_prove_knowledge_proof(
 /// C interface for 'wedpr_verify_knowledge_proof'.
 pub unsafe extern "C" fn wedpr_verify_knowledge_proof(
     c_point_data: &CInputBuffer,
-    proof: &CKnowledgeProof,
+    proof: &CInputBuffer,
     c_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
 ) -> i8 {
     // c_point
-    let c_point_result =
-        bytes_to_point(c_read_raw_pointer(c_point_data).as_slice());
+    let c_point_result = c_input_buffer_to_point(c_point_data);
     let c_point = match c_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -254,15 +238,14 @@ pub unsafe extern "C" fn wedpr_verify_knowledge_proof(
         Err(_) => return FAILURE,
     };
     // c_basepoint
-    let c_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c_basepoint_data).as_slice());
+    let c_basepoint_result = c_input_buffer_to_point(c_basepoint_data);
     let c_basepoint = match c_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -292,32 +275,29 @@ pub unsafe extern "C" fn wedpr_generate_prove_format_proof(
     c1_basepoint_data: &CInputBuffer,
     c2_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
-    generated_format_proof: &mut CFormatProof,
+    generated_format_proof: &mut COutputBuffer,
 ) -> i8 {
     // c_blinding
-    let c_blinding_data_result =
-        bytes_to_scalar(c_read_raw_pointer(c_blinding_data).as_slice());
+    let c_blinding_data_result = c_input_buffer_to_scalar(c_blinding_data);
     let c_blinding_value = match c_blinding_data_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c1_basepoint
-    let c1_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c1_basepoint_data).as_slice());
+    let c1_basepoint_result = c_input_buffer_to_point(c1_basepoint_data);
     let c1_basepoint = match c1_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_basepoint
-    let c2_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c2_basepoint_data).as_slice());
+    let c2_basepoint_result = c_input_buffer_to_point(c2_basepoint_data);
     let c2_basepoint = match c2_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -338,21 +318,19 @@ pub unsafe extern "C" fn wedpr_generate_prove_format_proof(
 pub unsafe extern "C" fn wedpr_verify_format_proof(
     c1_point_data: &CInputBuffer,
     c2_point_data: &CInputBuffer,
-    proof: &CFormatProof,
+    proof: &CInputBuffer,
     c1_basepoint_data: &CInputBuffer,
     c2_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
 ) -> i8 {
     // c1_point
-    let c1_point_result =
-        bytes_to_point(c_read_raw_pointer(c1_point_data).as_slice());
+    let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_point
-    let c2_point_result =
-        bytes_to_point(c_read_raw_pointer(c2_point_data).as_slice());
+    let c2_point_result = c_input_buffer_to_point(c2_point_data);
     let c2_point = match c2_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -364,22 +342,20 @@ pub unsafe extern "C" fn wedpr_verify_format_proof(
         Err(_) => return FAILURE,
     };
     // c1_basepoint
-    let c1_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c1_basepoint_data).as_slice());
+    let c1_basepoint_result = c_input_buffer_to_point(c1_basepoint_data);
     let c1_basepoint = match c1_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_basepoint
-    let c2_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(c2_basepoint_data).as_slice());
+    let c2_basepoint_result = c_input_buffer_to_point(c2_basepoint_data);
     let c2_basepoint = match c2_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -414,39 +390,35 @@ pub unsafe extern "C" fn wedpr_generate_prove_sum_relationship(
     c3_blinding_data: &CInputBuffer,
     value_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
-    proof: &mut CArithmeticProof,
+    proof: &mut COutputBuffer,
 ) -> i8 {
     // c1_blinding
-    let c1_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c1_blinding_data).as_slice());
+    let c1_blinding_result = c_input_buffer_to_scalar(c1_blinding_data);
     let c1_blinding = match c1_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_blinding
-    let c2_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c2_blinding_data).as_slice());
+    let c2_blinding_result = c_input_buffer_to_scalar(c2_blinding_data);
     let c2_blinding = match c2_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c3_blinding
-    let c3_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c3_blinding_data).as_slice());
+    let c3_blinding_result = c_input_buffer_to_scalar(c3_blinding_data);
     let c3_blinding = match c3_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // value_basepoint
-    let value_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(value_basepoint_data).as_slice());
+    let value_basepoint_result = c_input_buffer_to_point(value_basepoint_data);
     let value_basepoint = match value_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -470,27 +442,24 @@ pub unsafe extern "C" fn wedpr_verify_sum_relationship(
     c1_point_data: &CInputBuffer,
     c2_point_data: &CInputBuffer,
     c3_point_data: &CInputBuffer,
-    proof: &CArithmeticProof,
+    proof: &CInputBuffer,
     value_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
 ) -> i8 {
     // c1_point
-    let c1_point_result =
-        bytes_to_point(c_read_raw_pointer(c1_point_data).as_slice());
+    let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_point
-    let c2_point_result =
-        bytes_to_point(c_read_raw_pointer(c2_point_data).as_slice());
+    let c2_point_result = c_input_buffer_to_point(c2_point_data);
     let c2_point = match c2_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c3_point
-    let c3_point_result =
-        bytes_to_point(c_read_raw_pointer(c3_point_data).as_slice());
+    let c3_point_result = c_input_buffer_to_point(c3_point_data);
     let c3_point = match c3_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -502,15 +471,14 @@ pub unsafe extern "C" fn wedpr_verify_sum_relationship(
         Err(_) => return FAILURE,
     };
     // value_basepoint
-    let value_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(value_basepoint_data).as_slice());
+    let value_basepoint_result = c_input_buffer_to_point(value_basepoint_data);
     let value_basepoint = match value_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -543,40 +511,36 @@ pub unsafe extern "C" fn wedpr_generate_prove_product_relationship(
     c3_blinding_data: &CInputBuffer,
     value_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
-    generated_proof: &mut CArithmeticProof,
+    generated_proof: &mut COutputBuffer,
 ) -> i8 {
     // c1_blinding
-    let c1_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c1_blinding_data).as_slice());
+    let c1_blinding_result = c_input_buffer_to_scalar(c1_blinding_data);
     let c1_blinding = match c1_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_blinding
-    let c2_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c2_blinding_data).as_slice());
+    let c2_blinding_result = c_input_buffer_to_scalar(c2_blinding_data);
     let c2_blinding = match c2_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c3_blinding
-    let c3_blinding_result =
-        bytes_to_scalar(c_read_raw_pointer(c3_blinding_data).as_slice());
+    let c3_blinding_result = c_input_buffer_to_scalar(c3_blinding_data);
     let c3_blinding = match c3_blinding_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
 
     // value_basepoint
-    let value_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(value_basepoint_data).as_slice());
+    let value_basepoint_result = c_input_buffer_to_point(value_basepoint_data);
     let value_basepoint = match value_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -601,27 +565,24 @@ pub unsafe extern "C" fn wedpr_verify_product_relationship(
     c1_point_data: &CInputBuffer,
     c2_point_data: &CInputBuffer,
     c3_point_data: &CInputBuffer,
-    proof: &CArithmeticProof,
+    proof: &CInputBuffer,
     value_basepoint_data: &CInputBuffer,
     blinding_basepoint_data: &CInputBuffer,
 ) -> i8 {
     // c1_point
-    let c1_point_result =
-        bytes_to_point(c_read_raw_pointer(c1_point_data).as_slice());
+    let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_point
-    let c2_point_result =
-        bytes_to_point(c_read_raw_pointer(c2_point_data).as_slice());
+    let c2_point_result = c_input_buffer_to_point(c2_point_data);
     let c2_point = match c2_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c3_point
-    let c3_point_result =
-        bytes_to_point(c_read_raw_pointer(c3_point_data).as_slice());
+    let c3_point_result = c_input_buffer_to_point(c3_point_data);
     let c3_point = match c3_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -633,15 +594,14 @@ pub unsafe extern "C" fn wedpr_verify_product_relationship(
         Err(_) => return FAILURE,
     };
     // value_basepoint
-    let value_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(value_basepoint_data).as_slice());
+    let value_basepoint_result = c_input_buffer_to_point(value_basepoint_data);
     let value_basepoint = match value_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // blinding_basepoint
     let blinding_basepoint_result =
-        bytes_to_point(c_read_raw_pointer(blinding_basepoint_data).as_slice());
+        c_input_buffer_to_point(blinding_basepoint_data);
     let blinding_basepoint = match blinding_basepoint_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -670,25 +630,22 @@ pub unsafe extern "C" fn wedpr_generate_prove_equality_relationship_proof(
     c1_value_data: &CInputBuffer,
     basepoint1_data: &CInputBuffer,
     basepoint2_data: &CInputBuffer,
-    generated_proof: &mut CEqualityProof,
+    generated_proof: &mut COutputBuffer,
 ) -> i8 {
     // c1_value
-    let c1_value_result =
-        bytes_to_scalar(c_read_raw_pointer(c1_value_data).as_slice());
+    let c1_value_result = c_input_buffer_to_scalar(c1_value_data);
     let c1_value = match c1_value_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // basepoint1
-    let basepoint1_result =
-        bytes_to_point(c_read_raw_pointer(basepoint1_data).as_slice());
+    let basepoint1_result = c_input_buffer_to_point(basepoint1_data);
     let basepoint1 = match basepoint1_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // basepoint2
-    let basepoint2_result =
-        bytes_to_point(c_read_raw_pointer(basepoint2_data).as_slice());
+    let basepoint2_result = c_input_buffer_to_point(basepoint2_data);
     let basepoint2 = match basepoint2_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -704,20 +661,18 @@ pub unsafe extern "C" fn wedpr_generate_prove_equality_relationship_proof(
 pub unsafe extern "C" fn wedpr_verify_equality_relationship_proof(
     c1_point_data: &CInputBuffer,
     c2_point_data: &CInputBuffer,
-    proof: &CEqualityProof,
+    proof: &CInputBuffer,
     basepoint1_data: &CInputBuffer,
     basepoint2_data: &CInputBuffer,
 ) -> i8 {
     // c1_point
-    let c1_point_result =
-        bytes_to_point(c_read_raw_pointer(c1_point_data).as_slice());
+    let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // c2_point
-    let c2_point_result =
-        bytes_to_point(c_read_raw_pointer(c2_point_data).as_slice());
+    let c2_point_result = c_input_buffer_to_point(c2_point_data);
     let c2_point = match c2_point_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
@@ -729,15 +684,13 @@ pub unsafe extern "C" fn wedpr_verify_equality_relationship_proof(
         Err(_) => return FAILURE,
     };
     // basepoint1
-    let basepoint1_result =
-        bytes_to_point(c_read_raw_pointer(basepoint1_data).as_slice());
+    let basepoint1_result = c_input_buffer_to_point(basepoint1_data);
     let basepoint1 = match basepoint1_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
     // basepoint2
-    let basepoint2_result =
-        bytes_to_point(c_read_raw_pointer(basepoint2_data).as_slice());
+    let basepoint2_result = c_input_buffer_to_point(basepoint2_data);
     let basepoint2 = match basepoint2_result {
         Ok(v) => v,
         Err(_) => return FAILURE,

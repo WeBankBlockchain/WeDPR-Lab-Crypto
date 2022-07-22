@@ -1,77 +1,31 @@
 use curve25519_dalek::{ristretto::RistrettoPoint, scalar::Scalar};
 use wedpr_ffi_common::utils::{
     c_read_raw_data_pointer, c_read_raw_pointer, c_write_data_to_pointer,
-    CInputBuffer,
+    CInputBuffer, COutputBuffer,
 };
 use wedpr_l_crypto_zkp_utils::{
-    bytes_to_point, bytes_to_scalar, point_to_slice, scalar_to_slice,
-    ArithmeticProof, BalanceProof, EqualityProof, FormatProof, KnowledgeProof,
+    bytes_to_point, bytes_to_scalar, ArithmeticProof, BalanceProof,
+    Deserialize, EqualityProof, FormatProof, KnowledgeProof, Serialize,
 };
 use wedpr_l_utils::error::WedprError;
 
 // From Rust to C/C++.
 use libc::c_char;
-
-#[repr(C)]
-pub struct CBalanceProof {
-    pub check1: *mut c_char,
-    pub check2: *mut c_char,
-    pub m1: *mut c_char,
-    pub m2: *mut c_char,
-    pub m3: *mut c_char,
-    pub m4: *mut c_char,
-    pub m5: *mut c_char,
-    pub m6: *mut c_char,
-    pub scalar_len: usize,
-}
-
-#[repr(C)]
-pub struct CKnowledgeProof {
-    pub t1: *mut c_char,
-    pub m1: *mut c_char,
-    pub m2: *mut c_char,
-    pub scalar_len: usize,
-    pub point_len: usize,
-}
-
-#[repr(C)]
-pub struct CFormatProof {
-    pub t1: *mut c_char,
-    pub t2: *mut c_char,
-    pub m1: *mut c_char,
-    pub m2: *mut c_char,
-    pub scalar_len: usize,
-    pub point_len: usize,
-}
-
-#[repr(C)]
-pub struct CArithmeticProof {
-    pub t1: *mut c_char,
-    pub t2: *mut c_char,
-    pub t3: *mut c_char,
-    pub m1: *mut c_char,
-    pub m2: *mut c_char,
-    pub m3: *mut c_char,
-    pub m4: *mut c_char,
-    pub m5: *mut c_char,
-    pub scalar_len: usize,
-    pub point_len: usize,
-}
-
-#[repr(C)]
-pub struct CEqualityProof {
-    pub t1: *mut c_char,
-    pub t2: *mut c_char,
-    pub m1: *mut c_char,
-    pub scalar_len: usize,
-    pub point_len: usize,
-}
-
 pub unsafe fn c_input_buffer_to_point(
     input_data: &CInputBuffer,
 ) -> Result<RistrettoPoint, WedprError> {
     let rust_bytes_input = c_read_raw_pointer(&input_data);
     let result = bytes_to_point(&rust_bytes_input.as_slice());
+    // avoid the input c buffer been released
+    std::mem::forget(rust_bytes_input);
+    result
+}
+
+pub unsafe fn c_input_buffer_to_scalar(
+    input_data: &CInputBuffer,
+) -> Result<Scalar, WedprError> {
+    let rust_bytes_input = c_read_raw_pointer(&input_data);
+    let result = bytes_to_scalar(&rust_bytes_input.as_slice());
     // avoid the input c buffer been released
     std::mem::forget(rust_bytes_input);
     result
@@ -101,280 +55,112 @@ pub unsafe fn c_bytes_to_scalar(
 
 pub unsafe fn write_balance_proof(
     balance_proof: &BalanceProof,
-    c_balance_proof: &mut CBalanceProof,
+    c_balance_proof: &mut COutputBuffer,
 ) {
-    // check1
     c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.check1),
-        c_balance_proof.check1,
-        c_balance_proof.scalar_len,
-    );
-    // check2
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.check2),
-        c_balance_proof.check2,
-        c_balance_proof.scalar_len,
-    );
-    // m1
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.m1),
-        c_balance_proof.m1,
-        c_balance_proof.scalar_len,
-    );
-    // m2
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.m2),
-        c_balance_proof.m2,
-        c_balance_proof.scalar_len,
-    );
-    // m3
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.m3),
-        c_balance_proof.m3,
-        c_balance_proof.scalar_len,
-    );
-    // m4
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.m4),
-        c_balance_proof.m4,
-        c_balance_proof.scalar_len,
-    );
-    // m5
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.m5),
-        c_balance_proof.m5,
-        c_balance_proof.scalar_len,
-    );
-    // m6
-    c_write_data_to_pointer(
-        &scalar_to_slice(&balance_proof.m6),
-        c_balance_proof.m6,
-        c_balance_proof.scalar_len,
+        &balance_proof.serialize(),
+        c_balance_proof.data,
+        c_balance_proof.len,
     );
 }
 
 pub unsafe fn read_c_balance_proof(
-    c_balance_proof: &CBalanceProof,
+    c_balance_proof: &CInputBuffer,
 ) -> Result<BalanceProof, WedprError> {
-    let check1 =
-        c_bytes_to_scalar(c_balance_proof.check1, c_balance_proof.scalar_len)?;
-
-    let check2 =
-        c_bytes_to_scalar(c_balance_proof.check2, c_balance_proof.scalar_len)?;
-    let m1 = c_bytes_to_scalar(c_balance_proof.m1, c_balance_proof.scalar_len)?;
-    let m2 = c_bytes_to_scalar(c_balance_proof.m2, c_balance_proof.scalar_len)?;
-    let m3 = c_bytes_to_scalar(c_balance_proof.m3, c_balance_proof.scalar_len)?;
-    let m4 = c_bytes_to_scalar(c_balance_proof.m4, c_balance_proof.scalar_len)?;
-    let m5 = c_bytes_to_scalar(c_balance_proof.m5, c_balance_proof.scalar_len)?;
-    let m6 = c_bytes_to_scalar(c_balance_proof.m6, c_balance_proof.scalar_len)?;
-    return Ok(BalanceProof {
-        check1: check1,
-        check2: check2,
-        m1: m1,
-        m2: m2,
-        m3: m3,
-        m4: m4,
-        m5: m5,
-        m6: m6,
-    });
+    let proof =
+        c_read_raw_data_pointer(c_balance_proof.data, c_balance_proof.len);
+    let balance_proof = Deserialize::deserialize(&proof);
+    // avoid the input c buffer been released
+    std::mem::forget(proof);
+    balance_proof
 }
 
 pub unsafe fn write_knowledger_proof(
     knowledge_proof: &KnowledgeProof,
-    c_knowledge_proof: &mut CKnowledgeProof,
+    c_knowledge_proof: &mut COutputBuffer,
 ) {
     c_write_data_to_pointer(
-        &point_to_slice(&knowledge_proof.t1),
-        c_knowledge_proof.t1,
-        c_knowledge_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&knowledge_proof.m1),
-        c_knowledge_proof.m1,
-        c_knowledge_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&knowledge_proof.m2),
-        c_knowledge_proof.m2,
-        c_knowledge_proof.scalar_len,
+        &knowledge_proof.serialize(),
+        c_knowledge_proof.data,
+        c_knowledge_proof.len,
     );
 }
 
 pub unsafe fn read_c_knowledge_proof(
-    c_knowledge_proof: &CKnowledgeProof,
+    c_knowledge_proof: &CInputBuffer,
 ) -> Result<KnowledgeProof, WedprError> {
-    let t1 =
-        c_bytes_to_point(c_knowledge_proof.t1, c_knowledge_proof.point_len)?;
-    let m1 =
-        c_bytes_to_scalar(c_knowledge_proof.m1, c_knowledge_proof.scalar_len)?;
-    let m2 =
-        c_bytes_to_scalar(c_knowledge_proof.m2, c_knowledge_proof.scalar_len)?;
-    return Ok(KnowledgeProof {
-        t1: t1,
-        m1: m1,
-        m2: m2,
-    });
+    let proof =
+        c_read_raw_data_pointer(c_knowledge_proof.data, c_knowledge_proof.len);
+    let knowledge_proof = Deserialize::deserialize(&proof);
+    // avoid the input c buffer been released
+    std::mem::forget(proof);
+    knowledge_proof
 }
 
 pub unsafe fn write_format_proof(
     format_proof: &FormatProof,
-    c_format_proof: &mut CFormatProof,
+    c_format_proof: &mut COutputBuffer,
 ) {
     c_write_data_to_pointer(
-        &point_to_slice(&format_proof.t1),
-        c_format_proof.t1,
-        c_format_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &point_to_slice(&format_proof.t2),
-        c_format_proof.t2,
-        c_format_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&format_proof.m1),
-        c_format_proof.m1,
-        c_format_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&format_proof.m2),
-        c_format_proof.m2,
-        c_format_proof.scalar_len,
+        &format_proof.serialize(),
+        c_format_proof.data,
+        c_format_proof.len,
     );
 }
 
 pub unsafe fn read_c_format_proof(
-    c_format_proof: &CFormatProof,
+    c_format_proof: &CInputBuffer,
 ) -> Result<FormatProof, WedprError> {
-    let t1 = c_bytes_to_point(c_format_proof.t1, c_format_proof.point_len)?;
-    let t2 = c_bytes_to_point(c_format_proof.t2, c_format_proof.point_len)?;
-    let m1 = c_bytes_to_scalar(c_format_proof.m1, c_format_proof.scalar_len)?;
-    let m2 = c_bytes_to_scalar(c_format_proof.m2, c_format_proof.scalar_len)?;
-    return Ok(FormatProof {
-        t1: t1,
-        t2: t2,
-        m1: m1,
-        m2: m2,
-    });
+    let proof =
+        c_read_raw_data_pointer(c_format_proof.data, c_format_proof.len);
+    let format_proof = Deserialize::deserialize(&proof);
+    // avoid the input c buffer been released
+    std::mem::forget(proof);
+    format_proof
 }
 
 pub unsafe fn write_arithmetic_proof(
     arithmetic_proof: &ArithmeticProof,
-    c_arithmetic_proof_proof: &mut CArithmeticProof,
+    c_arithmetic_proof_proof: &mut COutputBuffer,
 ) {
     c_write_data_to_pointer(
-        &point_to_slice(&arithmetic_proof.t1),
-        c_arithmetic_proof_proof.t1,
-        c_arithmetic_proof_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &point_to_slice(&arithmetic_proof.t2),
-        c_arithmetic_proof_proof.t2,
-        c_arithmetic_proof_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &point_to_slice(&arithmetic_proof.t3),
-        c_arithmetic_proof_proof.t3,
-        c_arithmetic_proof_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&arithmetic_proof.m1),
-        c_arithmetic_proof_proof.m1,
-        c_arithmetic_proof_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&arithmetic_proof.m2),
-        c_arithmetic_proof_proof.m2,
-        c_arithmetic_proof_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&arithmetic_proof.m3),
-        c_arithmetic_proof_proof.m3,
-        c_arithmetic_proof_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&arithmetic_proof.m4),
-        c_arithmetic_proof_proof.m4,
-        c_arithmetic_proof_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &scalar_to_slice(&arithmetic_proof.m5),
-        c_arithmetic_proof_proof.m5,
-        c_arithmetic_proof_proof.scalar_len,
+        &arithmetic_proof.serialize(),
+        c_arithmetic_proof_proof.data,
+        c_arithmetic_proof_proof.len,
     );
 }
 
 pub unsafe fn read_c_arithmetic_proof(
-    c_arithmetic_proof: &CArithmeticProof,
+    c_arithmetic_proof: &CInputBuffer,
 ) -> Result<ArithmeticProof, WedprError> {
-    let t1 =
-        c_bytes_to_point(c_arithmetic_proof.t1, c_arithmetic_proof.point_len)?;
-    let t2 =
-        c_bytes_to_point(c_arithmetic_proof.t2, c_arithmetic_proof.point_len)?;
-    let t3 =
-        c_bytes_to_point(c_arithmetic_proof.t3, c_arithmetic_proof.point_len)?;
-    let m1 = c_bytes_to_scalar(
-        c_arithmetic_proof.m1,
-        c_arithmetic_proof.scalar_len,
-    )?;
-    let m2 = c_bytes_to_scalar(
-        c_arithmetic_proof.m2,
-        c_arithmetic_proof.scalar_len,
-    )?;
-    let m3 = c_bytes_to_scalar(
-        c_arithmetic_proof.m3,
-        c_arithmetic_proof.scalar_len,
-    )?;
-    let m4 = c_bytes_to_scalar(
-        c_arithmetic_proof.m4,
-        c_arithmetic_proof.scalar_len,
-    )?;
-    let m5 = c_bytes_to_scalar(
-        c_arithmetic_proof.m5,
-        c_arithmetic_proof.scalar_len,
-    )?;
-    return Ok(ArithmeticProof {
-        t1: t1,
-        t2: t2,
-        t3: t3,
-        m1: m1,
-        m2: m2,
-        m3: m3,
-        m4: m4,
-        m5: m5,
-    });
+    let proof = c_read_raw_data_pointer(
+        c_arithmetic_proof.data,
+        c_arithmetic_proof.len,
+    );
+    let arithmetic_proof = Deserialize::deserialize(&proof);
+    // avoid the input c buffer been released
+    std::mem::forget(proof);
+    arithmetic_proof
 }
 
 pub unsafe fn write_equality_proof(
     equality_proof: &EqualityProof,
-    c_equality_proof: &mut CEqualityProof,
+    c_equality_proof: &mut COutputBuffer,
 ) {
     c_write_data_to_pointer(
-        &scalar_to_slice(&equality_proof.m1),
-        c_equality_proof.m1,
-        c_equality_proof.scalar_len,
-    );
-    c_write_data_to_pointer(
-        &point_to_slice(&equality_proof.t1),
-        c_equality_proof.t1,
-        c_equality_proof.point_len,
-    );
-    c_write_data_to_pointer(
-        &point_to_slice(&equality_proof.t2),
-        c_equality_proof.t2,
-        c_equality_proof.point_len,
+        &equality_proof.serialize(),
+        c_equality_proof.data,
+        c_equality_proof.len,
     );
 }
 
 pub unsafe fn read_c_equality_proof(
-    c_equality_proof: &CEqualityProof,
+    c_equality_proof: &CInputBuffer,
 ) -> Result<EqualityProof, WedprError> {
-    let m1 =
-        c_bytes_to_scalar(c_equality_proof.m1, c_equality_proof.scalar_len)?;
-    let t1 = c_bytes_to_point(c_equality_proof.t1, c_equality_proof.point_len)?;
-    let t2 = c_bytes_to_point(c_equality_proof.t2, c_equality_proof.point_len)?;
-    return Ok(EqualityProof {
-        m1: m1,
-        t1: t1,
-        t2: t2,
-    });
+    let proof =
+        c_read_raw_data_pointer(c_equality_proof.data, c_equality_proof.len);
+    let equality_proof = Deserialize::deserialize(&proof);
+    // avoid the input c buffer been released
+    std::mem::forget(proof);
+    equality_proof
 }
