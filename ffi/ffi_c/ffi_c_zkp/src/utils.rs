@@ -1,5 +1,7 @@
+use curve25519_dalek::{ristretto::RistrettoPoint, scalar::Scalar};
 use wedpr_ffi_common::utils::{
-    c_read_raw_data_pointer, c_write_data_to_pointer,
+    c_read_raw_data_pointer, c_read_raw_pointer, c_write_data_to_pointer,
+    CInputBuffer,
 };
 use wedpr_l_crypto_zkp_utils::{
     bytes_to_point, bytes_to_scalar, point_to_slice, scalar_to_slice,
@@ -65,6 +67,38 @@ pub struct CEqualityProof {
     pub point_len: usize,
 }
 
+pub unsafe fn c_input_buffer_to_point(
+    input_data: &CInputBuffer,
+) -> Result<RistrettoPoint, WedprError> {
+    let rust_bytes_input = c_read_raw_pointer(&input_data);
+    let result = bytes_to_point(&rust_bytes_input.as_slice());
+    // avoid the input c buffer been released
+    std::mem::forget(rust_bytes_input);
+    result
+}
+
+pub unsafe fn c_bytes_to_point(
+    c_bytes: *const c_char,
+    len: usize,
+) -> Result<RistrettoPoint, WedprError> {
+    let rust_bytes_input = c_read_raw_data_pointer(c_bytes, len);
+    let result = bytes_to_point(&rust_bytes_input.as_slice());
+    // avoid the input c buffer been released
+    std::mem::forget(rust_bytes_input);
+    return result;
+}
+
+pub unsafe fn c_bytes_to_scalar(
+    c_bytes: *const c_char,
+    len: usize,
+) -> Result<Scalar, WedprError> {
+    let rust_bytes_input = c_read_raw_data_pointer(c_bytes, len);
+    let result = bytes_to_scalar(&rust_bytes_input.as_slice());
+    // avoid the input c buffer been released
+    std::mem::forget(rust_bytes_input);
+    return result;
+}
+
 pub unsafe fn write_balance_proof(
     balance_proof: &BalanceProof,
     c_balance_proof: &mut CBalanceProof,
@@ -122,44 +156,17 @@ pub unsafe fn write_balance_proof(
 pub unsafe fn read_c_balance_proof(
     c_balance_proof: &CBalanceProof,
 ) -> Result<BalanceProof, WedprError> {
-    let check1 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_balance_proof.check1,
-            c_balance_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let check2 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_balance_proof.check2,
-            c_balance_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let m1 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_balance_proof.m1, c_balance_proof.scalar_len)
-            .as_slice(),
-    )?;
-    let m2 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_balance_proof.m2, c_balance_proof.scalar_len)
-            .as_slice(),
-    )?;
-    let m3 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_balance_proof.m3, c_balance_proof.scalar_len)
-            .as_slice(),
-    )?;
-    let m4 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_balance_proof.m4, c_balance_proof.scalar_len)
-            .as_slice(),
-    )?;
-    let m5 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_balance_proof.m5, c_balance_proof.scalar_len)
-            .as_slice(),
-    )?;
-    let m6 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_balance_proof.m6, c_balance_proof.scalar_len)
-            .as_slice(),
-    )?;
+    let check1 =
+        c_bytes_to_scalar(c_balance_proof.check1, c_balance_proof.scalar_len)?;
+
+    let check2 =
+        c_bytes_to_scalar(c_balance_proof.check2, c_balance_proof.scalar_len)?;
+    let m1 = c_bytes_to_scalar(c_balance_proof.m1, c_balance_proof.scalar_len)?;
+    let m2 = c_bytes_to_scalar(c_balance_proof.m2, c_balance_proof.scalar_len)?;
+    let m3 = c_bytes_to_scalar(c_balance_proof.m3, c_balance_proof.scalar_len)?;
+    let m4 = c_bytes_to_scalar(c_balance_proof.m4, c_balance_proof.scalar_len)?;
+    let m5 = c_bytes_to_scalar(c_balance_proof.m5, c_balance_proof.scalar_len)?;
+    let m6 = c_bytes_to_scalar(c_balance_proof.m6, c_balance_proof.scalar_len)?;
     return Ok(BalanceProof {
         check1: check1,
         check2: check2,
@@ -196,27 +203,12 @@ pub unsafe fn write_knowledger_proof(
 pub unsafe fn read_c_knowledge_proof(
     c_knowledge_proof: &CKnowledgeProof,
 ) -> Result<KnowledgeProof, WedprError> {
-    let t1 = bytes_to_point(
-        c_read_raw_data_pointer(
-            c_knowledge_proof.t1,
-            c_knowledge_proof.point_len,
-        )
-        .as_slice(),
-    )?;
-    let m1 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_knowledge_proof.m1,
-            c_knowledge_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let m2 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_knowledge_proof.m2,
-            c_knowledge_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
+    let t1 =
+        c_bytes_to_point(c_knowledge_proof.t1, c_knowledge_proof.point_len)?;
+    let m1 =
+        c_bytes_to_scalar(c_knowledge_proof.m1, c_knowledge_proof.scalar_len)?;
+    let m2 =
+        c_bytes_to_scalar(c_knowledge_proof.m2, c_knowledge_proof.scalar_len)?;
     return Ok(KnowledgeProof {
         t1: t1,
         m1: m1,
@@ -253,22 +245,10 @@ pub unsafe fn write_format_proof(
 pub unsafe fn read_c_format_proof(
     c_format_proof: &CFormatProof,
 ) -> Result<FormatProof, WedprError> {
-    let t1 = bytes_to_point(
-        c_read_raw_data_pointer(c_format_proof.t1, c_format_proof.point_len)
-            .as_slice(),
-    )?;
-    let t2 = bytes_to_point(
-        c_read_raw_data_pointer(c_format_proof.t2, c_format_proof.point_len)
-            .as_slice(),
-    )?;
-    let m1 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_format_proof.m1, c_format_proof.scalar_len)
-            .as_slice(),
-    )?;
-    let m2 = bytes_to_scalar(
-        c_read_raw_data_pointer(c_format_proof.m2, c_format_proof.scalar_len)
-            .as_slice(),
-    )?;
+    let t1 = c_bytes_to_point(c_format_proof.t1, c_format_proof.point_len)?;
+    let t2 = c_bytes_to_point(c_format_proof.t2, c_format_proof.point_len)?;
+    let m1 = c_bytes_to_scalar(c_format_proof.m1, c_format_proof.scalar_len)?;
+    let m2 = c_bytes_to_scalar(c_format_proof.m2, c_format_proof.scalar_len)?;
     return Ok(FormatProof {
         t1: t1,
         t2: t2,
@@ -326,61 +306,31 @@ pub unsafe fn write_arithmetic_proof(
 pub unsafe fn read_c_arithmetic_proof(
     c_arithmetic_proof: &CArithmeticProof,
 ) -> Result<ArithmeticProof, WedprError> {
-    let t1 = bytes_to_point(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.t1,
-            c_arithmetic_proof.point_len,
-        )
-        .as_slice(),
+    let t1 =
+        c_bytes_to_point(c_arithmetic_proof.t1, c_arithmetic_proof.point_len)?;
+    let t2 =
+        c_bytes_to_point(c_arithmetic_proof.t2, c_arithmetic_proof.point_len)?;
+    let t3 =
+        c_bytes_to_point(c_arithmetic_proof.t3, c_arithmetic_proof.point_len)?;
+    let m1 = c_bytes_to_scalar(
+        c_arithmetic_proof.m1,
+        c_arithmetic_proof.scalar_len,
     )?;
-    let t2 = bytes_to_point(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.t2,
-            c_arithmetic_proof.point_len,
-        )
-        .as_slice(),
+    let m2 = c_bytes_to_scalar(
+        c_arithmetic_proof.m2,
+        c_arithmetic_proof.scalar_len,
     )?;
-    let t3 = bytes_to_point(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.t3,
-            c_arithmetic_proof.point_len,
-        )
-        .as_slice(),
+    let m3 = c_bytes_to_scalar(
+        c_arithmetic_proof.m3,
+        c_arithmetic_proof.scalar_len,
     )?;
-    let m1 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.m1,
-            c_arithmetic_proof.scalar_len,
-        )
-        .as_slice(),
+    let m4 = c_bytes_to_scalar(
+        c_arithmetic_proof.m4,
+        c_arithmetic_proof.scalar_len,
     )?;
-    let m2 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.m2,
-            c_arithmetic_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let m3 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.m3,
-            c_arithmetic_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let m4 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.m4,
-            c_arithmetic_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let m5 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_arithmetic_proof.m5,
-            c_arithmetic_proof.scalar_len,
-        )
-        .as_slice(),
+    let m5 = c_bytes_to_scalar(
+        c_arithmetic_proof.m5,
+        c_arithmetic_proof.scalar_len,
     )?;
     return Ok(ArithmeticProof {
         t1: t1,
@@ -418,27 +368,10 @@ pub unsafe fn write_equality_proof(
 pub unsafe fn read_c_equality_proof(
     c_equality_proof: &CEqualityProof,
 ) -> Result<EqualityProof, WedprError> {
-    let m1 = bytes_to_scalar(
-        c_read_raw_data_pointer(
-            c_equality_proof.m1,
-            c_equality_proof.scalar_len,
-        )
-        .as_slice(),
-    )?;
-    let t1 = bytes_to_point(
-        c_read_raw_data_pointer(
-            c_equality_proof.t1,
-            c_equality_proof.point_len,
-        )
-        .as_slice(),
-    )?;
-    let t2 = bytes_to_point(
-        c_read_raw_data_pointer(
-            c_equality_proof.t2,
-            c_equality_proof.point_len,
-        )
-        .as_slice(),
-    )?;
+    let m1 =
+        c_bytes_to_scalar(c_equality_proof.m1, c_equality_proof.scalar_len)?;
+    let t1 = c_bytes_to_point(c_equality_proof.t1, c_equality_proof.point_len)?;
+    let t2 = c_bytes_to_point(c_equality_proof.t2, c_equality_proof.point_len)?;
     return Ok(EqualityProof {
         m1: m1,
         t1: t1,

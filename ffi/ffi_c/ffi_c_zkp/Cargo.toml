@@ -13,6 +13,7 @@ name = "ffi_c_zkp"
 crate-type = [ "cdylib", "staticlib" ]
 
 [dependencies]
+curve25519-dalek = { version = "1.0", features = [ "serde" ] }
 libc = "0.2.60"
 wedpr_l_utils = "1.1.0"
 wedpr_ffi_common = { path = "../../ffi_common" }

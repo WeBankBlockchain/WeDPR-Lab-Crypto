@@ -1,9 +1,9 @@
 use crate::utils::{
-    read_c_arithmetic_proof, read_c_balance_proof, read_c_equality_proof,
-    read_c_format_proof, read_c_knowledge_proof, write_arithmetic_proof,
-    write_balance_proof, write_equality_proof, write_format_proof,
-    write_knowledger_proof, CArithmeticProof, CBalanceProof, CEqualityProof,
-    CFormatProof, CKnowledgeProof,
+    c_input_buffer_to_point, read_c_arithmetic_proof, read_c_balance_proof,
+    read_c_equality_proof, read_c_format_proof, read_c_knowledge_proof,
+    write_arithmetic_proof, write_balance_proof, write_equality_proof,
+    write_format_proof, write_knowledger_proof, CArithmeticProof,
+    CBalanceProof, CEqualityProof, CFormatProof, CKnowledgeProof,
 };
 use wedpr_ffi_common::utils::{
     c_read_raw_pointer, CInputBuffer, COutputBuffer, FAILURE, SUCCESS,
@@ -33,16 +33,14 @@ pub unsafe extern "C" fn wedpr_aggregate_ristretto_point(
     result_data: &mut COutputBuffer,
 ) -> i8 {
     // point_sum
-    let point_sum_result =
-        bytes_to_point(c_read_raw_pointer(&point_sum_data).as_slice());
+    let point_sum_result = c_input_buffer_to_point(&point_sum_data);
     let point_sum = match point_sum_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
     };
 
     // point_share
-    let point_share_result =
-        bytes_to_point(c_read_raw_pointer(&point_share_data).as_slice());
+    let point_share_result = c_input_buffer_to_point(&point_share_data);
     let point_share = match point_share_result {
         Ok(v) => v,
         Err(_) => return FAILURE,
