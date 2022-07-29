@@ -2106,6 +2106,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "wedpr_ffi_c_zkp"
+version = "1.0.0"
+dependencies = [
+ "cbindgen",
+ "curve25519-dalek 1.2.6",
+ "libc",
+ "wedpr_ffi_common 1.1.0",
+ "wedpr_ffi_macros 1.1.0",
+ "wedpr_l_crypto_zkp_discrete_logarithm_proof",
+ "wedpr_l_crypto_zkp_utils 1.3.0",
+ "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "wedpr_ffi_common"
 version = "1.1.0"
 dependencies = [
@@ -2432,7 +2446,7 @@ dependencies = [
 
 [[package]]
 name = "wedpr_l_crypto_ot_base_ot"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "criterion",
  "curve25519-dalek 1.2.6",
@@ -2441,8 +2455,7 @@ dependencies = [
  "rand_core 0.5.1",
  "sha3 0.8.2",
  "wedpr_l_crypto_hash_sha3 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_zkp_utils 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_protos 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_crypto_zkp_utils 1.3.0",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2487,19 +2500,20 @@ dependencies = [
  "rand 0.6.5",
  "sha3 0.8.2",
  "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_zkp_utils 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_crypto_zkp_utils 1.2.0",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "wedpr_l_crypto_zkp_discrete_logarithm_proof"
-version = "1.2.0"
+version = "1.3.0"
 dependencies = [
  "criterion",
  "curve25519-dalek 1.2.6",
+ "hex",
  "rand 0.6.5",
- "wedpr_l_crypto_zkp_utils 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_crypto_zkp_utils 1.3.0",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_protos 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2512,21 +2526,7 @@ dependencies = [
  "curve25519-dalek 1.2.6",
  "merlin",
  "wedpr_l_bulletproofs",
- "wedpr_l_crypto_zkp_utils 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "wedpr_l_crypto_zkp_utils"
-version = "1.2.0"
-dependencies = [
- "curve25519-dalek 1.2.6",
- "lazy_static 1.4.0",
- "rand 0.6.5",
- "rand_core 0.5.1",
- "sha3 0.8.2",
- "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_crypto_zkp_utils 1.2.0",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -2541,6 +2541,21 @@ dependencies = [
  "lazy_static 1.4.0",
  "rand 0.6.5",
  "rand_core 0.5.1",
+ "sha3 0.8.2",
+ "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wedpr_l_crypto_zkp_utils"
+version = "1.3.0"
+dependencies = [
+ "curve25519-dalek 1.2.6",
+ "lazy_static 1.4.0",
+ "rand 0.6.5",
+ "rand_core 0.5.1",
+ "serde",
  "sha3 0.8.2",
  "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2628,7 +2643,7 @@ dependencies = [
  "sha3 0.8.2",
  "wedpr_l_common_coder_hex 1.1.0",
  "wedpr_l_crypto_hash_keccak256 1.1.0",
- "wedpr_l_crypto_zkp_utils 1.2.0",
+ "wedpr_l_crypto_zkp_utils 1.3.0",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
