@@ -206,7 +206,12 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
 
     let public_key = WedprCurve25519Vrf::derive_public_key(&private_key_bytes);
 
-    java_safe_set_bytes_field!(_env, result_jobject, public_key, "publicKey");
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&public_key),
+        "publicKey"
+    );
     result_jobject.into_inner()
 }
 
@@ -254,7 +259,12 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
         },
     };
 
-    java_safe_set_bytes_field!(_env, result_jobject, hash_bytes, "hash");
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&hash_bytes),
+        "hash"
+    );
     result_jobject.into_inner()
 }
 
