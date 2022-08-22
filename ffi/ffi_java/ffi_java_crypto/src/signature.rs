@@ -211,7 +211,12 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
             },
         };
 
-    java_safe_set_bytes_field!(_env, result_jobject, result, "publicKey");
+    java_safe_set_string_field!(
+        _env,
+        result_jobject,
+        bytes_to_string(&result),
+        "publicKey"
+    );
     result_jobject.into_inner()
 }
 

@@ -15,7 +15,7 @@
 
 ### Issue
 
-可直接去[issues page](https://github.com/WeBankBlockchain/WeDPR-Lab-Core/issues)提issue。
+可直接去[issues page](https://github.com/WeBankBlockchain/WeDPR-Lab-Crypto/issues)提issue。
 
 ### 修复bug
 
