@@ -89,7 +89,7 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_sdk.dylib.tar.gz
-          path: target/release/libffi_java_sdk.dylib  
+          file: target/release/libffi_java_sdk.dylib  
           tag: ${{ github.ref }}
           overwrite: true   
 
