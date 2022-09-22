@@ -21,6 +21,7 @@ members = [
     "crypto/zkp/discrete_logarithm_proof",
     "crypto/zkp/range_proof",
     "crypto/zkp/utils",
+    "crypto/pairing/bls12_381",
     "ffi/ffi_c/ffi_c_common",
     "ffi/ffi_c/ffi_c_crypto",
     "ffi/ffi_c/ffi_c_crypto_binary",
