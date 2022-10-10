@@ -7,6 +7,7 @@ members = [
     "crypto/block_cipher/aes",
     "crypto/block_cipher/sm4",
     "crypto/ecies/secp256k1",
+    "crypto/ecies/sm2",
     "crypto/hash/blake2b",
     "crypto/hash/keccak256",
     "crypto/hash/ripemd160",

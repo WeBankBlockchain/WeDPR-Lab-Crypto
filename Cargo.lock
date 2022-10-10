@@ -1061,6 +1061,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "libsm"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5cb4d919012f3dea3beca36879aa1e71532ed4dd2de005a3a9060b577ae3f324"
+dependencies = [
+ "byteorder",
+ "lazy_static 1.4.0",
+ "num-bigint 0.4.3",
+ "num-integer",
+ "num-traits",
+ "rand 0.8.3",
+ "yasna 0.4.0",
+]
+
+[[package]]
 name = "log"
 version = "0.4.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1117,6 +1132,17 @@ name = "num-bigint"
 version = "0.2.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "090c7f9998ee0ff65aa5b723e4009f7b217707f1fb5ea551329cc4d6231fb304"
+dependencies = [
+ "autocfg 1.0.1",
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
+name = "num-bigint"
+version = "0.4.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f93ab6289c7b344a8a9f60f88d80aa20032336fe78da341afc91c8a2341fc75f"
 dependencies = [
  "autocfg 1.0.1",
  "num-integer",
@@ -2423,6 +2449,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "wedpr_l_crypto_ecies_sm2"
+version = "1.1.0"
+dependencies = [
+ "lazy_static 1.4.0",
+ "libsm",
+ "rand 0.6.5",
+ "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
 name = "wedpr_l_crypto_hash_blake2b"
 version = "1.0.0"
 dependencies = [
@@ -2657,11 +2694,11 @@ checksum = "860e8c9ede976ffb26f9470cdaf0ac7135b0eb8ab70baea0d2bb88cb0a44e4f6"
 dependencies = [
  "byteorder",
  "lazy_static 1.4.0",
- "num-bigint",
+ "num-bigint 0.2.6",
  "num-integer",
  "num-traits",
  "rand 0.4.6",
- "yasna",
+ "yasna 0.3.2",
 ]
 
 [[package]]
@@ -2790,7 +2827,16 @@ version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0de7bff972b4f2a06c85f6d8454b09df153af7e3a4ec2aac81db1b105b684ddb"
 dependencies = [
- "num-bigint",
+ "num-bigint 0.2.6",
+]
+
+[[package]]
+name = "yasna"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e262a29d0e61ccf2b6190d7050d4b237535fc76ce4c1210d9caa316f71dffa75"
+dependencies = [
+ "num-bigint 0.4.3",
 ]
 
 [[package]]
