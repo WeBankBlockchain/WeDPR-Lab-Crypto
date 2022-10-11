@@ -12,7 +12,7 @@ extern crate lazy_static;
 
 lazy_static! {
     // Shared sm2 instance initialized for all functions.
-    static ref SM2_CTX: SigCtx = SigCtx::new();
+    pub static ref SM2_CTX: SigCtx = SigCtx::new();
 }
 
 /// Implements a ECIES instance on sm2 curve.
@@ -20,7 +20,7 @@ lazy_static! {
 pub struct WedprSm2Ecies {}
 
 impl WedprSm2Ecies {
-    fn encrypt<T: ?Sized + AsRef<[u8]>>(
+    pub fn encrypt<T: ?Sized + AsRef<[u8]>>(
         &self,
         public_key: &T,
         message: &T,
@@ -42,7 +42,7 @@ impl WedprSm2Ecies {
         }
     }
 
-    fn decrypt<T: ?Sized + AsRef<[u8]>>(
+    pub fn decrypt<T: ?Sized + AsRef<[u8]>>(
         &self,
         private_key: &T,
         ciphertext: &T,
