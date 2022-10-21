@@ -1,0 +1,23 @@
+[package]
+name = "wedpr_ffi_java_equality"
+version = "0.1.0"
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "ffi_java_equality"
+crate-type = [ "cdylib", "staticlib" ]
+
+[dependencies]
+jni = "0.13.0"
+lazy_static = "1.4.0"
+wedpr_ffi_common = "1.1.0"
+wedpr_ffi_macros = "1.1.0"
+wedpr_l_macros = "1.0.0"
+wedpr_l_utils = "1.1.0"
+wedpr_bls12_381 = { path = "../../../crypto/pairing/bls12_381/"}
+
+
+
+[target.'cfg(target_os = "android")'.dependencies]
+jni = { version = "0.13.1", default-features = false }

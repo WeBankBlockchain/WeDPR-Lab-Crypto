@@ -2144,6 +2144,8 @@ dependencies = [
  "ff",
  "rand 0.8.3",
  "sha2 0.9.5",
+ "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -2202,6 +2204,18 @@ dependencies = [
  "wedpr_l_crypto_vrf_curve25519",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_protos 1.2.0",
+ "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wedpr_ffi_c_equality"
+version = "1.0.0"
+dependencies = [
+ "cbindgen",
+ "libc",
+ "wedpr_bls12_381",
+ "wedpr_ffi_common 1.1.0",
+ "wedpr_ffi_macros 1.1.0",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2308,6 +2322,19 @@ dependencies = [
  "wedpr_l_crypto_signature_secp256k1",
  "wedpr_l_crypto_signature_sm2",
  "wedpr_l_crypto_vrf_curve25519",
+ "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wedpr_ffi_java_equality"
+version = "0.1.0"
+dependencies = [
+ "jni",
+ "lazy_static 1.4.0",
+ "wedpr_bls12_381",
+ "wedpr_ffi_common 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_ffi_macros 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]

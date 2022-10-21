@@ -1,0 +1,21 @@
+[package]
+name = "wedpr_ffi_c_equality"
+version = "1.0.0"
+authors = [ "WeDPR <wedpr@webank.com>" ]
+edition = "2018"
+
+
+[lib]
+name = "ffi_c_equality"
+crate-type = [ "cdylib", "staticlib" ]
+
+[dependencies]
+libc = "0.2.60"
+wedpr_l_utils = "1.1.0"
+wedpr_ffi_common = { path = "../../ffi_common" }
+wedpr_ffi_macros = { path = "../../ffi_macros" }
+wedpr_bls12_381 = { path = "../../../crypto/pairing/bls12_381/"}
+
+# This is required to generate C/C++ header files.
+[build-dependencies]
+cbindgen = "0.9.0"
