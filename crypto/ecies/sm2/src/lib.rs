@@ -2,9 +2,11 @@
 
 //! Sm2 ECIES functions.
 
+use libsm::sm2::{
+    encrypt::{DecryptCtx, EncryptCtx},
+    signature::SigCtx,
+};
 use wedpr_l_utils::{error::WedprError, traits::Ecies};
-use libsm::sm2::encrypt::{EncryptCtx, DecryptCtx};
-use libsm::sm2::signature::SigCtx;
 #[macro_use]
 extern crate wedpr_l_macros;
 #[macro_use]
@@ -24,7 +26,7 @@ impl WedprSm2Ecies {
         &self,
         public_key: &T,
         message: &T,
-        message_len: usize
+        message_len: usize,
     ) -> Result<Vec<u8>, WedprError> {
         let public_key_point = match SM2_CTX.load_pubkey(&public_key.as_ref()) {
             Ok(v) => v,
@@ -46,7 +48,7 @@ impl WedprSm2Ecies {
         &self,
         private_key: &T,
         ciphertext: &T,
-        message_len: usize
+        message_len: usize,
     ) -> Result<Vec<u8>, WedprError> {
         let secret_key = match SM2_CTX.load_seckey(&private_key.as_ref()) {
             Ok(v) => v,
@@ -76,15 +78,12 @@ mod tests {
         let (pk_b, sk_b) = SM2_CTX.new_keypair().unwrap();
         let public_key = SM2_CTX.serialize_pubkey(&pk_b, false).unwrap();
         let secret_key = SM2_CTX.serialize_seckey(&sk_b).unwrap();
-        let message: Vec<u8> = (0..1024).map(|_| { rand::random::<u8>() }).collect();
+        let message: Vec<u8> =
+            (0..1024).map(|_| rand::random::<u8>()).collect();
         let message_size = 1024;
 
         let ciphertext = sm2_ecies
-            .encrypt(
-                &public_key,
-                &message,
-                message_size
-            )
+            .encrypt(&public_key, &message, message_size)
             .unwrap();
         wedpr_println!("ciphertext = :{:?}", ciphertext.len());
         let decrypted_msg = sm2_ecies

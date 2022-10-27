@@ -35,20 +35,20 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_equality_test(
 ) -> i8 {
     let cipher1 = c_read_raw_pointer(raw_cipher1);
     let cipher2 = c_read_raw_pointer(raw_cipher2);
-    let cipher1_struct = match wedpr_bls12_381::WedprBls128Cipher::from_bytes(&cipher1) {
-        Ok(v) => v,
-        Err(_) => {return FAILURE},
-    };
-    let cipher2_struct = match wedpr_bls12_381::WedprBls128Cipher::from_bytes(&cipher2) {
-        Ok(v) => v,
-        Err(_) => {return FAILURE},
-    };
+    let cipher1_struct =
+        match wedpr_bls12_381::WedprBls128Cipher::from_bytes(&cipher1) {
+            Ok(v) => v,
+            Err(_) => return FAILURE,
+        };
+    let cipher2_struct =
+        match wedpr_bls12_381::WedprBls128Cipher::from_bytes(&cipher2) {
+            Ok(v) => v,
+            Err(_) => return FAILURE,
+        };
     std::mem::forget(raw_cipher1);
     std::mem::forget(raw_cipher2);
     if wedpr_bls12_381::equality_test(&cipher1_struct, &cipher2_struct) {
-        return SUCCESS
+        return SUCCESS;
     };
     FAILURE
-
 }
-
