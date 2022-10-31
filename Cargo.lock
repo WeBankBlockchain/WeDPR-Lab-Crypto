@@ -771,13 +771,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "ffi_wasm_equality_test"
-version = "0.1.0"
-dependencies = [
- "wasm-bindgen",
-]
-
-[[package]]
 name = "foreign-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2149,6 +2142,7 @@ dependencies = [
  "bls12_381",
  "criterion",
  "ff",
+ "hex",
  "rand 0.8.3",
  "sha2 0.9.5",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",

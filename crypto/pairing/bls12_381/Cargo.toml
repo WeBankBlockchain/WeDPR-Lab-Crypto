@@ -16,6 +16,7 @@ wedpr_l_macros = "1.0.0"
 
 [dev-dependencies]
 criterion = "0.3"
+hex = "0.4.2"
 
 [[bench]]
 name = "pairing"

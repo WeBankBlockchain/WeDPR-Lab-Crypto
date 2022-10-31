@@ -35,7 +35,6 @@ members = [
     "ffi/ffi_java/ffi_java_fisco_bcos_sdk",
     "ffi/ffi_java/ffi_java_equality",
     "ffi/ffi_macros",
-    "ffi/ffi_wasm/ffi_wasm_equality_test",
     "protos",
     "third_party/fisco_bcos",
     "third_party/fisco_bcos_java_sdk",
