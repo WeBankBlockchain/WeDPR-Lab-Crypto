@@ -34,7 +34,7 @@ use wedpr_ffi_common::utils::{
 #[allow(dead_code)]
 // Result class name is 'com.webank.wedpr.crypto.EqualityResult'.
 const RESULT_EQUALITY_CLASS_NAME: &str =
-    "com/webank/wedpr/crypto/EqualityResult";
+    "com/webank/wedpr/crypto/CryptoResult";
 
 #[allow(dead_code)]
 fn get_result_jobject<'a>(_env: &'a JNIEnv) -> JObject<'a> {
@@ -60,7 +60,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_encryptMessa
         _env,
         result_jobject,
         &result.to_bytes(),
-        "blcCipher"
+        "cipher"
     );
     result_jobject.into_inner()
 }

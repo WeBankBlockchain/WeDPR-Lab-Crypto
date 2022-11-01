@@ -47,12 +47,12 @@ impl WedprBls128Cipher {
             G1Affine::from_compressed(&u_point_bytes).unwrap();
         let mut v_point_bytes: [u8; 96] = [0; 96];
         v_point_bytes.copy_from_slice(&message[48..144]);
-        println!(
-            "v1:{}",
-            G2Affine::from_compressed(&v_point_bytes)
-                .is_some()
-                .unwrap_u8()
-        );
+        // println!(
+        //     "v1:{}",
+        //     G2Affine::from_compressed(&v_point_bytes)
+        //         .is_some()
+        //         .unwrap_u8()
+        // );
         if G2Affine::from_compressed(&v_point_bytes)
             .is_some()
             .unwrap_u8()
@@ -137,6 +137,46 @@ mod tests {
     }
 
     #[test]
+    fn test_from_sdk() {
+        let message_hello = b"hello";
+        let message_wrong = b"wrong";
+        let cipher1_hello = encrypt_message(message_hello);
+        let cipher1_wrong = encrypt_message(message_wrong);
+
+        let sdk_hello1 = "a6d13d10c0cce4715d49ed4f0ecf1a4774762f96fa8bce2717be8b4a3f8b50577f71dc8db0143c95f810be0e09b6925e8c391c8008e87d7e227c454d4e961b51755160c473b0dfa191984254650d5d1cc8a79349bf9440ad084ce3deadda6a6217194c54253872d2a08b1dfcd9e01edd2e43a5fe3dd141473262bfc94d46aaf4cb50d1070366563ec7369b3f4e78df45";
+        let sdk_bytes1 = hex::decode(sdk_hello1).unwrap();
+
+        // let web_bytes1 = [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
+        let sdk_hello2 = "85d07655fa04e21a6a1439f1571deb453fa79f73d46d5662e92c65a046bb62168a3a0e1a65b8e77453887c5239e1005eb99e19294063590976bc65f99e33f3e6b17e9b2c4a80f58c3bfd96ebde66710c76f8b79b522760f50ae312bf973f460c19a76bba34b4a92e5d36dff28300894835e3272c388a6d08d2ea92b94bb5a00808f6a5d013bec61642d8eac1b58303f3";
+        let sdk_bytes2 = hex::decode(sdk_hello2).unwrap();
+        let cipher1_m1_recover =
+            WedprBls128Cipher::from_bytes(&sdk_bytes1).unwrap();
+        let cipher2_m1_recover =
+            WedprBls128Cipher::from_bytes(&sdk_bytes2).unwrap();
+        // assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello), true);
+
+        let sdk_wrong1 = "9426437c99f65c8242fa805bd9e38bfa4a0343cc105de36c54793d0e1e318c7eac830b3a7f5ef6bc877c3d358949d63d8d6456544bc019ec9aa5f98deef11b308b4eb19a59942aff977cc5e62e562ae4689a3c0150cf7d5733e9f52d026dd02714bd9e00977e813b3a4783f1bb7dc5acf0c6344b8583006f9f8326add8292a01ae6a385054d65127cd8894f4ed74a618";
+        let sdk_bytes1_wrong = hex::decode(sdk_wrong1).unwrap();
+
+        let sdk_wrong2 = "9087ac1f377026c855769bfb9fafb5f28ccdbb01981a5a2da22615dd801cd2e93ed9fc5c0ee39b13fe6721ada3aa19ee86e3446b9acb20ff7e035b3191687ef465cf31e9062f174908007ef6c588e6cee4691861ce4bd64e5b96618dfda4b0d407612abbd841822fb5ba52d4e29639e89074c9442ceba3ea219c001036d91d504cbe24e087a331abd4eb881ad0cd22eb";
+        let sdk_bytes2_wrong = hex::decode(sdk_wrong2).unwrap();
+        let cipher1_m2_recover =
+            WedprBls128Cipher::from_bytes(&sdk_bytes1_wrong).unwrap();
+        let cipher2_m2_recover =
+            WedprBls128Cipher::from_bytes(&sdk_bytes2_wrong).unwrap();
+        // assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello), true);
+
+
+        assert_eq!(equality_test(&cipher1_m1_recover, &cipher2_m1_recover), true);
+        assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_hello), true);
+        assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_wrong), false);
+
+        assert_eq!(equality_test(&cipher1_m2_recover, &cipher2_m2_recover), true);
+        assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_wrong), true);
+        assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello), false);
+    }
+
+    #[test]
     fn test_from_web() {
         let message_hello = b"hello";
         let message_wrong = b"wrong";
@@ -175,9 +215,6 @@ mod tests {
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher2_m2_recover), true);
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_wrong), true);
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello), false);
-
-
-
     }
 
 }
