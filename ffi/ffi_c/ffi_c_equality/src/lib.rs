@@ -45,8 +45,8 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_equality_test(
             Ok(v) => v,
             Err(_) => return FAILURE,
         };
-    std::mem::forget(raw_cipher1);
-    std::mem::forget(raw_cipher2);
+    std::mem::forget(cipher1);
+    std::mem::forget(cipher2);
     if wedpr_bls12_381::equality_test(&cipher1_struct, &cipher2_struct) {
         return SUCCESS;
     };
