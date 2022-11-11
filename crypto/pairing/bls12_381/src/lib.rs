@@ -217,4 +217,26 @@ mod tests {
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello), false);
     }
 
+    #[test]
+    fn test_from_cpp() {
+
+        let message1 = "8097e7187c6cd863e9f458d5bc320c9ff93a0c830dda517ec915b7deb5c96b9bbab01798226b1c7fa14ad9f455f77f9a851713e3f8211041ca3f905886016b003fa049b97e25e109389a07f95501ede83f9f38eefa174f55383107269cff4c730dbe9a8bdc09a31e847c62d2366f46a042e64c780623c51c9fd9798d731338048576dd3830fdf3dfb4d64eb8f51770c4";
+        let message_bytes1 = hex::decode(message1).unwrap();
+
+        // let web_bytes1 = [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
+        let message2 = "f097e7187c6cd863e9f458d5bc320c9ff93a0c830dda517ec915b7deb5c96b9bbab01798226b1c7fa14ad9f455f77f9a851713e3f8211041ca3f905886016b003fa049b97e25e109389a07f95501ede83f9f38eefa174f55383107269cff4c730dbe9a8bdc09a31e847c62d2366f46a042e64c780623c51c9fd9798d731338048576dd3830fdf3dfb4d64eb8f51770c4";
+        let message2_bytes2 = hex::decode(message2).unwrap();
+        let cipher1_m1_recover =
+            WedprBls128Cipher::from_bytes(&message_bytes1).unwrap();
+        match WedprBls128Cipher::from_bytes(&message2_bytes2) {
+                 Ok(v) => {
+                     println!("normal happened")
+
+                 },
+                 Err(_) => {
+                     println!("error happened")
+                 },
+             };
+    }
+
 }

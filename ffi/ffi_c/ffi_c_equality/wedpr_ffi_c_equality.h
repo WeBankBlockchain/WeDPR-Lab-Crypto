@@ -21,3 +21,5 @@ int8_t wedpr_pairing_bls128_encrypt_message(const CInputBuffer *raw_plaintext,
 int8_t wedpr_pairing_bls128_equality_test(const CInputBuffer *raw_cipher1,
                                           const CInputBuffer *raw_cipher2);
 }
+
+#endif

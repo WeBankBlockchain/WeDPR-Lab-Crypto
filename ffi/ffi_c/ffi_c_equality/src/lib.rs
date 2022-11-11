@@ -38,12 +38,20 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_equality_test(
     let cipher1_struct =
         match wedpr_bls12_381::WedprBls128Cipher::from_bytes(&cipher1) {
             Ok(v) => v,
-            Err(_) => return FAILURE,
+            Err(_) => {
+                std::mem::forget(cipher1);
+                std::mem::forget(cipher2);
+                return FAILURE
+            },
         };
     let cipher2_struct =
         match wedpr_bls12_381::WedprBls128Cipher::from_bytes(&cipher2) {
             Ok(v) => v,
-            Err(_) => return FAILURE,
+            Err(_) => {
+                std::mem::forget(cipher1);
+                std::mem::forget(cipher2);
+                return FAILURE
+            },
         };
     std::mem::forget(cipher1);
     std::mem::forget(cipher2);
