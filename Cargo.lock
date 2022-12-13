@@ -2137,7 +2137,7 @@ dependencies = [
 
 [[package]]
 name = "wedpr_bls12_381"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "bls12_381",
  "criterion",

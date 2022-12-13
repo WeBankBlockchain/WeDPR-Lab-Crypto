@@ -41,6 +41,41 @@ impl PeksKeyPair {
         let pk = G2Projective::from(&pk_affine);
         Ok(PeksKeyPair { pk, sk })
     }
+
+    pub fn get_public_key(&self) -> Vec<u8> {
+        G2Affine::from(self.pk).to_compressed().to_vec()
+    }
+
+    pub fn recover_public_key(pk_bytes: &[u8]) -> Result<G2Projective, WedprError> {
+        if pk_bytes.len() != 96 {
+            return Err(WedprError::FormatError);
+        }
+        let mut point_bytes: [u8; 96] = [0; 96];
+        point_bytes.copy_from_slice(&pk_bytes);
+        let pk_affine: G2Affine = G2Affine::from_compressed(&point_bytes)
+            .unwrap_or(G2Affine::default());
+        if pk_affine.eq(&G2Affine::default()) {
+            return Err(WedprError::FormatError);
+        }
+        Ok(G2Projective::from(&pk_affine))
+    }
+
+    pub fn get_secret_key(&self) -> Vec<u8> {
+        self.sk.to_bytes().to_vec()
+    }
+
+    pub fn recover_secret_key(scalar_bytes: &[u8]) -> Result<Scalar, WedprError> {
+        if scalar_bytes.len() != 32 {
+            return Err(WedprError::FormatError);
+        }
+        let mut sk_bytes: [u8; 32] = [0; 32];
+        sk_bytes.copy_from_slice(&scalar_bytes);
+        let sk = Scalar::from_bytes(&sk_bytes).unwrap_or(Scalar::zero());
+        if sk.eq(&Scalar::zero()) {
+            return Err(WedprError::FormatError);
+        }
+        Ok(sk)
+    }
 }
 
 #[derive(Clone, Debug, Default)]
