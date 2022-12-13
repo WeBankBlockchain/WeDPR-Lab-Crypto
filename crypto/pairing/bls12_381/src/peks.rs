@@ -202,11 +202,16 @@ mod tests {
         let id3 = "123456".as_bytes();
         let key3 = generate_key();
 
-        let cipher_id1 = encrypt_message(&id1, &key1.pk);
+        let pk_bytes = key1.get_public_key();
+
+        // let cipher_id1 = encrypt_message(&id1, &key1.pk);
+        let cipher_id1 = encrypt_message(&id1, &PeksKeyPair::recover_public_key(&pk_bytes).unwrap());
         let cipher_id2 = encrypt_message(&id2, &key2.pk);
         let cipher_id3 = encrypt_message(&id3, &key3.pk);
 
-        let trapdoor1 = trapdoor(id1, &key1.sk);
+        let sk_bytes = key1.get_secret_key();
+        // let trapdoor1 = trapdoor(id1, &key1.sk);
+        let trapdoor1 = trapdoor(id1, &PeksKeyPair::recover_secret_key(&sk_bytes).unwrap());
         assert_eq!(trapdoor_test(&cipher_id1, &trapdoor1), true);
         assert_eq!(trapdoor_test(&cipher_id2, &trapdoor1), false);
         assert_eq!(trapdoor_test(&cipher_id3, &trapdoor1), false);
