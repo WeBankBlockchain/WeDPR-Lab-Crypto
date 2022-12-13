@@ -116,3 +116,84 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_equalityTest
     java_safe_set_boolean_field!(_env, result_jobject, result, "booleanResult");
     result_jobject.into_inner()
 }
+
+
+
+#[no_mangle]
+/// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->peksGenerateKeyPair'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksGenerateKeyPair(
+    _env: JNIEnv,
+    _class: JClass,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+
+    let result = wedpr_bls12_381::peks::generate_key();
+
+    java_safe_set_byte_array_field!(
+        _env,
+        result_jobject,
+        &result.get_public_key(),
+        "publicKey"
+    );
+    java_safe_set_byte_array_field!(
+        _env,
+        result_jobject,
+        &result.get_secret_key(),
+        "secretKey"
+    );
+    result_jobject.into_inner()
+}
+
+#[no_mangle]
+/// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->peksTrapdoorTest'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksTrapdoorTest(
+    _env: JNIEnv,
+    _class: JClass,
+    pkes_cipher_jbyte_array: jbyteArray,
+    trapdoor_cipher_jbyte_array: jbyteArray,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+    let pkes_cipher_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, pkes_cipher_jbyte_array);
+    let trapdoor_cipher_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, trapdoor_cipher_jbyte_array);
+
+
+    let pkes_cipher =
+        match wedpr_bls12_381::peks::PeksCipher::from_bytes(&pkes_cipher_bytes) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    &format!(
+                        "pkesTrapdoorTest recover failed, pkes_cipher_bytes={:?}",
+                        &pkes_cipher_bytes
+                    ),
+                )
+            },
+        };
+
+    let trapdoor_cipher =
+        match wedpr_bls12_381::peks::TrapdoorCipher::from_bytes(&trapdoor_cipher_bytes) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    &format!(
+                        "pkesTrapdoorTest recover failed, trapdoor_cipher_bytes={:?}",
+                        &trapdoor_cipher_bytes
+                    ),
+                )
+            },
+        };
+    let result = wedpr_bls12_381::peks::trapdoor_test(&pkes_cipher, &trapdoor_cipher);
+
+    java_safe_set_boolean_field!(_env, result_jobject, result, "booleanResult");
+    result_jobject.into_inner()
+}
