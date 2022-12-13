@@ -1,5 +1,7 @@
 //! This module provides bls12_381 equality test
 
+pub mod peks;
+
 extern crate bls12_381;
 use bls12_381::{
     hash_to_curve::{ExpandMsgXmd, HashToCurve},
@@ -78,6 +80,14 @@ fn message_to_g1_point(message: &[u8]) -> G1Projective {
     return g1_point;
 }
 
+// fn message_to_g2_point(message: &[u8]) -> G2Projective {
+//     let domain: &[u8] = b"wedpr-BLS12381G2:SHA-256_";
+//     let g2_point = <G2Projective as
+// HashToCurve<ExpandMsgXmd<sha2::Sha256>>>::encode_to_curve(         &message,
+// domain,     );
+//     return g2_point;
+// }
+
 pub fn encrypt_message(message: &[u8]) -> WedprBls128Cipher {
     let message_g1 = message_to_g1_point(message);
     let rng = rand::rngs::OsRng::default();
@@ -146,7 +156,15 @@ mod tests {
         let sdk_hello1 = "a6d13d10c0cce4715d49ed4f0ecf1a4774762f96fa8bce2717be8b4a3f8b50577f71dc8db0143c95f810be0e09b6925e8c391c8008e87d7e227c454d4e961b51755160c473b0dfa191984254650d5d1cc8a79349bf9440ad084ce3deadda6a6217194c54253872d2a08b1dfcd9e01edd2e43a5fe3dd141473262bfc94d46aaf4cb50d1070366563ec7369b3f4e78df45";
         let sdk_bytes1 = hex::decode(sdk_hello1).unwrap();
 
-        // let web_bytes1 = [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
+        // let web_bytes1 =
+        // [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,
+        // 216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,
+        // 237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,
+        // 64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,
+        // 185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,
+        // 120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,
+        // 249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,
+        // 202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
         let sdk_hello2 = "85d07655fa04e21a6a1439f1571deb453fa79f73d46d5662e92c65a046bb62168a3a0e1a65b8e77453887c5239e1005eb99e19294063590976bc65f99e33f3e6b17e9b2c4a80f58c3bfd96ebde66710c76f8b79b522760f50ae312bf973f460c19a76bba34b4a92e5d36dff28300894835e3272c388a6d08d2ea92b94bb5a00808f6a5d013bec61642d8eac1b58303f3";
         let sdk_bytes2 = hex::decode(sdk_hello2).unwrap();
         let cipher1_m1_recover =
@@ -166,12 +184,17 @@ mod tests {
             WedprBls128Cipher::from_bytes(&sdk_bytes2_wrong).unwrap();
         // assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello), true);
 
-
-        assert_eq!(equality_test(&cipher1_m1_recover, &cipher2_m1_recover), true);
+        assert_eq!(
+            equality_test(&cipher1_m1_recover, &cipher2_m1_recover),
+            true
+        );
         assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_hello), true);
         assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_wrong), false);
 
-        assert_eq!(equality_test(&cipher1_m2_recover, &cipher2_m2_recover), true);
+        assert_eq!(
+            equality_test(&cipher1_m2_recover, &cipher2_m2_recover),
+            true
+        );
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_wrong), true);
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello), false);
     }
@@ -186,7 +209,15 @@ mod tests {
         let web_hello1 = "912caa3f6fb385af33cc9059ba87523a5ab2ff0112fd21d239ec1ea93a767ae68068a7da29d45dd1665740c32593461f868a81a830ca7db6943dc56512f9507373b35beeec8a4a2f77fe03a72ba6ec0b94bb79de3ff9f24c0bc39e4a75e35c2816c33de0310b2194a48d0eb69cfc86b76e67238a94cea87459c0359451362c8ea6321d9d57dc03d55b219fd20e1188a9";
         let web_bytes1 = hex::decode(web_hello1).unwrap();
 
-        // let web_bytes1 = [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
+        // let web_bytes1 =
+        // [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,
+        // 216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,
+        // 237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,
+        // 64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,
+        // 185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,
+        // 120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,
+        // 249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,
+        // 202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
         let web_hello2 = "8fa65c08f9d137934380af14cd659370b8c7e51e8df839f31fb3edaeb50d70a8aed3e7ef441927401e8f40691776292188adecd16201d2f868b2d862771bcb1ade33492db124a4b5329c32ae24971b4980f5649134eb9ac00615286e1dc0b3ae02d27938a92f7a49b9e830fd3857c4c7648f65879a2b018aef26dbfe253ef25e7e7c36dc92d5de4a2fce6e0c4d1c7803";
         let web_bytes2 = hex::decode(web_hello2).unwrap();
         let cipher1_m1_recover =
@@ -198,7 +229,15 @@ mod tests {
         let web_wrong1 = "ae80d2a0349fac71423365ba24a4ecd195f629e11b3a403de0ba4c81bda121e050508220a50e4da78ff0b4d3c0f4fafcab3c6080b96d3050ec0dcf271e3c00ce81b6e34de2628817a7f9312d4a64bac56207208abc7594c29fb427cd0c0372c80cb4e5e966471dcefedba86857f572554102075f560949b38ba1cb928360b9c865aafaabea691ea2bbc5863775f02f32";
         let web_bytes1_wrong = hex::decode(web_wrong1).unwrap();
 
-        // let web_bytes1 = [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
+        // let web_bytes1 =
+        // [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,
+        // 216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,
+        // 237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,
+        // 64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,
+        // 185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,
+        // 120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,
+        // 249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,
+        // 202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
         let web_wrong2 = "80770cfb268456382939b1182f25088c93def05becf439db9c7f1c98628627593ab6b75e6b4f849328bf7aacdd142b7394417f658689838b086fc27a4d649d3c5ec3fbaa9e8fc6de2390e07f8a28bba2308fcf9870e55cd4e723c5ac74202b8213f38e1b950e009894d1334ca47be89d42080aee0b3b942f5a3da3f3e02757b25f9b9ae529d5d1a342df5b708a919ab8";
         let web_bytes2_wrong = hex::decode(web_wrong2).unwrap();
         let cipher1_m2_recover =
@@ -207,36 +246,46 @@ mod tests {
             WedprBls128Cipher::from_bytes(&web_bytes2_wrong).unwrap();
         // assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello), true);
 
-
-        assert_eq!(equality_test(&cipher1_m1_recover, &cipher2_m1_recover), true);
+        assert_eq!(
+            equality_test(&cipher1_m1_recover, &cipher2_m1_recover),
+            true
+        );
         assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_hello), true);
         assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_wrong), false);
 
-        assert_eq!(equality_test(&cipher1_m2_recover, &cipher2_m2_recover), true);
+        assert_eq!(
+            equality_test(&cipher1_m2_recover, &cipher2_m2_recover),
+            true
+        );
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_wrong), true);
         assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello), false);
     }
 
     #[test]
     fn test_from_cpp() {
-
         let message1 = "8097e7187c6cd863e9f458d5bc320c9ff93a0c830dda517ec915b7deb5c96b9bbab01798226b1c7fa14ad9f455f77f9a851713e3f8211041ca3f905886016b003fa049b97e25e109389a07f95501ede83f9f38eefa174f55383107269cff4c730dbe9a8bdc09a31e847c62d2366f46a042e64c780623c51c9fd9798d731338048576dd3830fdf3dfb4d64eb8f51770c4";
         let message_bytes1 = hex::decode(message1).unwrap();
 
-        // let web_bytes1 = [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
+        // let web_bytes1 =
+        // [178,100,235,129,182,124,252,216,28,9,219,125,168,153,128,192,138,
+        // 216,173,172,141,46,235,167,172,72,82,241,145,129,208,150,80,80,214,
+        // 237,229,158,116,93,141,67,101,166,116,228,108,0,175,152,239,234,129,
+        // 64,178,132,188,240,52,31,118,115,145,215,203,27,19,162,231,180,136,
+        // 185,63,110,117,174,203,105,51,56,13,138,252,231,179,40,235,128,6,39,
+        // 120,220,191,62,60,37,16,61,3,197,40,175,205,130,189,125,62,134,80,
+        // 249,131,21,43,60,171,164,147,6,72,214,246,66,219,97,37,203,31,211,33,
+        // 202,115,242,164,224,125,110,238,238,95,158,248,74,24,124];
         let message2 = "f097e7187c6cd863e9f458d5bc320c9ff93a0c830dda517ec915b7deb5c96b9bbab01798226b1c7fa14ad9f455f77f9a851713e3f8211041ca3f905886016b003fa049b97e25e109389a07f95501ede83f9f38eefa174f55383107269cff4c730dbe9a8bdc09a31e847c62d2366f46a042e64c780623c51c9fd9798d731338048576dd3830fdf3dfb4d64eb8f51770c4";
         let message2_bytes2 = hex::decode(message2).unwrap();
-        let cipher1_m1_recover =
+        let _cipher1_m1_recover =
             WedprBls128Cipher::from_bytes(&message_bytes1).unwrap();
         match WedprBls128Cipher::from_bytes(&message2_bytes2) {
-                 Ok(v) => {
-                     println!("normal happened")
-
-                 },
-                 Err(_) => {
-                     println!("error happened")
-                 },
-             };
+            Ok(_v) => {
+                println!("normal happened")
+            },
+            Err(_) => {
+                println!("error happened")
+            },
+        };
     }
-
 }

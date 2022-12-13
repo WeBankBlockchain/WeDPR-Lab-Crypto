@@ -2145,6 +2145,7 @@ dependencies = [
  "hex",
  "rand 0.8.3",
  "sha2 0.9.5",
+ "wedpr_l_crypto_hash_sha2",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
