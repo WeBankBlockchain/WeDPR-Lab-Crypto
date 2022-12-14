@@ -175,16 +175,16 @@ pub fn trapdoor(message: &[u8], sk: &Scalar) -> TrapdoorCipher {
 }
 
 pub fn trapdoor_test(
-    pkes_cipher: &PeksCipher,
+    peks_cipher: &PeksCipher,
     trapdoor_cipher: &TrapdoorCipher,
 ) -> bool {
     let pairing_e = pairing(
         &G1Affine::from(trapdoor_cipher.c1),
-        &G2Affine::from(pkes_cipher.c1),
+        &G2Affine::from(peks_cipher.c1),
     );
     let sha2_crate = WedprSha2_256::default();
     let c_vec = sha2_crate.hash(&pairing_e.to_string().as_bytes());
-    c_vec.eq(&pkes_cipher.c2)
+    c_vec.eq(&peks_cipher.c2)
 }
 
 #[cfg(test)]

@@ -5,5 +5,8 @@
 #[macro_use]
 extern crate lazy_static;
 
+#[macro_use]
+extern crate wedpr_l_macros;
+
 pub mod ot_kv;
 pub mod ot_message;
