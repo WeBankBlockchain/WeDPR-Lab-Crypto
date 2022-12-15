@@ -280,4 +280,39 @@ mod tests {
         assert_eq!(trapdoor_test(&cipher_id1_recover, &trapdoor1), true);
         assert_eq!(trapdoor_test(&cipher_id1, &trapdoor1_recover), true);
     }
+
+    #[test]
+    fn test_from_web() {
+        let message_hello = hex::decode("01020304").unwrap();
+        let message_wrong = hex::decode("04030201").unwrap();
+
+        let seed = hex::decode("0195f7500b825a152a42ed730df86de0331ee7b2579c944ee68f682a84e6004d").unwrap();
+
+
+        let cipher_message_str = "87af4f84f5cabefe4e4e52a98735a4aa7ac39ad56ca14f2d1fef6aea07dae2c42e948df92465940057329e241c13aa3213941282526cc735e6926fc9c4044b1a733e11c82fffcf4f516a9a3fb32dbafac76446270226e96f4a9a6d2537a68e4f2bdca94fd6d2ad2904196174ccb66a5cec3135f1b6310c942bfccae5a4386d34";
+        let cipher_message_bytes = hex::decode(cipher_message_str).unwrap();
+        let cipher_message = PeksCipher::from_bytes(&cipher_message_bytes).unwrap();
+
+
+        let key1 = generate_key_with_seed(&seed).unwrap();
+        let cipher_message_test = encrypt_message_with_seed(&seed, &message_hello, &key1.pk).unwrap();
+        wedpr_println!("cipher_message_test:{:?}", cipher_message_test.to_bytes());
+        wedpr_println!("cipher_message_bytes:{:?}", cipher_message_bytes);
+
+
+        let trapdoor1 = trapdoor(&message_hello, &key1.sk);
+        let trapdoor2 = trapdoor(&message_wrong, &key1.sk);
+
+
+        assert_eq!(
+            trapdoor_test(&cipher_message, &trapdoor1),
+            true
+        );
+
+        assert_eq!(
+            trapdoor_test(&cipher_message, &trapdoor2),
+            false
+        );
+
+    }
 }

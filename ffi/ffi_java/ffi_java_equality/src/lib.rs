@@ -34,7 +34,7 @@ use wedpr_ffi_common::utils::{
 #[allow(dead_code)]
 // Result class name is 'com.webank.wedpr.crypto.EqualityResult'.
 const RESULT_EQUALITY_CLASS_NAME: &str =
-    "com/webank/wedpr/crypto/CryptoResult";
+    "com/webank/webet/peks/CryptoResult";
 
 #[allow(dead_code)]
 fn get_result_jobject<'a>(_env: &'a JNIEnv) -> JObject<'a> {
@@ -44,7 +44,7 @@ fn get_result_jobject<'a>(_env: &'a JNIEnv) -> JObject<'a> {
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->encryptMessage'.
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_encryptMessage(
+pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_encryptMessage(
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
@@ -68,7 +68,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_encryptMessa
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->equalityTest'.
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_equalityTest(
+pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_equalityTest(
     _env: JNIEnv,
     _class: JClass,
     cipher1_jbyte_array: jbyteArray,
@@ -122,7 +122,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_equalityTest
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->peksGenerateKeyPair'.
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksGenerateKeyPair(
+pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksGenerateKeyPair(
     _env: JNIEnv,
     _class: JClass,
 ) -> jobject {
@@ -150,7 +150,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksGenerate
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->peksTrapdoor'.
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksTrapdoor(
+pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksTrapdoor(
     _env: JNIEnv,
     _class: JClass,
     message_jbyte_array: jbyteArray,
@@ -189,7 +189,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksTrapdoor
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->peksTrapdoorTest'.
-pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksTrapdoorTest(
+pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksTrapdoorTest(
     _env: JNIEnv,
     _class: JClass,
     pkes_cipher_jbyte_array: jbyteArray,
