@@ -6,6 +6,7 @@ use ff::Field;
 use rand;
 use wedpr_l_crypto_hash_sha2::WedprSha2_256;
 use wedpr_l_utils::{error::WedprError, traits::Hash};
+use std::convert::TryInto;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct PeksKeyPair {
@@ -140,21 +141,53 @@ impl TrapdoorCipher {
     }
 }
 
-pub fn generate_key() -> PeksKeyPair {
-    let rng = rand::rngs::OsRng::default();
-    let blinding = Scalar::random(rng);
+
+pub fn seed_to_scalar(seed: &[u8]) -> Result<Scalar, WedprError> {
+    let seed_vec = seed.to_vec();
+    if seed_vec.len() != 32 {
+        return Err(WedprError::FormatError);
+    }
+    let seed_array: [u8; 32] = match seed_vec.try_into() {
+        Ok(v) =>v,
+        Err(_) => return Err(WedprError::FormatError),
+    };
+    let result = Scalar::from_bytes(&seed_array).unwrap_or(Scalar::zero());
+    if result.eq(&Scalar::zero()) {
+        return Err(WedprError::FormatError);
+    }
+    Ok(result)
+}
+pub fn generate_key_with_seed(seed: &[u8]) -> Result<PeksKeyPair, WedprError> {
+    let blinding = seed_to_scalar(seed)?;
     let base_g2 = G2Projective::generator();
     let g2_point = base_g2 * blinding;
-    return PeksKeyPair {
+    return Ok(PeksKeyPair {
         pk: g2_point,
         sk: blinding,
-    };
+    });
 }
 
-pub fn encrypt_message(message: &[u8], pk: &G2Projective) -> PeksCipher {
-    let message_g1 = message_to_g1_point(message);
+pub fn generate_key() -> PeksKeyPair {
     let rng = rand::rngs::OsRng::default();
-    let blinding = Scalar::random(rng);
+    let blinding = Scalar::random(rng).to_bytes();
+    generate_key_with_seed(&blinding).unwrap()
+}
+
+
+
+pub fn encrypt_message(message: &[u8], pk: &G2Projective) -> PeksCipher {
+    let rng = rand::rngs::OsRng::default();
+    let blinding = Scalar::random(rng).to_bytes();
+    encrypt_message_with_seed(&blinding, message, pk).unwrap()
+}
+
+
+pub fn encrypt_message_with_seed(seed: &[u8], message: &[u8], pk: &G2Projective) -> Result<PeksCipher, WedprError> {
+
+    let blinding = seed_to_scalar(seed)?;
+
+    let message_g1 = message_to_g1_point(message);
+
     let base_g2 = G2Projective::generator();
     let g2_point = base_g2 * blinding;
 
@@ -162,10 +195,10 @@ pub fn encrypt_message(message: &[u8], pk: &G2Projective) -> PeksCipher {
         pairing(&G1Affine::from(message_g1), &G2Affine::from(pk * blinding));
     let sha2_crate = WedprSha2_256::default();
     let c2_vec = sha2_crate.hash(&pairing_t.to_string().as_bytes());
-    PeksCipher {
+    Ok(PeksCipher {
         c1: g2_point,
         c2: c2_vec,
-    }
+    })
 }
 
 pub fn trapdoor(message: &[u8], sk: &Scalar) -> TrapdoorCipher {
@@ -195,6 +228,8 @@ mod tests {
     fn test_peks() {
         let id1 = "zhangsan".as_bytes();
         let key1 = generate_key();
+        wedpr_println!("key1:{:?}", key1.to_bytes());
+        wedpr_println!("key1_length:{:?}", key1.to_bytes().len());
 
         let id2 = "李四".as_bytes();
         let key2 = generate_key();
@@ -208,6 +243,11 @@ mod tests {
         let cipher_id1 = encrypt_message(&id1, &PeksKeyPair::recover_public_key(&pk_bytes).unwrap());
         let cipher_id2 = encrypt_message(&id2, &key2.pk);
         let cipher_id3 = encrypt_message(&id3, &key3.pk);
+
+        // let cipher_id1 = encrypt_message(&vec![1, 2, 3, 4], &PeksKeyPair::recover_public_key(&pk_bytes).unwrap());
+        // wedpr_println!("cipher_id1:{:?}", cipher_id1.to_bytes());
+
+
 
         let sk_bytes = key1.get_secret_key();
         // let trapdoor1 = trapdoor(id1, &key1.sk);

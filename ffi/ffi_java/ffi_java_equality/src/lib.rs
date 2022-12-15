@@ -146,6 +146,46 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksGenerate
     result_jobject.into_inner()
 }
 
+
+#[no_mangle]
+/// Java interface for
+/// 'com.webank.wedpr.crypto.NativeInterface->peksTrapdoor'.
+pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_peksTrapdoor(
+    _env: JNIEnv,
+    _class: JClass,
+    message_jbyte_array: jbyteArray,
+    secret_jbyte_array: jbyteArray,
+) -> jobject {
+    let result_jobject = get_result_jobject(&_env);
+
+    let message_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
+    let secret_bytes =
+        java_safe_jbytes_to_bytes!(_env, result_jobject, secret_jbyte_array);
+
+    let secret = match wedpr_bls12_381::peks::PeksKeyPair::recover_secret_key(&secret_bytes) {
+        Ok(v) =>v,
+        Err(_) => return java_set_error_field_and_extract_jobject(
+            &_env,
+            &result_jobject,
+            &format!(
+                "pkesTrapdoor recover failed, secret_bytes={:?}",
+                &secret_bytes
+            ),
+        )
+    };
+
+    let result = wedpr_bls12_381::peks::trapdoor(&message_bytes, &secret);
+
+    java_safe_set_byte_array_field!(
+        _env,
+        result_jobject,
+        &result.to_bytes(),
+        "Trapdoor"
+    );
+    result_jobject.into_inner()
+}
+
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->peksTrapdoorTest'.

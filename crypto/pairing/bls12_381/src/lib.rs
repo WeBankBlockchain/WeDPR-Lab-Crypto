@@ -1,5 +1,4 @@
 //! This module provides bls12_381 equality test
-
 pub mod peks;
 
 extern crate bls12_381;
@@ -11,6 +10,7 @@ use ff::Field;
 use rand;
 use sha2;
 use wedpr_l_utils::error::WedprError;
+use rand::Rng;
 
 #[macro_use]
 extern crate wedpr_l_macros;
