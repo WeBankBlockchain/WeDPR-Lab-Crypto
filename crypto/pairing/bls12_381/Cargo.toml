@@ -18,6 +18,7 @@ wedpr_l_crypto_hash_sha2 = { path = "../../hash/sha2" }
 [dev-dependencies]
 criterion = "0.3"
 hex = "0.4.2"
+wedpr_l_common_coder_base64 =  { path = "../../../common/coder/base64" }
 
 [[bench]]
 name = "pairing"
