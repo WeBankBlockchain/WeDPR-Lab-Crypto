@@ -729,7 +729,7 @@ dependencies = [
  "wedpr_l_crypto_signature_sm2",
  "wedpr_l_crypto_vrf_curve25519",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_protos 1.2.0",
+ "wedpr_l_protos",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2088,7 +2088,7 @@ dependencies = [
  "wedpr_l_crypto_signature_sm2",
  "wedpr_l_crypto_vrf_curve25519",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_protos 1.2.0",
+ "wedpr_l_protos",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2515,7 +2515,7 @@ dependencies = [
  "rand 0.6.5",
  "wedpr_l_crypto_zkp_utils",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_protos 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_protos",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
@@ -2574,17 +2574,6 @@ checksum = "cc94d205d8c9f3f4563c92c7852fc2c1d6bc5aa7cc5f9939e06d3ede8d69dd10"
 [[package]]
 name = "wedpr_l_protos"
 version = "1.2.0"
-dependencies = [
- "protobuf",
- "protoc-rust",
- "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "wedpr_l_protos"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c31a6ae7aa606bd391e9d8e051909259f939464f431df12a61dc8e2f5d1553cd"
 dependencies = [
  "protobuf",
  "protoc-rust",
