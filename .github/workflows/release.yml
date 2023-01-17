@@ -28,7 +28,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_crypto.dylib.tar.gz
+          asset_name: libffi_c_crypto.dylib
           file: target/release/libffi_c_crypto.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -36,7 +36,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_zkp.dylib.tar.gz
+          asset_name: libffi_c_zkp.dylib
           file: target/release/libffi_c_zkp.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -44,7 +44,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_java_crypto_binary.dylib.tar.gz
+          asset_name: libffi_java_crypto_binary.dylib
           file: target/release/libffi_java_crypto_binary.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -52,7 +52,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_crypto_binary.dylib.tar.gz
+          asset_name: libffi_c_crypto_binary.dylib
           file: target/release/libffi_c_crypto_binary.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -60,7 +60,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_fisco_bcos_sdk.dylib.tar.gz
+          asset_name: libffi_fisco_bcos_sdk.dylib
           file: target/release/libffi_fisco_bcos_sdk.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -68,7 +68,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_fisco_bcos.dylib.tar.gz
+          asset_name: libffi_c_fisco_bcos.dylib
           file: target/release/libffi_c_fisco_bcos.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -76,7 +76,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_java_crypto.dylib.tar.gz
+          asset_name: libffi_java_crypto.dylib
           file: target/release/libffi_java_crypto.dylib
           tag: ${{ github.ref }}
           overwrite: true
@@ -88,7 +88,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_java_sdk.dylib.tar.gz
+          asset_name: libffi_java_sdk.dylib
           file: target/release/libffi_java_sdk.dylib  
           tag: ${{ github.ref }}
           overwrite: true   
@@ -105,7 +105,7 @@ jobs:
       - name: install rust language
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2021-06-17
+          toolchain: nightly-2022-07-28
           override: true
       - name: install CentOS dependencies
         run: |
@@ -118,7 +118,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_crypto.so.tar.gz
+          asset_name: libffi_c_crypto.so
           file: target/release/libffi_c_crypto.so
           tag: ${{ github.ref }}
           overwrite: true
@@ -126,7 +126,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_zkp.so.tar.gz
+          asset_name: libffi_c_zkp.so
           file: target/release/libffi_c_zkp.so
           tag: ${{ github.ref }}
           overwrite: true          
@@ -134,7 +134,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_java_crypto_binary.so.tar.gz
+          asset_name: libffi_java_crypto_binary.so
           file: target/release/libffi_java_crypto_binary.so
           tag: ${{ github.ref }}
           overwrite: true          
@@ -142,7 +142,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_crypto_binary.so.tar.gz
+          asset_name: libffi_c_crypto_binary.so
           file: target/release/libffi_c_crypto_binary.so
           tag: ${{ github.ref }}
           overwrite: true
@@ -150,7 +150,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_fisco_bcos_sdk.so.tar.gz
+          asset_name: libffi_fisco_bcos_sdk.so
           file: target/release/libffi_fisco_bcos_sdk.so
           tag: ${{ github.ref }}
           overwrite: true
@@ -158,7 +158,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_c_fisco_bcos.so.tar.gz
+          asset_name: libffi_c_fisco_bcos.so
           file: target/release/libffi_c_fisco_bcos.so
           tag: ${{ github.ref }}
           overwrite: true
@@ -166,7 +166,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_java_crypto.so.tar.gz
+          asset_name: libffi_java_crypto.so
           file: target/release/libffi_java_crypto.so
           tag: ${{ github.ref }}
           overwrite: true
@@ -178,7 +178,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: libffi_java_sdk.so.tar.gz
+          asset_name: libffi_java_sdk.so
           file: target/release/libffi_java_sdk.so
           tag: ${{ github.ref }}
           overwrite: true
@@ -203,14 +203,14 @@ jobs:
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_crypto.dll
-          asset_name: ffi_c_crypto.dll.zip
+          asset_name: ffi_c_crypto.dll
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_c_zkp.dll.zip
+          asset_name: ffi_c_zkp.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_zkp.dll
           tag: ${{ github.ref }}
           overwrite: true
@@ -218,7 +218,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_java_crypto_binary.dll.zip
+          asset_name: ffi_java_crypto_binary.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_crypto_binary.dll
           tag: ${{ github.ref }}
           overwrite: true
@@ -226,7 +226,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_c_crypto_binary.dll.zip
+          asset_name: ffi_c_crypto_binary.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_crypto_binary.dll
           tag: ${{ github.ref }}
           overwrite: true
@@ -234,7 +234,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_fisco_bcos_sdk.dll.zip
+          asset_name: ffi_fisco_bcos_sdk.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_fisco_bcos_sdk.dll
           tag: ${{ github.ref }}
           overwrite: true
@@ -242,7 +242,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_c_fisco_bcos.dll.zip
+          asset_name: ffi_c_fisco_bcos.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_fisco_bcos.dll
           tag: ${{ github.ref }}
           overwrite: true
@@ -250,7 +250,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_java_crypto.dll.zip
+          asset_name: ffi_java_crypto.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_crypto.dll
           tag: ${{ github.ref }}
           overwrite: true
@@ -262,7 +262,7 @@ jobs:
         uses: svenstaro/upload-release-action@v1-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
-          asset_name: ffi_java_sdk.dll.tar.gz
+          asset_name: ffi_java_sdk.dll
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_sdk.dll
           tag: ${{ github.ref }}
           overwrite: true
