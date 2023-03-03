@@ -1615,11 +1615,11 @@ checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
 
 [[package]]
 name = "secp256k1"
-version = "0.19.0"
+version = "0.26.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c6179428c22c73ac0fbb7b5579a56353ce78ba29759b3b8575183336ea74cdfb"
+checksum = "4124a35fe33ae14259c490fd70fa199a32b9ce9502f2ee6bc4f81ec06fa65894"
 dependencies = [
- "rand 0.6.5",
+ "rand 0.8.3",
  "secp256k1-sys",
 ]
 
@@ -1639,9 +1639,9 @@ dependencies = [
 
 [[package]]
 name = "secp256k1-sys"
-version = "0.3.0"
+version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "11553d210db090930f4432bea123b31f70bbf693ace14504ea2a35e796c28dd2"
+checksum = "642a62736682fdd8c71da0eb273e453c8ac74e33b9fb310e22ba5b03ec7651ff"
 dependencies = [
  "cc",
 ]
@@ -2475,8 +2475,8 @@ dependencies = [
 name = "wedpr_l_crypto_signature_secp256k1"
 version = "1.1.0"
 dependencies = [
+ "criterion",
  "lazy_static 1.4.0",
- "rand 0.6.5",
  "secp256k1",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
