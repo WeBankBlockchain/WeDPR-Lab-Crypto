@@ -9,10 +9,11 @@ extern crate lazy_static;
 
 extern crate secp256k1;
 use secp256k1::{
-    recovery::{RecoverableSignature, RecoveryId},
     All, Message, PublicKey, Secp256k1, SecretKey, VerifyOnly,
 };
+use secp256k1::ecdsa::{RecoverableSignature, RecoveryId};
 use wedpr_l_utils::{error::WedprError, traits::Signature};
+use secp256k1::rand::rngs::OsRng;
 
 lazy_static! {
     // Shared secp256k1 instance initialized for verification function only.
@@ -20,6 +21,7 @@ lazy_static! {
     // Shared secp256k1 instance initialized for all functions.
     static ref SECP256K1_ALL: Secp256k1<All> = Secp256k1::new();
 }
+
 
 /// Implements FISCO-BCOS-compatible Secp256k1 as a Signature instance.
 #[derive(Default, Debug, Clone, Copy)]
@@ -53,7 +55,7 @@ impl Signature for WedprSecp256k1Recover {
             },
         };
         let signature_obj =
-            SECP256K1_ALL.sign_recoverable(&msg_hash_obj, &secret_key);
+            SECP256K1_ALL.sign_ecdsa_recoverable(&msg_hash_obj, &secret_key);
         let (recid, signature_bytes) = &signature_obj.serialize_compact();
         // Append recovery id to the end of signature bytes.
         let mut signature_output = signature_bytes.to_vec();
@@ -72,6 +74,10 @@ impl Signature for WedprSecp256k1Recover {
     ) -> bool {
         // Message hash length for Secp256k1 signature should be 32 bytes.
         let recover_public_key =
+            // match self.recover_public_key(msg_hash, signature) {
+            //     Ok(v) => v,
+            //     Err(_) => return false,
+            // };
             match self.recover_public_key(msg_hash, signature) {
                 Ok(v) => v,
                 Err(_) => return false,
@@ -93,17 +99,10 @@ impl Signature for WedprSecp256k1Recover {
 
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
         loop {
-            // "rand" feature of secp256k1 need to be enabled for this.
-            let mut rng: rand::rngs::OsRng = loop {
-                // Keep retrying if encountering any error.
-                match rand::rngs::OsRng::new() {
-                    Ok(v) => break v,
-                    Err(_) => continue,
-                }
-            };
+
             let (secret_key, public_key) =
-                SECP256K1_ALL.generate_keypair(&mut rng);
-            // Drop weak secret key.
+                SECP256K1_ALL.generate_keypair(&mut OsRng);
+
             if secret_key[0] > 15 {
                 return (
                     public_key.serialize_uncompressed().to_vec(),
@@ -157,7 +156,7 @@ impl WedprSecp256k1Recover {
                 },
             };
         let recovered_public_key =
-            match SECP256K1_VERIFY.recover(&msg_hash_obj, &get_sign_final) {
+            match SECP256K1_VERIFY.recover_ecdsa(&msg_hash_obj, &get_sign_final) {
                 Ok(v) => v,
                 Err(_) => {
                     wedpr_println!("Signature recover failed");
