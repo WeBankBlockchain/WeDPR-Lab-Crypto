@@ -99,6 +99,11 @@ mod tests {
         let msg = b"hello";
 
         let ciphertext = aes256.encrypt(&msg.to_vec(), &key, &iv).unwrap();
+        // let iv2 = aes256.generate_iv();
+        let ciphertext2 = aes256.encrypt(&msg.to_vec(), &key, &iv).unwrap();
+        assert_eq!(ciphertext, ciphertext2);
+        println!("{:?}", ciphertext);
+        println!("{:?}", ciphertext2);
         let decrypted_msg = aes256.decrypt(&ciphertext, &key, &iv).unwrap();
         assert_eq!(decrypted_msg, msg);
 

@@ -4,9 +4,9 @@ use bls12_381::{
 };
 use ff::Field;
 use rand;
+use std::convert::TryInto;
 use wedpr_l_crypto_hash_sha2::WedprSha2_256;
 use wedpr_l_utils::{error::WedprError, traits::Hash};
-use std::convert::TryInto;
 
 #[derive(Clone, Copy, Debug, Default)]
 pub struct PeksKeyPair {
@@ -47,7 +47,9 @@ impl PeksKeyPair {
         G2Affine::from(self.pk).to_compressed().to_vec()
     }
 
-    pub fn recover_public_key(pk_bytes: &[u8]) -> Result<G2Projective, WedprError> {
+    pub fn recover_public_key(
+        pk_bytes: &[u8],
+    ) -> Result<G2Projective, WedprError> {
         if pk_bytes.len() != 96 {
             return Err(WedprError::FormatError);
         }
@@ -65,7 +67,9 @@ impl PeksKeyPair {
         self.sk.to_bytes().to_vec()
     }
 
-    pub fn recover_secret_key(scalar_bytes: &[u8]) -> Result<Scalar, WedprError> {
+    pub fn recover_secret_key(
+        scalar_bytes: &[u8],
+    ) -> Result<Scalar, WedprError> {
         if scalar_bytes.len() != 32 {
             return Err(WedprError::FormatError);
         }
@@ -141,14 +145,13 @@ impl TrapdoorCipher {
     }
 }
 
-
 pub fn seed_to_scalar(seed: &[u8]) -> Result<Scalar, WedprError> {
     let seed_vec = seed.to_vec();
     if seed_vec.len() != 32 {
         return Err(WedprError::FormatError);
     }
     let seed_array: [u8; 32] = match seed_vec.try_into() {
-        Ok(v) =>v,
+        Ok(v) => v,
         Err(_) => return Err(WedprError::FormatError),
     };
     let result = Scalar::from_bytes(&seed_array).unwrap_or(Scalar::zero());
@@ -173,17 +176,17 @@ pub fn generate_key() -> PeksKeyPair {
     generate_key_with_seed(&blinding).unwrap()
 }
 
-
-
 pub fn encrypt_message(message: &[u8], pk: &G2Projective) -> PeksCipher {
     let rng = rand::rngs::OsRng::default();
     let blinding = Scalar::random(rng).to_bytes();
     encrypt_message_with_seed(&blinding, message, pk).unwrap()
 }
 
-
-pub fn encrypt_message_with_seed(seed: &[u8], message: &[u8], pk: &G2Projective) -> Result<PeksCipher, WedprError> {
-
+pub fn encrypt_message_with_seed(
+    seed: &[u8],
+    message: &[u8],
+    pk: &G2Projective,
+) -> Result<PeksCipher, WedprError> {
     let blinding = seed_to_scalar(seed)?;
 
     let message_g1 = message_to_g1_point(message);
@@ -242,18 +245,21 @@ mod tests {
         let pk_bytes = key1.get_public_key();
 
         // let cipher_id1 = encrypt_message(&id1, &key1.pk);
-        let cipher_id1 = encrypt_message(&id1, &PeksKeyPair::recover_public_key(&pk_bytes).unwrap());
+        let cipher_id1 = encrypt_message(
+            &id1,
+            &PeksKeyPair::recover_public_key(&pk_bytes).unwrap(),
+        );
         let cipher_id2 = encrypt_message(&id2, &key2.pk);
         let cipher_id3 = encrypt_message(&id3, &key3.pk);
 
-        // let cipher_id1 = encrypt_message(&vec![1, 2, 3, 4], &PeksKeyPair::recover_public_key(&pk_bytes).unwrap());
+        // let cipher_id1 = encrypt_message(&vec![1, 2, 3, 4],
+        // &PeksKeyPair::recover_public_key(&pk_bytes).unwrap());
         // wedpr_println!("cipher_id1:{:?}", cipher_id1.to_bytes());
-
-
 
         let sk_bytes = key1.get_secret_key();
         // let trapdoor1 = trapdoor(id1, &key1.sk);
-        let trapdoor1 = trapdoor(id1, &PeksKeyPair::recover_secret_key(&sk_bytes).unwrap());
+        let trapdoor1 =
+            trapdoor(id1, &PeksKeyPair::recover_secret_key(&sk_bytes).unwrap());
         assert_eq!(trapdoor_test(&cipher_id1, &trapdoor1), true);
         assert_eq!(trapdoor_test(&cipher_id2, &trapdoor1), false);
         assert_eq!(trapdoor_test(&cipher_id3, &trapdoor1), false);
@@ -288,34 +294,29 @@ mod tests {
         let message_hello = hex::decode("01020304").unwrap();
         let message_wrong = hex::decode("04030201").unwrap();
 
-        let seed = hex::decode("0195f7500b825a152a42ed730df86de0331ee7b2579c944ee68f682a84e6004d").unwrap();
-
+        let seed = hex::decode(
+            "0195f7500b825a152a42ed730df86de0331ee7b2579c944ee68f682a84e6004d",
+        )
+        .unwrap();
 
         let cipher_message_str = "87af4f84f5cabefe4e4e52a98735a4aa7ac39ad56ca14f2d1fef6aea07dae2c42e948df92465940057329e241c13aa3213941282526cc735e6926fc9c4044b1a733e11c82fffcf4f516a9a3fb32dbafac76446270226e96f4a9a6d2537a68e4f2bdca94fd6d2ad2904196174ccb66a5cec3135f1b6310c942bfccae5a4386d34";
         let cipher_message_bytes = hex::decode(cipher_message_str).unwrap();
-        let cipher_message = PeksCipher::from_bytes(&cipher_message_bytes).unwrap();
-
+        let cipher_message =
+            PeksCipher::from_bytes(&cipher_message_bytes).unwrap();
 
         let key1 = generate_key_with_seed(&seed).unwrap();
-        let cipher_message_test = encrypt_message_with_seed(&seed, &message_hello, &key1.pk).unwrap();
-        // wedpr_println!("cipher_message_test:{:?}", cipher_message_test.to_bytes());
-        // wedpr_println!("cipher_message_bytes:{:?}", cipher_message_bytes);
-
+        let cipher_message_test =
+            encrypt_message_with_seed(&seed, &message_hello, &key1.pk).unwrap();
+        // wedpr_println!("cipher_message_test:{:?}",
+        // cipher_message_test.to_bytes()); wedpr_println!("
+        // cipher_message_bytes:{:?}", cipher_message_bytes);
 
         let trapdoor1 = trapdoor(&message_hello, &key1.sk);
         let trapdoor2 = trapdoor(&message_wrong, &key1.sk);
 
+        assert_eq!(trapdoor_test(&cipher_message, &trapdoor1), true);
 
-        assert_eq!(
-            trapdoor_test(&cipher_message, &trapdoor1),
-            true
-        );
-
-        assert_eq!(
-            trapdoor_test(&cipher_message, &trapdoor2),
-            false
-        );
-
+        assert_eq!(trapdoor_test(&cipher_message, &trapdoor2), false);
     }
 
     #[test]
@@ -330,14 +331,26 @@ mod tests {
         let cipher = encrypt_message(&message_hello, &pk);
         // wedpr_println!("cipher:{:?}", cipher.to_bytes());
 
-        let pk_b: Vec<u8> = vec![166, 128, 102, 24, 26, 188, 251, 191, 70, 187, 221, 154, 94, 222, 132, 98, 247, 202, 88, 211, 23, 95, 6, 11, 218, 184, 14, 25, 137, 212, 231, 234, 79, 132, 33, 142, 12, 108, 128, 138, 42, 28, 32, 95, 28, 37, 192, 237, 9, 123, 245, 203, 141, 103, 203, 241, 14, 187, 150, 79, 172, 21, 11, 7, 250, 94, 86, 143, 233, 96, 246, 10, 133, 71, 226, 121, 202, 80, 119, 56, 95, 88, 23, 221, 119, 131, 109, 120, 55, 99, 132, 208, 237, 115, 51, 179];
-        let seed_b: Vec<u8> = vec![1, 90, 160, 40, 152, 38, 133, 69, 16, 19, 78, 178, 73, 141, 154, 223, 51, 220, 69, 67, 206, 170, 49, 27, 74, 232, 77, 229, 212, 234, 4, 105];
+        let pk_b: Vec<u8> = vec![
+            166, 128, 102, 24, 26, 188, 251, 191, 70, 187, 221, 154, 94, 222,
+            132, 98, 247, 202, 88, 211, 23, 95, 6, 11, 218, 184, 14, 25, 137,
+            212, 231, 234, 79, 132, 33, 142, 12, 108, 128, 138, 42, 28, 32, 95,
+            28, 37, 192, 237, 9, 123, 245, 203, 141, 103, 203, 241, 14, 187,
+            150, 79, 172, 21, 11, 7, 250, 94, 86, 143, 233, 96, 246, 10, 133,
+            71, 226, 121, 202, 80, 119, 56, 95, 88, 23, 221, 119, 131, 109,
+            120, 55, 99, 132, 208, 237, 115, 51, 179,
+        ];
+        let seed_b: Vec<u8> = vec![
+            1, 90, 160, 40, 152, 38, 133, 69, 16, 19, 78, 178, 73, 141, 154,
+            223, 51, 220, 69, 67, 206, 170, 49, 27, 74, 232, 77, 229, 212, 234,
+            4, 105,
+        ];
         let pk_b_new = PeksKeyPair::recover_public_key(&pk_b).unwrap();
-        let cipher_new = encrypt_message_with_seed(&seed_b, &message_hello, &pk_b_new).unwrap();
+        let cipher_new =
+            encrypt_message_with_seed(&seed_b, &message_hello, &pk_b_new)
+                .unwrap();
         // wedpr_println!("cipher_new:{:?}", cipher_new.to_bytes());
 
-
         // assert_eq!(pk_bytes, pk.to_bytes());
-
     }
 }

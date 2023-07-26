@@ -41,7 +41,7 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_equality_test(
             Err(_) => {
                 std::mem::forget(cipher1);
                 std::mem::forget(cipher2);
-                return FAILURE
+                return FAILURE;
             },
         };
     let cipher2_struct =
@@ -50,7 +50,7 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_equality_test(
             Err(_) => {
                 std::mem::forget(cipher1);
                 std::mem::forget(cipher2);
-                return FAILURE
+                return FAILURE;
             },
         };
     std::mem::forget(cipher1);
@@ -61,7 +61,6 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_equality_test(
     FAILURE
 }
 
-
 #[no_mangle]
 /// C interface for 'peks_test'.
 pub unsafe extern "C" fn wedpr_pairing_bls128_peks_test(
@@ -70,24 +69,25 @@ pub unsafe extern "C" fn wedpr_pairing_bls128_peks_test(
 ) -> i8 {
     let peks_bytes = c_read_raw_pointer(peks_cipher);
     let trapdoor_bytes = c_read_raw_pointer(trapdoor_cipher);
-    let peks =
-        match wedpr_bls12_381::peks::PeksCipher::from_bytes(&peks_bytes) {
-            Ok(v) => v,
-            Err(_) => {
-                std::mem::forget(peks_bytes);
-                std::mem::forget(trapdoor_bytes);
-                return FAILURE
-            },
-        };
-    let trapdoor =
-        match wedpr_bls12_381::peks::TrapdoorCipher::from_bytes(&trapdoor_bytes) {
-            Ok(v) => v,
-            Err(_) => {
-                std::mem::forget(peks_bytes);
-                std::mem::forget(trapdoor_bytes);
-                return FAILURE
-            },
-        };
+    let peks = match wedpr_bls12_381::peks::PeksCipher::from_bytes(&peks_bytes)
+    {
+        Ok(v) => v,
+        Err(_) => {
+            std::mem::forget(peks_bytes);
+            std::mem::forget(trapdoor_bytes);
+            return FAILURE;
+        },
+    };
+    let trapdoor = match wedpr_bls12_381::peks::TrapdoorCipher::from_bytes(
+        &trapdoor_bytes,
+    ) {
+        Ok(v) => v,
+        Err(_) => {
+            std::mem::forget(peks_bytes);
+            std::mem::forget(trapdoor_bytes);
+            return FAILURE;
+        },
+    };
     std::mem::forget(peks_bytes);
     std::mem::forget(trapdoor_bytes);
     if wedpr_bls12_381::peks::trapdoor_test(&peks, &trapdoor) {

@@ -5,16 +5,21 @@
 use curve25519_dalek::{
     ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
 };
+use rand::Rng;
 use sha3::Sha3_512;
+use wedpr_l_crypto_block_cipher_aes;
 use wedpr_l_crypto_hash_sha3::WedprSha3_256;
 use wedpr_l_crypto_zkp_utils::{
     get_random_scalar, point_to_bytes, BASEPOINT_G1,
 };
-use wedpr_l_utils::{error::WedprError, traits::Hash};
-use wedpr_l_crypto_block_cipher_aes;
-use wedpr_l_utils::traits::BlockCipher;
-use rand::Rng;
-use wedpr_l_protos::generated::ot::{IdList, DataDict, OtReceiverCommitmentKOutOfN, OtCiphertextItemKOutOfN, OtCiphertextsKOutOfN, OtReceiverSecretKOutOfN};
+use wedpr_l_protos::generated::ot::{
+    DataDict, IdList, OtCiphertextItemKOutOfN, OtCiphertextsKOutOfN,
+    OtReceiverCommitmentKOutOfN, OtReceiverSecretKOutOfN,
+};
+use wedpr_l_utils::{
+    error::WedprError,
+    traits::{BlockCipher, Hash},
+};
 
 lazy_static! {
     static ref HASH_SHA3_256: WedprSha3_256 = WedprSha3_256::default();
@@ -41,7 +46,6 @@ pub struct CiphertextItemKOutOfN {
     pub key_basepoint: RistrettoPoint,
     pub encrypted_message: Vec<Vec<u8>>,
 }
-//
 // pub struct TwoDeepVector {}
 //
 // impl TwoDeepVector {
@@ -109,12 +113,9 @@ pub struct CiphertextItemKOutOfN {
 pub struct OtKvKOutOfN {}
 
 impl OtKvKOutOfN {
-
     // pub fn ot_make_choice(choice_list: &Vec<Vec<u8>>) -> IdList {
     //
     // }
-
-
 
     /// Generates an OT query based on receiver's choice of ids from
     /// choice_list. It returns ReceiverSecret and ReceiverCommitment.
@@ -145,7 +146,8 @@ impl OtKvKOutOfN {
                 .push(RistrettoPoint::multiscalar_mul(&[c_id - id_scalar], &[
                     *BASEPOINT_G1,
                 ]));
-            // ot_receiver_commitment.point_z.push(RistrettoPoint::multiscalar_mul(&[c_id - id_scalar], &[
+            // ot_receiver_commitment.point_z.
+            // push(RistrettoPoint::multiscalar_mul(&[c_id - id_scalar], &[
             //     *BASEPOINT_G1,
             // ]).compress().to_bytes().to_vec());
             // point_z_list
@@ -153,7 +155,6 @@ impl OtKvKOutOfN {
             //         *BASEPOINT_G1,
             //     ]).compress().to_bytes().to_vec());
         }
-
 
         // ot_receiver_commitment.set_point_z(point_z_list);
         (
@@ -223,8 +224,10 @@ impl OtKvKOutOfN {
 
                 // let key1 = bytes_key[0..16].to_vec();
                 // let iv1 = bytes_key[16..32].to_vec();
-                // let aes256 = wedpr_l_crypto_block_cipher_aes::WedprBlockCipherAes256::default();
-                // let encrypted_message = match aes256.encrypt(message, &key1, &iv1) {
+                // let aes256 =
+                // wedpr_l_crypto_block_cipher_aes::WedprBlockCipherAes256::default();
+                // let encrypted_message = match
+                // aes256.encrypt(message, &key1, &iv1) {
                 //     Ok(v) =>v,
                 //     Err(_) => {
                 //         wedpr_println!("aes256 encrypt failed");
@@ -266,15 +269,16 @@ impl OtKvKOutOfN {
 
                 while bytes_key_cp.len() < encrypted_message.len() {
                     bytes_key_cp.append(&mut bytes_key.clone());
-
                 }
                 let decrypted_message: Vec<u8> = encrypted_message
                     .iter()
                     .zip(bytes_key_cp.iter())
                     .map(|(&x1, &x2)| x1 ^ x2)
                     .collect();
-                // let aes256 = wedpr_l_crypto_block_cipher_aes::WedprBlockCipherAes256::default();
-                // let decrypted_message = match aes256.encrypt(encrypted_message, &bytes_key, &bytes_key) {
+                // let aes256 =
+                // wedpr_l_crypto_block_cipher_aes::WedprBlockCipherAes256::default();
+                // let decrypted_message = match
+                // aes256.encrypt(encrypted_message, &bytes_key, &bytes_key) {
                 //     Ok(v) =>v,
                 //     Err(_) => {
                 //         wedpr_println!("secp256k1 ECIES encrypt failed");
@@ -314,7 +318,8 @@ mod tests {
         let choice_list =
             vec![id0.as_bytes().to_vec(), id2.as_bytes().to_vec()];
         let choice_list_bytes = TwoDeepVector::to_bytes(&choice_list);
-        let choice_list_recover = TwoDeepVector::from_bytes(&choice_list_bytes).unwrap();
+        let choice_list_recover =
+            TwoDeepVector::from_bytes(&choice_list_bytes).unwrap();
         let id_list = vec![
             id0.as_bytes().to_vec(),
             id1.as_bytes().to_vec(),
@@ -342,11 +347,11 @@ mod tests {
             )
             .unwrap();
         let message_bytes = TwoDeepVector::to_bytes(&message);
-        let message_bytes_recover = TwoDeepVector::from_bytes(&message_bytes).unwrap();
+        let message_bytes_recover =
+            TwoDeepVector::from_bytes(&message_bytes).unwrap();
         assert_eq!(
             vec![message0.as_bytes().to_vec(), message2.as_bytes().to_vec()],
             message_bytes_recover
         );
-
     }
 }

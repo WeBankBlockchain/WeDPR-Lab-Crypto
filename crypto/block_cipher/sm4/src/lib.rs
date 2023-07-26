@@ -87,6 +87,9 @@ mod tests {
         let msg = b"helloworld1 helloworld2 helloworld3 helloworld4";
 
         let ciphertext = sm4.encrypt(&msg.to_vec(), &key, &iv).unwrap();
+        let ciphertext2 = sm4.encrypt(&msg.to_vec(), &key, &iv).unwrap();
+        assert_eq!(ciphertext, ciphertext2);
+
         let decrypted_msg = sm4.decrypt(&ciphertext, &key, &iv).unwrap();
         assert_eq!(decrypted_msg, msg);
     }

@@ -33,8 +33,7 @@ use wedpr_ffi_common::utils::{
 
 #[allow(dead_code)]
 // Result class name is 'com.webank.wedpr.crypto.EqualityResult'.
-const RESULT_EQUALITY_CLASS_NAME: &str =
-    "com/webank/webet/peks/CryptoResult";
+const RESULT_EQUALITY_CLASS_NAME: &str = "com/webank/webet/peks/CryptoResult";
 
 #[allow(dead_code)]
 fn get_result_jobject<'a>(_env: &'a JNIEnv) -> JObject<'a> {
@@ -117,8 +116,6 @@ pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_equalityTest(
     result_jobject.into_inner()
 }
 
-
-
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->peksGenerateKeyPair'.
@@ -127,7 +124,6 @@ pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksGenerateKe
     _class: JClass,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
-
 
     let result = wedpr_bls12_381::peks::generate_key();
 
@@ -146,7 +142,6 @@ pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksGenerateKe
     result_jobject.into_inner()
 }
 
-
 #[no_mangle]
 /// Java interface for
 /// 'com.webank.wedpr.crypto.NativeInterface->peksTrapdoor'.
@@ -163,16 +158,20 @@ pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksTrapdoor(
     let secret_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, secret_jbyte_array);
 
-    let secret = match wedpr_bls12_381::peks::PeksKeyPair::recover_secret_key(&secret_bytes) {
-        Ok(v) =>v,
-        Err(_) => return java_set_error_field_and_extract_jobject(
-            &_env,
-            &result_jobject,
-            &format!(
-                "pkesTrapdoor recover failed, secret_bytes={:?}",
-                &secret_bytes
-            ),
-        )
+    let secret = match wedpr_bls12_381::peks::PeksKeyPair::recover_secret_key(
+        &secret_bytes,
+    ) {
+        Ok(v) => v,
+        Err(_) => {
+            return java_set_error_field_and_extract_jobject(
+                &_env,
+                &result_jobject,
+                &format!(
+                    "pkesTrapdoor recover failed, secret_bytes={:?}",
+                    &secret_bytes
+                ),
+            )
+        },
     };
 
     let result = wedpr_bls12_381::peks::trapdoor(&message_bytes, &secret);
@@ -197,21 +196,28 @@ pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksTrapdoorTe
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
 
-    let pkes_cipher_bytes =
-        java_safe_jbytes_to_bytes!(_env, result_jobject, pkes_cipher_jbyte_array);
-    let trapdoor_cipher_bytes =
-        java_safe_jbytes_to_bytes!(_env, result_jobject, trapdoor_cipher_jbyte_array);
-
+    let pkes_cipher_bytes = java_safe_jbytes_to_bytes!(
+        _env,
+        result_jobject,
+        pkes_cipher_jbyte_array
+    );
+    let trapdoor_cipher_bytes = java_safe_jbytes_to_bytes!(
+        _env,
+        result_jobject,
+        trapdoor_cipher_jbyte_array
+    );
 
     let pkes_cipher =
-        match wedpr_bls12_381::peks::PeksCipher::from_bytes(&pkes_cipher_bytes) {
+        match wedpr_bls12_381::peks::PeksCipher::from_bytes(&pkes_cipher_bytes)
+        {
             Ok(v) => v,
             Err(_) => {
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
                     &format!(
-                        "pkesTrapdoorTest recover failed, pkes_cipher_bytes={:?}",
+                        "pkesTrapdoorTest recover failed, \
+                         pkes_cipher_bytes={:?}",
                         &pkes_cipher_bytes
                     ),
                 )
@@ -219,20 +225,24 @@ pub extern "system" fn Java_com_webank_webet_peks_NativeInterface_peksTrapdoorTe
         };
 
     let trapdoor_cipher =
-        match wedpr_bls12_381::peks::TrapdoorCipher::from_bytes(&trapdoor_cipher_bytes) {
+        match wedpr_bls12_381::peks::TrapdoorCipher::from_bytes(
+            &trapdoor_cipher_bytes,
+        ) {
             Ok(v) => v,
             Err(_) => {
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
                     &format!(
-                        "pkesTrapdoorTest recover failed, trapdoor_cipher_bytes={:?}",
+                        "pkesTrapdoorTest recover failed, \
+                         trapdoor_cipher_bytes={:?}",
                         &trapdoor_cipher_bytes
                     ),
                 )
             },
         };
-    let result = wedpr_bls12_381::peks::trapdoor_test(&pkes_cipher, &trapdoor_cipher);
+    let result =
+        wedpr_bls12_381::peks::trapdoor_test(&pkes_cipher, &trapdoor_cipher);
 
     java_safe_set_boolean_field!(_env, result_jobject, result, "booleanResult");
     result_jobject.into_inner()

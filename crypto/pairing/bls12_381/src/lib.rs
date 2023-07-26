@@ -7,10 +7,9 @@ use bls12_381::{
     pairing, G1Affine, G1Projective, G2Affine, G2Projective, Scalar,
 };
 use ff::Field;
-use rand;
+use rand::{self, Rng};
 use sha2;
 use wedpr_l_utils::error::WedprError;
-use rand::Rng;
 
 #[macro_use]
 extern crate wedpr_l_macros;
@@ -211,9 +210,9 @@ mod tests {
         let web_hello1 = "a91c14d9111e95206e5be9e644f68dd6ddb5865da5bfab80d4c7fb7a1a1299db401e200bb401adc87da751283dd8cb2984820a100894e50583daec6261bd8728d6c80689fa02d8f3e7fae23329755229c98456db47f78071e03dd4344e7e8dc3029bf4809a8fc3198dcd4c6810465cbc42fc57329b1d980f70b2a383507c257e35f33f2851e0ab2a40bb24606900c152";
         let web_bytes1 = hex::decode(web_hello1).unwrap();
 
-
-        // let web_hello2 = "8fa65c08f9d137934380af14cd659370b8c7e51e8df839f31fb3edaeb50d70a8aed3e7ef441927401e8f40691776292188adecd16201d2f868b2d862771bcb1ade33492db124a4b5329c32ae24971b4980f5649134eb9ac00615286e1dc0b3ae02d27938a92f7a49b9e830fd3857c4c7648f65879a2b018aef26dbfe253ef25e7e7c36dc92d5de4a2fce6e0c4d1c7803";
-        // let web_bytes2 = hex::decode(web_hello2).unwrap();
+        // let web_hello2 =
+        // "8fa65c08f9d137934380af14cd659370b8c7e51e8df839f31fb3edaeb50d70a8aed3e7ef441927401e8f40691776292188adecd16201d2f868b2d862771bcb1ade33492db124a4b5329c32ae24971b4980f5649134eb9ac00615286e1dc0b3ae02d27938a92f7a49b9e830fd3857c4c7648f65879a2b018aef26dbfe253ef25e7e7c36dc92d5de4a2fce6e0c4d1c7803"
+        // ; let web_bytes2 = hex::decode(web_hello2).unwrap();
         // let cipher1_m2_recover = encrypt_message(message_hello);
         let cipher2_m1_recover =
             WedprBls128Cipher::from_bytes(&web_bytes1).unwrap();
@@ -221,31 +220,36 @@ mod tests {
         //     WedprBls128Cipher::from_bytes(&web_bytes2).unwrap();
         assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello), true);
 
-        // let web_wrong1 = "ae80d2a0349fac71423365ba24a4ecd195f629e11b3a403de0ba4c81bda121e050508220a50e4da78ff0b4d3c0f4fafcab3c6080b96d3050ec0dcf271e3c00ce81b6e34de2628817a7f9312d4a64bac56207208abc7594c29fb427cd0c0372c80cb4e5e966471dcefedba86857f572554102075f560949b38ba1cb928360b9c865aafaabea691ea2bbc5863775f02f32";
-        // let web_bytes1_wrong = hex::decode(web_wrong1).unwrap();
+        // let web_wrong1 =
+        // "ae80d2a0349fac71423365ba24a4ecd195f629e11b3a403de0ba4c81bda121e050508220a50e4da78ff0b4d3c0f4fafcab3c6080b96d3050ec0dcf271e3c00ce81b6e34de2628817a7f9312d4a64bac56207208abc7594c29fb427cd0c0372c80cb4e5e966471dcefedba86857f572554102075f560949b38ba1cb928360b9c865aafaabea691ea2bbc5863775f02f32"
+        // ; let web_bytes1_wrong = hex::decode(web_wrong1).unwrap();
         //
         //
-        // let web_wrong2 = "80770cfb268456382939b1182f25088c93def05becf439db9c7f1c98628627593ab6b75e6b4f849328bf7aacdd142b7394417f658689838b086fc27a4d649d3c5ec3fbaa9e8fc6de2390e07f8a28bba2308fcf9870e55cd4e723c5ac74202b8213f38e1b950e009894d1334ca47be89d42080aee0b3b942f5a3da3f3e02757b25f9b9ae529d5d1a342df5b708a919ab8";
-        // let web_bytes2_wrong = hex::decode(web_wrong2).unwrap();
+        // let web_wrong2 =
+        // "80770cfb268456382939b1182f25088c93def05becf439db9c7f1c98628627593ab6b75e6b4f849328bf7aacdd142b7394417f658689838b086fc27a4d649d3c5ec3fbaa9e8fc6de2390e07f8a28bba2308fcf9870e55cd4e723c5ac74202b8213f38e1b950e009894d1334ca47be89d42080aee0b3b942f5a3da3f3e02757b25f9b9ae529d5d1a342df5b708a919ab8"
+        // ; let web_bytes2_wrong = hex::decode(web_wrong2).unwrap();
         // let cipher1_m2_recover =
         //     WedprBls128Cipher::from_bytes(&web_bytes1_wrong).unwrap();
         // let cipher2_m2_recover =
         //     WedprBls128Cipher::from_bytes(&web_bytes2_wrong).unwrap();
-        // // assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello), true);
+        // // assert_eq!(equality_test(&cipher2_m1_recover, &cipher1_hello),
+        // true);
         //
         // assert_eq!(
         //     equality_test(&cipher1_m1_recover, &cipher2_m1_recover),
         //     true
         // );
         // assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_hello), true);
-        // assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_wrong), false);
+        // assert_eq!(equality_test(&cipher1_m1_recover, &cipher1_wrong),
+        // false);
         //
         // assert_eq!(
         //     equality_test(&cipher1_m2_recover, &cipher2_m2_recover),
         //     true
         // );
         // assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_wrong), true);
-        // assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello), false);
+        // assert_eq!(equality_test(&cipher1_m2_recover, &cipher1_hello),
+        // false);
     }
 
     #[test]
