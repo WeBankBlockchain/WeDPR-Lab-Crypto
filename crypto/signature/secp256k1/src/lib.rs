@@ -9,11 +9,11 @@ extern crate lazy_static;
 
 extern crate secp256k1;
 use secp256k1::{
+    ecdsa::{RecoverableSignature, RecoveryId},
+    rand::rngs::OsRng,
     All, Message, PublicKey, Secp256k1, SecretKey, VerifyOnly,
 };
-use secp256k1::ecdsa::{RecoverableSignature, RecoveryId};
 use wedpr_l_utils::{error::WedprError, traits::Signature};
-use secp256k1::rand::rngs::OsRng;
 
 lazy_static! {
     // Shared secp256k1 instance initialized for verification function only.
@@ -21,7 +21,6 @@ lazy_static! {
     // Shared secp256k1 instance initialized for all functions.
     static ref SECP256K1_ALL: Secp256k1<All> = Secp256k1::new();
 }
-
 
 /// Implements FISCO-BCOS-compatible Secp256k1 as a Signature instance.
 #[derive(Default, Debug, Clone, Copy)]
@@ -99,7 +98,6 @@ impl Signature for WedprSecp256k1Recover {
 
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
         loop {
-
             let (secret_key, public_key) =
                 SECP256K1_ALL.generate_keypair(&mut OsRng);
 
@@ -155,14 +153,15 @@ impl WedprSecp256k1Recover {
                     return Err(WedprError::FormatError);
                 },
             };
-        let recovered_public_key =
-            match SECP256K1_VERIFY.recover_ecdsa(&msg_hash_obj, &get_sign_final) {
-                Ok(v) => v,
-                Err(_) => {
-                    wedpr_println!("Signature recover failed");
-                    return Err(WedprError::FormatError);
-                },
-            };
+        let recovered_public_key = match SECP256K1_VERIFY
+            .recover_ecdsa(&msg_hash_obj, &get_sign_final)
+        {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("Signature recover failed");
+                return Err(WedprError::FormatError);
+            },
+        };
         return Ok(recovered_public_key.serialize_uncompressed().to_vec());
     }
 

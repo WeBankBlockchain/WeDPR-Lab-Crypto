@@ -1,16 +1,16 @@
 // Copyright 2021 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
 use criterion::Criterion;
-use wedpr_l_crypto_signature_secp256k1::{WedprSecp256k1Recover};
-use wedpr_l_utils::traits::Signature;
-use wedpr_l_utils::constant::tests::BASE64_ENCODED_TEST_MESSAGE;
+use wedpr_l_crypto_signature_secp256k1::WedprSecp256k1Recover;
+use wedpr_l_utils::{
+    constant::tests::BASE64_ENCODED_TEST_MESSAGE, traits::Signature,
+};
 
 #[macro_use]
 extern crate criterion;
 
 fn create_sign_helper(c: &mut Criterion, message_size: usize) {
-    let label =
-        format!("create_sign_helper, message_size = {}", message_size);
+    let label = format!("create_sign_helper, message_size = {}", message_size);
     let secp256k1 = WedprSecp256k1Recover::default();
     let (pk_b, sk_b) = secp256k1.generate_keypair();
 
@@ -26,8 +26,7 @@ fn create_sign_helper(c: &mut Criterion, message_size: usize) {
 fn create_verify_helper(c: &mut Criterion, message_size: usize) {
     let label =
         format!("create_verify_helper, message_size = {}", message_size);
-    let label =
-        format!("create_sign_helper, message_size = {}", message_size);
+    let label = format!("create_sign_helper, message_size = {}", message_size);
     let secp256k1 = WedprSecp256k1Recover::default();
     let (pk_b, sk_b) = secp256k1.generate_keypair();
 
@@ -35,11 +34,9 @@ fn create_verify_helper(c: &mut Criterion, message_size: usize) {
 
     let sign_obj = secp256k1.sign(&sk_b, &message.to_vec()).unwrap();
 
-
     c.bench_function(&label, move |b| {
         b.iter(|| {
-            let _ = secp256k1
-                .recover_public_key(&message.to_vec(), &sign_obj);
+            let _ = secp256k1.recover_public_key(&message.to_vec(), &sign_obj);
         })
     });
 }
