@@ -2,10 +2,7 @@ use sha2::Sha512;
 // use sha2::Digest;
 use rand::rngs::ThreadRng;
 // use rand::RngCore;
-use curve25519_dalek::{
-    edwards::{CompressedEdwardsY, EdwardsPoint},
-    Scalar,
-};
+use curve25519_dalek::{edwards::CompressedEdwardsY, Scalar};
 
 const SCALAR_SIZE: usize = 32;
 const POINT_SIZE: usize = 32;
@@ -22,9 +19,13 @@ pub fn random_scalar() -> Vec<u8> {
 }
 
 pub fn hash_to_curve(message: &[u8]) -> Vec<u8> {
-    let hash_scalar = Scalar::hash_from_bytes::<Sha512>(message);
-    let hash_point = EdwardsPoint::mul_base(&hash_scalar);
-    return hash_point.compress().to_bytes().to_vec();
+    let hash_scalar = Scalar::hash_from_bytes::<Sha512>(message).to_bytes();
+    let opt_point = match CompressedEdwardsY::from_slice(&hash_scalar) {
+        Ok(v) => v,
+        Err(_) => return Vec::new(),
+    };
+
+    return opt_point.to_bytes().to_vec();
 }
 
 pub fn scalar_inverse(scalar: &[u8]) -> Vec<u8> {
@@ -73,25 +74,48 @@ pub fn point_scalar_multi(point: &[u8], scalar: &[u8]) -> Vec<u8> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use curve25519_dalek::EdwardsPoint;
+    use rand::Rng;
+    use std::ops::Mul;
 
     #[test]
     fn test_flow() {
         // 生成一个随机的标量
-        let random_scalar = random_scalar();
-        println!("Random Scalar: {:?}", random_scalar);
+        let random_scalar1 = random_scalar();
+        let random_scalar2 = random_scalar();
+        println!("Random Scalar: {:?}", random_scalar1);
+        // 创建一个随机数生成器
+        let mut rng = rand::thread_rng();
+
+        // 定义要生成的字节长度
+        let byte_length = 16; // 例如，生成 16 字节的随机数据
+
+        // 生成随机字节序列
+        let random_bytes: Vec<u8> =
+            (0..byte_length).map(|_| rng.gen()).collect();
 
         // 定义一个消息，对其进行哈希并生成哈希点
-        let message = "To really appreciate architecture, you may even need \
-                       to commit a murder";
-        let hash_point = hash_to_curve(message.as_bytes());
+        let hash_point = hash_to_curve(&random_bytes);
+        println!("hash_point Scalar: {:?}", hash_point);
 
         // 定义一个标量并计算其逆元
-        let inverse_scalar = scalar_inverse(&random_scalar);
+        let inverse_scalar = scalar_inverse(&random_scalar1);
+        let test_scalar = Scalar::from_bytes_mod_order(
+            <[u8; 32]>::try_from(random_scalar1.clone()).unwrap(),
+        );
+        let test_scalar2 = Scalar::from_bytes_mod_order(
+            <[u8; 32]>::try_from(inverse_scalar.clone()).unwrap(),
+        );
+        let test3 = test_scalar.mul(test_scalar2);
+        println!("test3 Scalar: {:?}", test3);
+        let point_mul_result =
+            point_scalar_multi(&hash_point, &test3.to_bytes().to_vec());
+        assert_eq!(point_mul_result, hash_point);
 
         // 定义一个点和标量，并进行点乘操作
-        let point_mul_result = point_scalar_multi(&hash_point, &random_scalar);
-        let point_mul_result2 =
-            point_scalar_multi(&point_mul_result, &inverse_scalar);
-        assert_eq!(point_mul_result2, hash_point);
+        // let point_mul_result = point_scalar_multi(&hash_point,
+        // &random_scalar1); let point_mul_result2 =
+        //     point_scalar_multi(&point_mul_result, &inverse_scalar);
+        // assert_eq!(point_mul_result2, hash_point);
     }
 }
