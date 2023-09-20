@@ -619,7 +619,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "ecc_ed25519"
+name = "ecc_edwards25519"
 version = "0.1.0"
 dependencies = [
  "curve25519-dalek 4.0.0",
@@ -811,18 +811,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "ffi_java_ecc_ed25519"
+name = "ffi_java_ecc_edwards25519"
 version = "0.1.0"
 dependencies = [
- "ecc_ed25519",
+ "ecc_edwards25519",
  "jni",
 ]
 
 [[package]]
-name = "ffi_wasm_ecc_ed25519"
+name = "ffi_wasm_ecc_edwards25519"
 version = "0.1.0"
 dependencies = [
- "ecc_ed25519",
+ "ecc_edwards25519",
  "getrandom 0.2.2",
  "wasm-bindgen",
 ]
@@ -2231,6 +2231,16 @@ dependencies = [
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_protos 1.2.0",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wedpr_ffi_c_edwards25519"
+version = "1.0.0"
+dependencies = [
+ "cbindgen",
+ "ecc_edwards25519",
+ "libc",
+ "wedpr_ffi_common 1.1.0",
 ]
 
 [[package]]

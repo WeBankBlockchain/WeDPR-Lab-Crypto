@@ -1,8 +1,6 @@
 extern crate wasm_bindgen;
 
-use ecc_ed25519::{
-    hash_to_curve, point_scalar_multi, random_scalar,
-};
+use ecc_edwards25519::{hash_to_curve, point_scalar_multi, random_scalar};
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
