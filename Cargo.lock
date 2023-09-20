@@ -619,6 +619,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ecc_ed25519"
+version = "0.1.0"
+dependencies = [
+ "curve25519-dalek 4.0.0",
+ "rand 0.8.5",
+ "rand_core 0.6.4",
+ "sha2 0.10.7",
+]
+
+[[package]]
 name = "ed25519"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -801,19 +811,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "ffi_java_ecdh_psi"
+name = "ffi_java_ecc_ed25519"
 version = "0.1.0"
 dependencies = [
+ "ecc_ed25519",
  "jni",
- "psi_utils",
 ]
 
 [[package]]
-name = "ffi_wasm_ecdh_psi"
+name = "ffi_wasm_ecc_ed25519"
 version = "0.1.0"
 dependencies = [
+ "ecc_ed25519",
  "getrandom 0.2.2",
- "psi_utils",
  "wasm-bindgen",
 ]
 
@@ -1352,16 +1362,6 @@ dependencies = [
  "protobuf-codegen",
  "protoc",
  "tempfile",
-]
-
-[[package]]
-name = "psi_utils"
-version = "0.1.0"
-dependencies = [
- "curve25519-dalek 4.0.0",
- "rand 0.8.5",
- "rand_core 0.6.4",
- "sha2 0.10.7",
 ]
 
 [[package]]

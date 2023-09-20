@@ -34,7 +34,7 @@ members = [
     "protos",
     "third_party/fisco_bcos",
     "third_party/fisco_bcos_java_sdk",
-    "third_party/ecdh_psi/psi_utils",
-    "third_party/ecdh_psi/ffi_java_ecdh_psi",
-    "third_party/ecdh_psi/ffi_wasm_ecdh_psi",
+    "crypto/ecc/ecc_ed25519",
+    "crypto/ecc/ffi_java_ecc_ed25519",
+    "crypto/ecc/ffi_wasm_ecc_ed25519",
 ]

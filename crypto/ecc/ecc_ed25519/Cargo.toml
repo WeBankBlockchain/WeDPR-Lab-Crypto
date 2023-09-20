@@ -1,14 +1,13 @@
 [package]
-name = "ffi_java_ecdh_psi"
+name = "ecc_ed25519"
 version = "0.1.0"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
-[lib]
-name = "ffi_java_ecdh_psi"
-crate-type = [ "cdylib", "staticlib" ]
 
 [dependencies]
-jni = "0.13.0"
-psi_utils = { path = "../psi_utils"}
+sha2 = "0.10.7"
+rand = "0.8.4"
+rand_core = "0.6.3"
+curve25519-dalek = { version = "4", features = [ "digest" , "rand_core"] }
