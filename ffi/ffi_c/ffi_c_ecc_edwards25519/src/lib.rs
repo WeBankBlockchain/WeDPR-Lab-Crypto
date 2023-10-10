@@ -26,10 +26,8 @@ pub unsafe extern "C" fn wedpr_hash_to_curve(
     output_ciphertext: &mut COutputBuffer,
 ) -> i8 {
     let plaintext = c_read_raw_pointer(raw_message);
-
     let message = hash_to_curve(&plaintext);
-    std::mem::forget(raw_message);
-
+    std::mem::forget(plaintext);
     c_write_raw_pointer(&message, output_ciphertext);
     SUCCESS
 }
@@ -44,8 +42,8 @@ pub unsafe extern "C" fn wedpr_point_scalar_multi(
     let num_point = c_read_raw_pointer(raw_point);
     let num_scalar = c_read_raw_pointer(raw_scalar);
     let result = point_scalar_multi(&num_point, &num_scalar);
-    std::mem::forget(raw_point);
-    std::mem::forget(raw_scalar);
+    std::mem::forget(num_point);
+    std::mem::forget(num_scalar);
     c_write_raw_pointer(&result, output_ciphertext);
     SUCCESS
 }
