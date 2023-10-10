@@ -1,0 +1,18 @@
+[package]
+name = "wedpr_ffi_c_edwards25519"
+version = "1.0.0"
+authors = [ "WeDPR <wedpr@webank.com>" ]
+edition = "2018"
+
+[lib]
+name = "ffi_c_edwards25519"
+crate-type = [ "cdylib", "staticlib" ]
+
+[dependencies]
+libc = "0.2.60"
+ecc_edwards25519 = { path = "../../../crypto/ecc/ecc_edwards25519" }
+wedpr_ffi_common = { path = "../../ffi_common" }
+
+# This is required to generate C/C++ header files.
+[build-dependencies]
+cbindgen = "0.9.0"

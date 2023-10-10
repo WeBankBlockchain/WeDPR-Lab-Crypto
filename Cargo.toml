@@ -26,6 +26,7 @@ members = [
     "ffi/ffi_c/ffi_c_crypto_binary",
     "ffi/ffi_c/ffi_c_fisco_bcos",
     "ffi/ffi_c/ffi_c_zkp",
+    "ffi/ffi_c/ffi_c_ecc_edwards25519",
     "ffi/ffi_common",
     "ffi/ffi_java/ffi_java_crypto",
     "ffi/ffi_java/ffi_java_crypto_binary",
@@ -34,4 +35,7 @@ members = [
     "protos",
     "third_party/fisco_bcos",
     "third_party/fisco_bcos_java_sdk",
+    "crypto/ecc/ecc_edwards25519",
+    "ffi/ffi_java/ffi_java_ecc_edwards25519",
+    "ffi/ffi_wasm/ffi_wasm_ecc_edwards25519",
 ]
