@@ -4,10 +4,7 @@
 
 use ecc_edwards25519::{hash_to_curve, point_scalar_multi, random_scalar};
 
-use wedpr_ffi_common::utils::{
-    c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer,
-    SUCCESS,
-};
+use wedpr_ffi_common::utils::{c_read_raw_pointer, c_write_raw_pointer, CInputBuffer, COutputBuffer, FAILURE, SUCCESS};
 
 #[no_mangle]
 /// C interface for 'wedpr_random_scalar'.
@@ -44,6 +41,9 @@ pub unsafe extern "C" fn wedpr_point_scalar_multi(
     let result = point_scalar_multi(&num_point, &num_scalar);
     std::mem::forget(num_point);
     std::mem::forget(num_scalar);
+    if result.is_empty() {
+        return FAILURE;
+    }
     c_write_raw_pointer(&result, output_ciphertext);
     SUCCESS
 }
