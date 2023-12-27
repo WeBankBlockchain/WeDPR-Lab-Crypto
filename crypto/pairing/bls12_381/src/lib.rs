@@ -118,6 +118,19 @@ mod tests {
     use hex;
 
     #[test]
+    fn test_complex_word_cm() {
+        let id1 = hex::decode("f0a59684f0acba93").unwrap();
+        let web_cipher = hex::decode("830e9f65febccc7a3baba23b3216b3ee23003b57d95b834afbb0405312ce93306c9011973c4b278f080d62c822bd0bd699dedef98481ad3114de742cbc4c58078b67f56f037b112d4759090cd400e26a97cb14ca4bc03b9f87f8d663bd8f107308b4cfba32849d031bb045db5fb282a1cfa3c9ff3cac1eea4407c89a213fdda7f2528a40268fbd919c9f8abf54734893").unwrap();
+        let cipher1_m1_recover =
+            WedprBls128Cipher::from_bytes(&web_cipher).unwrap();
+        let cipher1_m1 = encrypt_message(&id1);
+        let cipher1_m2 = encrypt_message(&id1);
+        assert_eq!(equality_test(&cipher1_m1, &cipher1_m2), true);
+        assert_eq!(equality_test(&cipher1_m1, &cipher1_m1_recover), true);
+
+    }
+
+    #[test]
     fn test_equality() {
         let message1: &[u8] = b"hello world";
         let message2: &[u8] = b"hello wedpr";
@@ -200,14 +213,15 @@ mod tests {
 
     #[test]
     fn test_from_web() {
-        let message_hello = b"abc";
+        // let message_hello = b"𥖄𬺓";
+        let message_hello = &hex::decode("e6ada6e6b189").unwrap();
         // let message_hello:Vec<u8> = vec![96,97,98,0,0,0,0,0];
-        wedpr_println!("message_hello:{:?}", message_hello);
+        wedpr_println!("message:{:?}", message_hello);
         // let message_wrong = b"wrong";
         let cipher1_hello = encrypt_message(message_hello);
         // let cipher1_wrong = encrypt_message(message_wrong);
 
-        let web_hello1 = "a91c14d9111e95206e5be9e644f68dd6ddb5865da5bfab80d4c7fb7a1a1299db401e200bb401adc87da751283dd8cb2984820a100894e50583daec6261bd8728d6c80689fa02d8f3e7fae23329755229c98456db47f78071e03dd4344e7e8dc3029bf4809a8fc3198dcd4c6810465cbc42fc57329b1d980f70b2a383507c257e35f33f2851e0ab2a40bb24606900c152";
+        let web_hello1 = "80f26419aa4ab90def42ef065a1f3ee73fc4b1d7b9a28c3e886082641d1f144378df52b27f47eeb74e275c29e9a04a00ac06154bf0c7c741bdd4f65e22c156c2f5e7a0779e2fa51a461307886c6c6443952e76c54ea46106eef58fe3151aa9f20c52c47263b061b611921cdaabfc686cd79f41b42ab303c74396f60d64287d7e452fe50576e6550a9ff77493446f41ef";
         let web_bytes1 = hex::decode(web_hello1).unwrap();
 
         // let web_hello2 =

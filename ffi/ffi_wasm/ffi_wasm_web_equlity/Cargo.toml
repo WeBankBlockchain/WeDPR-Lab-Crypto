@@ -1,0 +1,15 @@
+[package]
+name = "ffi_wasm_web_equlity"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[lib]
+name = "ffi_wasm_equality"
+crate-type = ["rlib", "cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+hex = "0.4.2"
+wedpr_bls12_381 = { path = "../../../crypto/pairing/bls12_381" }
+getrandom = { version = "0.2", features = ["js"] }

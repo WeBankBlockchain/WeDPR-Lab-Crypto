@@ -29,6 +29,7 @@ members = [
     "ffi/ffi_c/ffi_c_fisco_bcos",
     "ffi/ffi_c/ffi_c_zkp",
     "ffi/ffi_c/ffi_c_equality",
+    "ffi/ffi_wasm/ffi_wasm_web_equlity",
     "ffi/ffi_common",
     "ffi/ffi_java/ffi_java_crypto",
     "ffi/ffi_java/ffi_java_crypto_binary",

@@ -771,6 +771,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ffi_wasm_web_equlity"
+version = "0.1.0"
+dependencies = [
+ "getrandom 0.2.2",
+ "hex",
+ "wasm-bindgen",
+ "wedpr_bls12_381",
+]
+
+[[package]]
 name = "foreign-types"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -851,8 +861,10 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c9495705279e7140bf035dde1f6e750c162df8b625267cd52cc44e0b156732c8"
 dependencies = [
  "cfg-if 1.0.0",
+ "js-sys",
  "libc",
  "wasi 0.10.2+wasi-snapshot-preview1",
+ "wasm-bindgen",
 ]
 
 [[package]]

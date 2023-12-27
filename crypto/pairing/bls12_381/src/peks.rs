@@ -230,6 +230,15 @@ mod tests {
     use wedpr_l_utils::traits::Coder;
 
     #[test]
+    fn test_complex_word() {
+        let id1 = hex::decode("f0a59684f0acba93").unwrap();
+        let key1 = generate_key();
+        let cipher_id1 = encrypt_message(&id1, &key1.pk);
+        let trapdoor1 = trapdoor(&id1, &key1.sk);
+        assert_eq!(trapdoor_test(&cipher_id1, &trapdoor1), true);
+    }
+
+    #[test]
     fn test_peks() {
         let id1 = "zhangsan".as_bytes();
         let key1 = generate_key();
