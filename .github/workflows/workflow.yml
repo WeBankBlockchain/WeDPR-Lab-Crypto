@@ -73,7 +73,7 @@ jobs:
       - uses: actions/upload-artifact@v2
         with:
           name: libffi_java_sdk.dylib
-          path: target/release/libffi_java_sdk.dylib     
+          path: target/release/libffi_java_sdk.dylib
 
   build_with_centos:
     name: build_with_centos
@@ -87,12 +87,12 @@ jobs:
       - name: install rust language
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2022-07-28
+          toolchain: nightly-2024-01-10
           override: true
       - name: install CentOS dependencies
         run: |
           yum install -y epel-release centos-release-scl
-          yum install -y java-11-openjdk-devel git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel && source /opt/rh/devtoolset-7/enable
+          yum install -y java-11-openjdk-devel git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel perl-IPC-Cmd && source /opt/rh/devtoolset-7/enable
       - name: configure and compile
         run: |
           cargo build --all --all-targets --verbose --release
