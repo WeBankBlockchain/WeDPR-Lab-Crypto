@@ -17,7 +17,7 @@ members = [
     "crypto/signature/ed25519",
     "crypto/signature/secp256k1",
     "crypto/signature/sm2",
-    "crypto/vrf/curve25519",
+    "crypto/vrf/curve25519", "crypto/vrf/secp256k1",
     "crypto/zkp/discrete_logarithm_proof",
     "crypto/zkp/range_proof",
     "crypto/zkp/utils",
