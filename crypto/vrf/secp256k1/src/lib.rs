@@ -6,7 +6,7 @@ extern crate k256;
 
 use k256::{
     elliptic_curve::{
-        generic_array::GenericArray, rand_core::OsRng, sec1::FromEncodedPoint,
+        generic_array::GenericArray, sec1::FromEncodedPoint,
         PrimeField,
     },
     AffinePoint, EncodedPoint, Scalar,
@@ -119,14 +119,14 @@ impl Vrf for WedprSecp256k1Vrf {
     }
 
     fn prove<T: ?Sized + AsRef<[u8]>>(
-        private_key: &T,
+        private_key_vec: &T,
         message: &T,
     ) -> Result<Self, WedprError>
     where
         Self: Sized,
     {
         let private_key_result =
-            k256::SecretKey::from_slice(private_key.as_ref());
+            k256::SecretKey::from_slice(private_key_vec.as_ref());
 
         let private_key = match private_key_result {
             Ok(private_key) => private_key,
@@ -157,9 +157,11 @@ impl Vrf for WedprSecp256k1Vrf {
 
         let gamma = h_point * private_key_scalar;
 
-        let blinding_k = k256::Scalar::random(&mut OsRng);
-
-        let scalar_k = private_key_scalar * blinding_k;
+        // let blinding_k = k256::Scalar::random(&mut OsRng);
+        let scalar_k = match hash_to_scalar(&private_key_vec.as_ref().to_vec()) {
+            Ok(scalar_k) => scalar_k,
+            Err(_) => return Err(WedprError::FormatError),
+        };
 
         let point_k = base_point * scalar_k;
 
@@ -300,6 +302,8 @@ impl Vrf for WedprSecp256k1Vrf {
 
 #[cfg(test)]
 mod tests {
+    use k256::elliptic_curve::rand_core::OsRng;
+
     use super::*;
 
     #[test]
@@ -318,7 +322,7 @@ mod tests {
             proof.verify(&public_key.as_affine().to_bytes().to_vec(), &message),
             true
         );
-        // println!("proof hash : {:?}", proof.proof_to_hash().unwrap());
+        println!("proof hash : {:?}", proof.proof_to_hash().unwrap());
     }
 
     #[test]
