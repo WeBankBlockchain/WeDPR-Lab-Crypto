@@ -2274,6 +2274,7 @@ dependencies = [
  "wedpr_l_crypto_signature_secp256k1",
  "wedpr_l_crypto_signature_sm2",
  "wedpr_l_crypto_vrf_curve25519",
+ "wedpr_l_crypto_vrf_secp256k1",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_protos 1.2.0",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
