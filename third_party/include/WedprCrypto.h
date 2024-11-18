@@ -117,6 +117,31 @@ int8_t wedpr_curve25519_vrf_proof_to_hash(
 /// C interface for 'wedpr_curve25519_vrf_is_valid_public_key'.
 int8_t wedpr_curve25519_vrf_is_valid_public_key(const CInputBuffer* raw_public_key);
 
+/// C interface for 'wedpr_secp256k1_vrf_derive_public_key'.
+int8_t wedpr_secp256k1_vrf_derive_public_key(
+    const CInputBuffer* raw_private_key, COutputBuffer* output_public_key);
+
+/// C interface for 'wedpr_secp256k1_vrf_prove_utf8'.
+int8_t wedpr_secp256k1_vrf_prove_utf8(const CInputBuffer* raw_private_key,
+    const CInputBuffer* raw_utf8_message, COutputBuffer* output_proof);
+
+/// C interface for 'wedpr_secp256k1_vrf_prove_fast_utf8'.
+int8_t wedpr_secp256k1_vrf_prove_fast_utf8(const CInputBuffer* raw_private_key,
+    const CInputBuffer* raw_public_key, const CInputBuffer* raw_utf8_message,
+    COutputBuffer* output_proof);
+
+/// C interface for 'wedpr_secp256k1_vrf_verify_utf8'.
+int8_t wedpr_secp256k1_vrf_verify_utf8(const CInputBuffer* raw_public_key,
+    const CInputBuffer* raw_utf8_message, const CInputBuffer* raw_proof);
+
+/// C interface for 'wedpr_secp256k1_vrf_proof_to_hash'.
+int8_t wedpr_secp256k1_vrf_proof_to_hash(
+    const CInputBuffer* raw_proof, COutputBuffer* output_hash);
+
+/// C interface for 'wedpr_secp256k1_vrf_is_valid_public_key'.
+int8_t wedpr_secp256k1_vrf_is_valid_public_key(const CInputBuffer* raw_public_key);
+
+
 }  // extern "C"
 
 #endif
