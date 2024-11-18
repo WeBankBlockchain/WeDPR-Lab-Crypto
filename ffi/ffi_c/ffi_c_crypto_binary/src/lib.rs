@@ -20,5 +20,6 @@ pub mod ecies;
 pub mod hash;
 pub mod signature;
 pub mod vrf;
+pub mod vrf_secp256k1;
 
 // C/C++ FFI: C-style interfaces will be generated.
