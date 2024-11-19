@@ -38,31 +38,31 @@ jobs:
         run: cargo test
       - name: bench
         run: cargo bench
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_crypto.dylib
           path: target/release/libffi_c_crypto.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_zkp.dylib
           path: target/release/libffi_c_zkp.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_java_crypto_binary.dylib
           path: target/release/libffi_java_crypto_binary.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_crypto_binary.dylib
           path: target/release/libffi_c_crypto_binary.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_fisco_bcos_sdk.dylib
           path: target/release/libffi_fisco_bcos_sdk.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_fisco_bcos.dylib
           path: target/release/libffi_c_fisco_bcos.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_java_crypto.dylib
           path: target/release/libffi_java_crypto.dylib
@@ -70,7 +70,7 @@ jobs:
         run: cargo clean && cd ffi/ffi_java/ffi_java_crypto && cargo build --release --no-default-features --features "wedpr_f_hex wedpr_f_signature_secp256k1 wedpr_f_hash_keccak256 wedpr_f_signature_sm2 wedpr_f_hash_sm3 wedpr_f_vrf_curve25519"
       - name: rename to ffi_java_sdk lib
         run: mv target/release/libffi_java_crypto.dylib target/release/libffi_java_sdk.dylib
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_java_sdk.dylib
           path: target/release/libffi_java_sdk.dylib
@@ -98,31 +98,31 @@ jobs:
           cargo build --all --all-targets --verbose --release
           cargo test
           cargo bench
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_crypto.so
           path: target/release/libffi_c_crypto.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_zkp.so
           path: target/release/libffi_c_zkp.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_java_crypto_binary.so
           path: target/release/libffi_java_crypto_binary.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_crypto_binary.so
           path: target/release/libffi_c_crypto_binary.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_fisco_bcos_sdk.so
           path: target/release/libffi_fisco_bcos_sdk.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_c_fisco_bcos.so
           path: target/release/libffi_c_fisco_bcos.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_java_crypto.so
           path: target/release/libffi_java_crypto.so
@@ -130,7 +130,7 @@ jobs:
         run: cargo clean && cd ffi/ffi_java/ffi_java_crypto && cargo build --release --no-default-features --features "wedpr_f_hex wedpr_f_signature_secp256k1 wedpr_f_hash_keccak256 wedpr_f_signature_sm2 wedpr_f_hash_sm3 wedpr_f_vrf_curve25519"
       - name: rename to ffi_java_sdk lib
         run: mv target/release/libffi_java_crypto.so target/release/libffi_java_sdk.so
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: libffi_java_sdk.so
           path: target/release/libffi_java_sdk.so
@@ -152,31 +152,31 @@ jobs:
           cargo build --all --all-targets --verbose --release
           cargo test
           cargo bench
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_c_crypto.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_crypto.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_c_zkp.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_zkp.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_java_crypto_binary.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_crypto_binary.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_c_crypto_binary.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_crypto_binary.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_fisco_bcos_sdk.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_fisco_bcos_sdk.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_c_fisco_bcos.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_fisco_bcos.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_java_crypto.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_crypto.dll
@@ -184,7 +184,7 @@ jobs:
         run: cargo clean && cd ffi/ffi_java/ffi_java_crypto && cargo build --release --no-default-features --features "wedpr_f_hex wedpr_f_signature_secp256k1 wedpr_f_hash_keccak256 wedpr_f_signature_sm2 wedpr_f_hash_sm3 wedpr_f_vrf_curve25519"
       - name: rename to vrf lib
         run: mv D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_crypto.dll D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_sdk.dll
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v4
         with:
           name: ffi_java_sdk.dll
           path: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_sdk.dll

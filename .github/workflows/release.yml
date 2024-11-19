@@ -25,7 +25,7 @@ jobs:
       - name: build
         run: cargo build --all --all-targets --verbose --release
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_crypto.dylib
@@ -33,7 +33,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_zkp.dylib
@@ -41,7 +41,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_crypto_binary.dylib
@@ -49,7 +49,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_crypto_binary.dylib
@@ -57,7 +57,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_fisco_bcos_sdk.dylib
@@ -65,7 +65,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_fisco_bcos.dylib
@@ -73,7 +73,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_crypto.dylib
@@ -85,7 +85,7 @@ jobs:
       - name: rename to ffi_java_sdk lib
         run: mv target/release/libffi_java_crypto.dylib target/release/libffi_java_sdk.dylib
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_sdk.dylib
@@ -95,11 +95,15 @@ jobs:
 
   build_with_centos:
     name: build_with_centos
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: "node16"
+      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: "node16"
     runs-on: ubuntu-latest
     container:
       image: docker.io/centos:7
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: install rust language
@@ -115,7 +119,7 @@ jobs:
         run: |
           cargo build --all --all-targets --verbose --release
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_crypto.so
@@ -123,7 +127,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_zkp.so
@@ -131,7 +135,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_crypto_binary.so
@@ -139,7 +143,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_crypto_binary.so
@@ -147,7 +151,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_fisco_bcos_sdk.so
@@ -155,7 +159,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_c_fisco_bcos.so
@@ -163,7 +167,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_crypto.so
@@ -175,7 +179,7 @@ jobs:
       - name: rename to ffi_java_sdk lib
         run: mv target/release/libffi_java_crypto.so target/release/libffi_java_sdk.so
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: libffi_java_sdk.so
@@ -199,7 +203,7 @@ jobs:
         run: |
           cargo build --all --all-targets --verbose --release
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_c_crypto.dll
@@ -207,7 +211,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_c_zkp.dll
@@ -215,7 +219,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_java_crypto_binary.dll
@@ -223,7 +227,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_c_crypto_binary.dll
@@ -231,7 +235,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_fisco_bcos_sdk.dll
@@ -239,7 +243,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_c_fisco_bcos.dll
@@ -247,7 +251,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_java_crypto.dll
@@ -259,7 +263,7 @@ jobs:
       - name: rename to vrf lib
         run: mv D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_crypto.dll D:\a\WeDPR-Lab-Crypto\WeDPR-Lab-Crypto\target\release\ffi_java_sdk.dll
       - name: Upload wedpr-lab-crypto binaries to release
-        uses: svenstaro/upload-release-action@v1-release
+        uses: svenstaro/upload-release-action@v4-release
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           asset_name: ffi_java_sdk.dll
