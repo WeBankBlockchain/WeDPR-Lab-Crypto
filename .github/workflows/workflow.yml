@@ -77,11 +77,15 @@ jobs:
 
   build_with_centos:
     name: build_with_centos
+    env:
+      ACTIONS_ALLOW_USE_UNSECURE_NODE_VERSION: true
+      ACTIONS_RUNNER_FORCED_INTERNAL_NODE_VERSION: "node16"
+      ACTIONS_RUNNER_FORCE_ACTIONS_NODE_VERSION: "node16"
     runs-on: ubuntu-latest
     container:
       image: docker.io/centos:7
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
         with:
           fetch-depth: 5
       - name: install rust language
@@ -89,10 +93,10 @@ jobs:
         with:
           toolchain: nightly-2024-01-10
           override: true
-      - name: install CentOS dependencies
-        run: |
-          yum install -y epel-release centos-release-scl
-          yum install -y java-11-openjdk-devel git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel perl-IPC-Cmd && source /opt/rh/devtoolset-7/enable
+      # - name: install CentOS dependencies
+      #   run: |
+      #     yum install -y epel-release centos-release-scl
+      #     yum install -y java-11-openjdk-devel git make gcc gcc-c++ glibc-static glibc-devel openssl openssl-devel cmake3 ccache devtoolset-7 libzstd-devel zlib-devel flex bison python-devel python3-devel perl-IPC-Cmd && source /opt/rh/devtoolset-7/enable
       - name: configure and compile
         run: |
           cargo build --all --all-targets --verbose --release

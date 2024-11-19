@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [macos-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - name: Nightly default
@@ -194,7 +194,7 @@ jobs:
       matrix:
         os: [windows-2019]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
           fetch-depth: 5
       - run: echo "VCPKG_ROOT=$env:VCPKG_INSTALLATION_ROOT" | Out-File -FilePath $env:GITHUB_ENV -Append
