@@ -7,9 +7,9 @@ extern crate k256;
 use k256::{
     elliptic_curve::{
         generic_array::GenericArray, sec1::FromEncodedPoint,
-        PrimeField,
+        Curve, FieldBytesEncoding, PrimeField,
     },
-    AffinePoint, EncodedPoint, Scalar,
+    AffinePoint, EncodedPoint, Scalar, Secp256k1,
 };
 use wedpr_l_utils::traits::Vrf;
 
@@ -22,6 +22,8 @@ use wedpr_l_utils::error::WedprError;
 
 const SECP256K1_POINT_LENGTH: usize = 33;
 const SECP256K1_SCALAR_LENGTH: usize = 32;
+// Keep VRF nonces separate from ECDSA nonces when callers reuse a signing key.
+const NONCE_DOMAIN: &[u8] = b"WeDPR/secp256k1/VRF/nonce/v1";
 
 /// Implements secp256k1 as a VRF instance.
 #[derive(PartialEq, Debug, Clone, Default)]
@@ -157,11 +159,18 @@ impl Vrf for WedprSecp256k1Vrf {
 
         let gamma = h_point * private_key_scalar;
 
-        // let blinding_k = k256::Scalar::random(&mut OsRng);
-        let scalar_k = match hash_to_scalar(&private_key_vec.as_ref().to_vec()) {
-            Ok(scalar_k) => scalar_k,
-            Err(_) => return Err(WedprError::FormatError),
-        };
+        // RFC 6979 binds the nonce to both the secret and this message's hash.
+        // Hashing only the secret reuses k across messages and exposes the key
+        // through x = (s1 - s2) / (c1 - c2). h_scalar is already reduced mod n.
+        // The domain tag also prevents nonce reuse with deterministic ECDSA.
+        let nonce_bytes = rfc6979::generate_k::<Sha256, _>(
+            &private_key.to_bytes(),
+            &Secp256k1::ORDER.encode_field_bytes(),
+            &h_scalar.to_bytes(),
+            NONCE_DOMAIN,
+        );
+        let scalar_k = Option::<Scalar>::from(Scalar::from_repr(nonce_bytes))
+            .ok_or(WedprError::FormatError)?;
 
         let point_k = base_point * scalar_k;
 
@@ -305,6 +314,75 @@ mod tests {
     use k256::elliptic_curve::rand_core::OsRng;
 
     use super::*;
+
+    #[test]
+    fn test_nonce_is_deterministic_for_the_same_key_and_message() {
+        let private_key = k256::SecretKey::random(&mut OsRng);
+        let key = private_key.to_bytes().to_vec();
+        let public_key = WedprSecp256k1Vrf::derive_public_key(&key);
+        let message = b"same rotation input".to_vec();
+        let first = WedprSecp256k1Vrf::prove(&key, &message).unwrap();
+        let second = WedprSecp256k1Vrf::prove(&key, &message).unwrap();
+        let fast = WedprSecp256k1Vrf::prove_fast(&key, &public_key, &message)
+            .unwrap();
+
+        assert_eq!(first, second);
+        assert_eq!(first, fast);
+        assert!(first.verify(&public_key, &message));
+        assert_eq!(first.proof_to_hash().unwrap(), second.proof_to_hash().unwrap());
+    }
+
+    #[test]
+    fn test_different_messages_do_not_reuse_nonce_or_reveal_private_key() {
+        let private_key = k256::SecretKey::random(&mut OsRng);
+        let key = private_key.to_bytes().to_vec();
+        let x: Scalar = private_key.as_scalar_primitive().into();
+        let public_key = WedprSecp256k1Vrf::derive_public_key(&key);
+        let first_message = b"rotation 1".to_vec();
+        let second_message = b"rotation 2".to_vec();
+        let first = WedprSecp256k1Vrf::prove(&key, &first_message).unwrap();
+        let second = WedprSecp256k1Vrf::prove(&key, &second_message).unwrap();
+        assert!(first.verify(&public_key, &first_message));
+        assert!(second.verify(&public_key, &second_message));
+        assert!(!first.verify(&public_key, &second_message));
+
+        let c1 = bytes_to_scalar(&first.c_param).unwrap();
+        let c2 = bytes_to_scalar(&second.c_param).unwrap();
+        let s1 = bytes_to_scalar(&first.s_param).unwrap();
+        let s2 = bytes_to_scalar(&second.s_param).unwrap();
+        let k1 = s1 - c1 * x;
+        let k2 = s2 - c2 * x;
+        assert_ne!(k1, Scalar::ZERO);
+        assert_ne!(k2, Scalar::ZERO);
+        assert_ne!(k1, k2);
+        let recovered = (s1 - s2) * (c1 - c2).invert().unwrap();
+        assert_ne!(recovered, x);
+        assert_ne!(
+            WedprSecp256k1Vrf::derive_public_key(&recovered.to_bytes().to_vec()),
+            public_key,
+        );
+    }
+
+    #[test]
+    fn test_vrf_nonce_is_separate_from_ecdsa_nonce() {
+        let private_key = k256::SecretKey::random(&mut OsRng);
+        let key = private_key.to_bytes().to_vec();
+        let x: Scalar = private_key.as_scalar_primitive().into();
+        let message = b"shared signing key".to_vec();
+        let proof = WedprSecp256k1Vrf::prove(&key, &message).unwrap();
+        let mut input = WedprSecp256k1Vrf::derive_public_key(&key);
+        input.extend_from_slice(&message);
+        let h = hash_to_scalar(&input).unwrap();
+        let ecdsa_nonce = rfc6979::generate_k::<Sha256, _>(
+            &private_key.to_bytes(),
+            &Secp256k1::ORDER.encode_field_bytes(),
+            &h.to_bytes(),
+            b"",
+        );
+        let actual_nonce = bytes_to_scalar(&proof.s_param).unwrap()
+            - bytes_to_scalar(&proof.c_param).unwrap() * x;
+        assert_ne!(actual_nonce.to_bytes(), ecdsa_nonce);
+    }
 
     #[test]
     fn test_secp256k1_vrf() {
