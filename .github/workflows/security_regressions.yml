@@ -24,6 +24,16 @@ jobs:
           java-version: "17"
       - name: ZKP utility encoding regressions
         run: cargo test --locked --manifest-path crypto/zkp/utils/Cargo.toml --lib
+      - name: Legacy range-proof compatibility
+        # The legacy dependency requests the now-stable nll feature. Limit this
+        # compatibility setting to that crate, not the whole workspace.
+        env:
+          RUSTC_BOOTSTRAP: wedpr_l_bulletproofs
+        run: cargo test --locked --lib -p wedpr_l_crypto_zkp_range_proof
+      - name: Legacy scalar backends
+        run: |
+          cargo test --locked --manifest-path third_party/curve25519-dalek-legacy/Cargo.toml --lib --no-default-features --features std,u32_backend
+          cargo test --locked --manifest-path third_party/curve25519-dalek-legacy/Cargo.toml --lib --no-default-features --features std,u64_backend,serde
       - name: Cryptographic and buffer regressions
         run: >-
           cargo test --locked --lib

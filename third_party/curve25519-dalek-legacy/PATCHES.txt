@@ -1,0 +1,73 @@
+This directory vendors curve25519-dalek 1.2.6 from crates.io.
+Original archive SHA-256 (from Cargo.lock before the patch):
+57c0d59fed08e452f286b251f88b2fc64a01f50a7b263aa09557ad7285d9e7fa
+The original BSD-3-Clause LICENSE is retained.
+
+Only the two Scalar29/Scalar52 subtraction implementations below differ from
+upstream source. Both backport the volatile-read optimization barrier described
+in RUSTSEC-2024-0344 and upstream PR 659. No field arithmetic, generators,
+transcripts or encodings are changed. The package version remains 1.2.6 so this
+is an explicit local backport, not a claim of an upstream patched v1 release.
+
+References:
+https://github.com/RustSec/advisory-db/blob/main/crates/curve25519-dalek/RUSTSEC-2024-0344.md
+https://github.com/dalek-cryptography/curve25519-dalek/pull/659
+
+The workspace root [patch.crates-io] mapping selects this copy for every legacy
+v1 transitive dependency. Cargo patch mappings are NOT inherited by downstream
+workspace roots: applications must carry the same mapping (with the appropriate
+path to this directory). Do not publish unpatched v1 dependency graphs or silence
+version-based audit findings without checking the actual compiled source.
+Modern Ed25519 independently uses the upstream curve25519-dalek 4.1.3 release.
+This backport addresses the cited issue only, not all possible side channels.
+
+Source diff against the original archive:
+
+--- upstream/src/backend/serial/u64/scalar.rs
++++ patched/src/backend/serial/u64/scalar.rs
+@@ -162,6 +162,12 @@
+ 
+     /// Compute `a - b` (mod l)
+     pub fn sub(a: &Scalar52, b: &Scalar52) -> Scalar52 {
++        // Backport of the upstream RUSTSEC-2024-0344 optimization barrier.
++        fn black_box(value: u64) -> u64 {
++            // SAFETY: the pointer refers to a live, aligned Copy integer.
++            unsafe { core::ptr::read_volatile(&value) }
++        }
++
+         let mut difference = Scalar52::zero();
+         let mask = (1u64 << 52) - 1;
+ 
+@@ -176,7 +182,7 @@
+         let underflow_mask = ((borrow >> 63) ^ 1).wrapping_sub(1);
+         let mut carry: u64 = 0;
+         for i in 0..5 {
+-            carry = (carry >> 52) + difference[i] + (constants::L[i] & underflow_mask);
++            carry = (carry >> 52) + difference[i] + (constants::L[i] & black_box(underflow_mask));
+             difference[i] = carry & mask;
+         }
+ 
+--- upstream/src/backend/serial/u32/scalar.rs
++++ patched/src/backend/serial/u32/scalar.rs
+@@ -172,6 +172,12 @@
+ 
+     /// Compute `a - b` (mod l).
+     pub fn sub(a: &Scalar29, b: &Scalar29) -> Scalar29 {
++        // Backport of the upstream RUSTSEC-2024-0344 optimization barrier.
++        fn black_box(value: u32) -> u32 {
++            // SAFETY: the pointer refers to a live, aligned Copy integer.
++            unsafe { core::ptr::read_volatile(&value) }
++        }
++
+         let mut difference = Scalar29::zero();
+         let mask = (1u32 << 29) - 1;
+ 
+@@ -186,7 +192,7 @@
+         let underflow_mask = ((borrow >> 31) ^ 1).wrapping_sub(1);
+         let mut carry: u32 = 0;
+         for i in 0..9 {
+-            carry = (carry >> 29) + difference[i] + (constants::L[i] & underflow_mask);
++            carry = (carry >> 29) + difference[i] + (constants::L[i] & black_box(underflow_mask));
+             difference[i] = carry & mask;
+         }
+ 

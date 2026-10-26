@@ -529,8 +529,6 @@ dependencies = [
 [[package]]
 name = "curve25519-dalek"
 version = "1.2.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "57c0d59fed08e452f286b251f88b2fc64a01f50a7b263aa09557ad7285d9e7fa"
 dependencies = [
  "byteorder",
  "clear_on_drop",
