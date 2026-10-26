@@ -611,7 +611,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9ed9a281f7bc9b7576e61468ba615a66a5c8cfdff42420a70aa82701a3b1e292"
 dependencies = [
  "block-buffer 0.10.4",
- "const-oid",
  "crypto-common",
  "subtle",
 ]
@@ -623,10 +622,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ee27f32b5c5292967d2d4a9d7f1e0b0aed2c15daded5a60300e4abb9d8020bca"
 dependencies = [
  "der",
- "digest 0.10.7",
  "elliptic-curve",
- "rfc6979",
- "serdect",
  "signature",
  "spki",
 ]
@@ -683,7 +679,6 @@ dependencies = [
  "pkcs8",
  "rand_core 0.6.4",
  "sec1",
- "serdect",
  "subtle",
  "zeroize",
 ]
@@ -1109,9 +1104,6 @@ dependencies = [
  "ecdsa",
  "elliptic-curve",
  "once_cell",
- "serdect",
- "sha2 0.10.8",
- "signature",
 ]
 
 [[package]]
@@ -1717,16 +1709,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2b15c43186be67a4fd63bee50d0303afffcef381492ebe2c5d87f324e1b8815c"
 
 [[package]]
-name = "rfc6979"
-version = "0.4.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f8dd2a808d456c4a54e300a23e9f5a67e122c3024119acbfd73e3bf664491cb2"
-dependencies = [
- "hmac 0.12.1",
- "subtle",
-]
-
-[[package]]
 name = "ripemd160"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1808,7 +1790,6 @@ dependencies = [
  "der",
  "generic-array 0.14.7",
  "pkcs8",
- "serdect",
  "subtle",
  "zeroize",
 ]
@@ -1894,16 +1875,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "serdect"
-version = "0.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a84f14a19e9a014bb9f4512488d9829a68e04ecabffb0f9904cd1ace94598177"
-dependencies = [
- "base16ct",
- "serde",
-]
-
-[[package]]
 name = "sha2"
 version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1977,7 +1948,6 @@ version = "2.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77549399552de45a898a580c1b41d445bf730df867cc44e6c0233bbc4b8329de"
 dependencies = [
- "digest 0.10.7",
  "rand_core 0.6.4",
 ]
 
@@ -2641,7 +2611,7 @@ dependencies = [
 
 [[package]]
 name = "wedpr_l_crypto_ot_base_ot"
-version = "0.3.0"
+version = "0.4.0"
 dependencies = [
  "criterion",
  "curve25519-dalek 1.2.6",
@@ -2701,16 +2671,9 @@ dependencies = [
 
 [[package]]
 name = "wedpr_l_crypto_vrf_secp256k1"
-version = "1.4.0"
+version = "2.0.0"
 dependencies = [
  "k256",
- "rand 0.6.5",
- "rfc6979",
- "serde",
- "sha2 0.10.8",
- "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_zkp_utils 1.2.0",
- "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

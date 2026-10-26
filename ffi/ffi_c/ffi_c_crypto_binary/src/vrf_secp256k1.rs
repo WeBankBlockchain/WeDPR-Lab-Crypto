@@ -41,6 +41,9 @@ pub unsafe extern "C" fn wedpr_secp256k1_vrf_derive_public_key(
     };
 
     let public_key = WedprSecp256k1Vrf::derive_public_key(&private_key);
+    if public_key.len() != 33 {
+        return FAILURE;
+    }
 
     if c_write_raw_pointer(&public_key, output_public_key).is_err() {
         return FAILURE;

@@ -1,444 +1,144 @@
 // Copyright 2024 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
-//! secp256k1 VRF functions.
+//! The legacy secp256k1 VRF is disabled: it leaks keys across messages and its
+//! output is publicly predictable. Updating the nonce alone is insufficient.
+//!
+//! All legacy proof operations fail closed. Key parsing/derivation remains
+//! available. See the repository README for migration requirements. No
+//! experimental replacement protocol is enabled by this crate.
 
-extern crate k256;
+#![forbid(unsafe_code)]
 
-use k256::{
-    elliptic_curve::{
-        generic_array::GenericArray, sec1::FromEncodedPoint,
-        Curve, FieldBytesEncoding, PrimeField,
-    },
-    AffinePoint, EncodedPoint, Scalar, Secp256k1,
-};
-use wedpr_l_utils::traits::Vrf;
+use k256::{elliptic_curve::sec1::ToEncodedPoint, PublicKey, SecretKey};
+use wedpr_l_utils::{error::WedprError, traits::Vrf};
 
-use crate::k256::elliptic_curve::{
-    group::{prime::PrimeCurveAffine, GroupEncoding},
-    Field,
-};
-use sha2::{Digest, Sha256};
-use wedpr_l_utils::error::WedprError;
-
-const SECP256K1_POINT_LENGTH: usize = 33;
-const SECP256K1_SCALAR_LENGTH: usize = 32;
-// Keep VRF nonces separate from ECDSA nonces when callers reuse a signing key.
-const NONCE_DOMAIN: &[u8] = b"WeDPR/secp256k1/VRF/nonce/v1";
-
-/// Implements secp256k1 as a VRF instance.
+/// Disabled legacy VRF. Public fields are retained for source compatibility;
+/// constructing this struct manually does not enable legacy verification.
 #[derive(PartialEq, Debug, Clone, Default)]
 pub struct WedprSecp256k1Vrf {
-    // 33 bytes
     pub gamma_param: Vec<u8>,
-    // 32 bytes
     pub c_param: Vec<u8>,
-    // 32 bytes
     pub s_param: Vec<u8>,
 }
 
-fn hash_to_scalar(hash_vec: &Vec<u8>) -> Result<Scalar, WedprError> {
-    let mut hasher = Sha256::new();
-    hasher.update(hash_vec);
-    let hash_vec = hasher.finalize().to_vec();
-
-    let array: GenericArray<u8, _> =
-        GenericArray::clone_from_slice(hash_vec.as_slice());
-
-    let scalar_option = k256::Scalar::from_repr(array);
-
-    if scalar_option.is_some().into() {
-        return Ok(scalar_option.unwrap());
-    } else {
-        return Err(WedprError::FormatError);
-    };
-}
-
-fn bytes_to_affine(bytes: &[u8]) -> Result<AffinePoint, WedprError> {
-    let encoded_point = EncodedPoint::from_bytes(bytes);
-    match encoded_point {
-        Ok(encoded_point) => {
-            let affine_point = AffinePoint::from_encoded_point(&encoded_point);
-            if affine_point.is_some().into() {
-                return Ok(affine_point.unwrap());
-            } else {
-                return Err(WedprError::FormatError);
-            }
-        },
-        Err(_) => Err(WedprError::FormatError),
-    }
-}
-
-fn bytes_to_scalar(bytes: &[u8]) -> Result<Scalar, WedprError> {
-    let scalar_option =
-        k256::Scalar::from_repr(GenericArray::clone_from_slice(bytes));
-    if scalar_option.is_some().into() {
-        return Ok(scalar_option.unwrap());
-    } else {
+// Only canonical, compressed, nonidentity secp256k1 points are accepted.
+fn parse_public_key(bytes: &[u8]) -> Result<PublicKey, WedprError> {
+    if bytes.len() != 33 || !matches!(bytes[0], 2 | 3) {
         return Err(WedprError::FormatError);
     }
+    PublicKey::from_sec1_bytes(bytes).map_err(|_| WedprError::FormatError)
+}
+
+fn parse_secret_key(bytes: &[u8]) -> Result<SecretKey, WedprError> {
+    if bytes.len() != 32 {
+        return Err(WedprError::FormatError);
+    }
+    SecretKey::from_slice(bytes).map_err(|_| WedprError::FormatError)
 }
 
 impl Vrf for WedprSecp256k1Vrf {
+    /// Disabled. Empty bytes are an invalid proof, never a legacy encoding.
     fn encode_proof(&self) -> Vec<u8> {
-        let mut proof = Vec::new();
-        proof.append(&mut self.gamma_param.to_vec());
-        proof.append(&mut self.c_param.to_vec());
-        proof.append(&mut self.s_param.to_vec());
-        proof
+        Vec::new()
     }
 
     fn decode_proof<T: ?Sized + AsRef<[u8]>>(
-        proof: &T,
+        _: &T,
     ) -> Result<Self, WedprError> {
-        if proof.as_ref().len()
-            != (SECP256K1_POINT_LENGTH
-                + SECP256K1_SCALAR_LENGTH
-                + SECP256K1_SCALAR_LENGTH)
-        {
-            return Err(WedprError::FormatError);
-        }
-        let mut gamma = [0u8; SECP256K1_POINT_LENGTH];
-        gamma.copy_from_slice(&proof.as_ref()[0..SECP256K1_POINT_LENGTH]);
-
-        let mut c = [0u8; SECP256K1_SCALAR_LENGTH];
-        c.copy_from_slice(
-            &proof.as_ref()[SECP256K1_POINT_LENGTH
-                ..SECP256K1_POINT_LENGTH + SECP256K1_SCALAR_LENGTH],
-        );
-
-        let mut s = [0u8; SECP256K1_SCALAR_LENGTH];
-        s.copy_from_slice(
-            &proof.as_ref()[SECP256K1_POINT_LENGTH + SECP256K1_SCALAR_LENGTH
-                ..SECP256K1_POINT_LENGTH
-                    + SECP256K1_SCALAR_LENGTH
-                    + SECP256K1_SCALAR_LENGTH],
-        );
-        Ok(WedprSecp256k1Vrf {
-            gamma_param: gamma.to_vec(),
-            c_param: c.to_vec(),
-            s_param: s.to_vec(),
-        })
+        Err(WedprError::VerificationError)
     }
 
     fn prove<T: ?Sized + AsRef<[u8]>>(
-        private_key_vec: &T,
-        message: &T,
-    ) -> Result<Self, WedprError>
-    where
-        Self: Sized,
-    {
-        let private_key_result =
-            k256::SecretKey::from_slice(private_key_vec.as_ref());
-
-        let private_key = match private_key_result {
-            Ok(private_key) => private_key,
-            Err(_) => return Err(WedprError::FormatError),
-        };
-
-        let private_key_scalar: Scalar =
-            private_key.as_scalar_primitive().into();
-
-        let public_key = private_key.public_key();
-
-        let public_key_bytes = public_key.as_affine().to_bytes().to_vec();
-
-        let message = message.as_ref();
-
-        let mut hash_vec = Vec::new();
-        hash_vec.append(&mut public_key_bytes.clone());
-        hash_vec.append(&mut message.to_vec());
-
-        let h_scalar_result = hash_to_scalar(&hash_vec);
-        let h_scalar = match h_scalar_result {
-            Ok(h_scalar_result) => h_scalar_result,
-            Err(_) => return Err(WedprError::FormatError),
-        };
-
-        let base_point = k256::AffinePoint::generator();
-        let h_point = base_point * h_scalar;
-
-        let gamma = h_point * private_key_scalar;
-
-        // RFC 6979 binds the nonce to both the secret and this message's hash.
-        // Hashing only the secret reuses k across messages and exposes the key
-        // through x = (s1 - s2) / (c1 - c2). h_scalar is already reduced mod n.
-        // The domain tag also prevents nonce reuse with deterministic ECDSA.
-        let nonce_bytes = rfc6979::generate_k::<Sha256, _>(
-            &private_key.to_bytes(),
-            &Secp256k1::ORDER.encode_field_bytes(),
-            &h_scalar.to_bytes(),
-            NONCE_DOMAIN,
-        );
-        let scalar_k = Option::<Scalar>::from(Scalar::from_repr(nonce_bytes))
-            .ok_or(WedprError::FormatError)?;
-
-        let point_k = base_point * scalar_k;
-
-        let point_kh = h_point * scalar_k;
-
-        let mut c_vec = Vec::new();
-        c_vec.append(&mut h_point.to_bytes().to_vec());
-        c_vec.append(&mut gamma.to_bytes().to_vec());
-        c_vec.append(&mut point_k.to_bytes().to_vec());
-        c_vec.append(&mut point_kh.to_bytes().to_vec());
-
-        let c_scalar_result = hash_to_scalar(&c_vec);
-        let c_scalar = match c_scalar_result {
-            Ok(c_scalar_result) => c_scalar_result,
-            Err(_) => return Err(WedprError::FormatError),
-        };
-
-        let s = scalar_k + (c_scalar * private_key_scalar);
-
-        // println!("gamma : {:?}", gamma.to_bytes().to_vec());
-        // println!("c : {:?}", c_scalar.to_bytes().to_vec());
-        // println!("s : {:?}", s.to_bytes().to_vec());
-
-        return Ok(WedprSecp256k1Vrf {
-            gamma_param: gamma.to_bytes().to_vec(),
-            c_param: c_scalar.to_bytes().to_vec(),
-            s_param: s.to_bytes().to_vec(),
-        });
+        _: &T,
+        _: &T,
+    ) -> Result<Self, WedprError> {
+        Err(WedprError::VerificationError)
     }
 
     fn prove_fast<T: ?Sized + AsRef<[u8]>>(
-        private_key: &T,
-        public_key: &T,
-        message: &T,
-    ) -> Result<Self, WedprError>
-    where
-        Self: Sized,
-    {
-        // TODO: We found use input public key directly is slower than derive
-        // public key from private key
-        Self::prove(private_key, message)
+        _: &T,
+        _: &T,
+        _: &T,
+    ) -> Result<Self, WedprError> {
+        Err(WedprError::VerificationError)
     }
 
-    fn verify<T: ?Sized + AsRef<[u8]>>(
-        &self,
-        public_key: &T,
-        message: &T,
-    ) -> bool {
-        let public_key_bytes = public_key.as_ref().to_vec();
-
-        let public_key_point = match bytes_to_affine(&public_key_bytes) {
-            Ok(public_key_point) => public_key_point,
-            Err(_) => return false,
-        };
-
-        let message = message.as_ref();
-
-        let mut hash_vec = Vec::new();
-        hash_vec.append(&mut public_key_bytes.clone());
-        hash_vec.append(&mut message.to_vec());
-
-        let base_point = k256::AffinePoint::generator();
-
-        let h_scalar = hash_to_scalar(&hash_vec).unwrap();
-        let h_point = base_point * h_scalar;
-
-        let gamma = match bytes_to_affine(&self.gamma_param) {
-            Ok(gamma) => gamma,
-            Err(_) => return false,
-        };
-
-        let c = match bytes_to_scalar(&self.c_param) {
-            Ok(c) => c,
-            Err(_) => return false,
-        };
-
-        let s = match bytes_to_scalar(&self.s_param) {
-            Ok(s) => s,
-            Err(_) => return false,
-        };
-
-        let u = (base_point * s) - (public_key_point * c);
-        let v = (h_point * s) - (gamma * c);
-
-        let mut c_vec = Vec::new();
-        c_vec.append(&mut h_point.to_bytes().to_vec());
-        c_vec.append(&mut self.gamma_param.clone());
-        c_vec.append(&mut u.to_bytes().to_vec());
-        c_vec.append(&mut v.to_bytes().to_vec());
-
-        let c_scalar_result = hash_to_scalar(&c_vec);
-        let c_scalar = match c_scalar_result {
-            Ok(c_scalar_result) => c_scalar_result,
-            Err(_) => return false,
-        };
-
-        return c_scalar.to_bytes().to_vec().eq(self.c_param.as_slice());
+    fn verify<T: ?Sized + AsRef<[u8]>>(&self, _: &T, _: &T) -> bool {
+        false
     }
 
     fn derive_public_key<T: ?Sized + AsRef<[u8]>>(private_key: &T) -> Vec<u8> {
-        let private_key_result =
-            k256::SecretKey::from_slice(private_key.as_ref());
-
-        let private_key = match private_key_result {
-            Ok(private_key) => private_key,
-            Err(_) => return Vec::new(),
-        };
-
-        let public_key = private_key.public_key();
-
-        public_key.as_affine().to_bytes().to_vec()
+        match parse_secret_key(private_key.as_ref()) {
+            Ok(key) => {
+                key.public_key().to_encoded_point(true).as_bytes().to_vec()
+            },
+            Err(_) => Vec::new(),
+        }
     }
 
     fn is_valid_public_key<T: ?Sized + AsRef<[u8]>>(public_key: &T) -> bool {
-        let public_key_bytes = public_key.as_ref().to_vec();
-        match bytes_to_affine(&public_key_bytes) {
-            Ok(_) => return true,
-            Err(_) => return false,
-        };
+        parse_public_key(public_key.as_ref()).is_ok()
     }
 
     fn proof_to_hash(&self) -> Result<Vec<u8>, WedprError> {
-        let gamma = match bytes_to_affine(&self.gamma_param) {
-            Ok(gamma) => gamma,
-            Err(_) => return Err(WedprError::FormatError),
-        };
-
-        let base_order = Scalar::from_u128(8);
-        let base = gamma * base_order;
-
-        let mut hasher = Sha256::new();
-        hasher.update(base.to_bytes().as_slice());
-        let hash_vec = hasher.finalize().to_vec();
-
-        Ok(hash_vec)
+        Err(WedprError::VerificationError)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use k256::elliptic_curve::rand_core::OsRng;
-
     use super::*;
 
     #[test]
-    fn test_nonce_is_deterministic_for_the_same_key_and_message() {
-        let private_key = k256::SecretKey::random(&mut OsRng);
-        let key = private_key.to_bytes().to_vec();
-        let public_key = WedprSecp256k1Vrf::derive_public_key(&key);
-        let message = b"same rotation input".to_vec();
-        let first = WedprSecp256k1Vrf::prove(&key, &message).unwrap();
-        let second = WedprSecp256k1Vrf::prove(&key, &message).unwrap();
-        let fast = WedprSecp256k1Vrf::prove_fast(&key, &public_key, &message)
-            .unwrap();
-
-        assert_eq!(first, second);
-        assert_eq!(first, fast);
-        assert!(first.verify(&public_key, &message));
-        assert_eq!(first.proof_to_hash().unwrap(), second.proof_to_hash().unwrap());
+    fn all_legacy_proof_operations_fail_closed() {
+        let secret = vec![1u8; 32];
+        let public = WedprSecp256k1Vrf::derive_public_key(&secret);
+        let message = b"quarantine regression".to_vec();
+        assert_eq!(public.len(), 33);
+        assert!(WedprSecp256k1Vrf::is_valid_public_key(&public));
+        assert!(WedprSecp256k1Vrf::prove(&secret, &message).is_err());
+        assert!(
+            WedprSecp256k1Vrf::prove_fast(&secret, &public, &message).is_err()
+        );
+        for length in [0, 96, 97, 98] {
+            assert!(
+                WedprSecp256k1Vrf::decode_proof(&vec![0u8; length]).is_err()
+            );
+        }
+        // Public fields and Default must not bypass the quarantine.
+        for proof in [
+            WedprSecp256k1Vrf::default(),
+            WedprSecp256k1Vrf {
+                gamma_param: public.clone(),
+                c_param: vec![0u8; 32],
+                s_param: vec![1u8; 32],
+            },
+        ] {
+            assert!(!proof.verify(&public, &message));
+            assert!(proof.proof_to_hash().is_err());
+            assert!(proof.encode_proof().is_empty());
+        }
     }
 
     #[test]
-    fn test_different_messages_do_not_reuse_nonce_or_reveal_private_key() {
-        let private_key = k256::SecretKey::random(&mut OsRng);
-        let key = private_key.to_bytes().to_vec();
-        let x: Scalar = private_key.as_scalar_primitive().into();
-        let public_key = WedprSecp256k1Vrf::derive_public_key(&key);
-        let first_message = b"rotation 1".to_vec();
-        let second_message = b"rotation 2".to_vec();
-        let first = WedprSecp256k1Vrf::prove(&key, &first_message).unwrap();
-        let second = WedprSecp256k1Vrf::prove(&key, &second_message).unwrap();
-        assert!(first.verify(&public_key, &first_message));
-        assert!(second.verify(&public_key, &second_message));
-        assert!(!first.verify(&public_key, &second_message));
-
-        let c1 = bytes_to_scalar(&first.c_param).unwrap();
-        let c2 = bytes_to_scalar(&second.c_param).unwrap();
-        let s1 = bytes_to_scalar(&first.s_param).unwrap();
-        let s2 = bytes_to_scalar(&second.s_param).unwrap();
-        let k1 = s1 - c1 * x;
-        let k2 = s2 - c2 * x;
-        assert_ne!(k1, Scalar::ZERO);
-        assert_ne!(k2, Scalar::ZERO);
-        assert_ne!(k1, k2);
-        let recovered = (s1 - s2) * (c1 - c2).invert().unwrap();
-        assert_ne!(recovered, x);
-        assert_ne!(
-            WedprSecp256k1Vrf::derive_public_key(&recovered.to_bytes().to_vec()),
-            public_key,
-        );
-    }
-
-    #[test]
-    fn test_vrf_nonce_is_separate_from_ecdsa_nonce() {
-        let private_key = k256::SecretKey::random(&mut OsRng);
-        let key = private_key.to_bytes().to_vec();
-        let x: Scalar = private_key.as_scalar_primitive().into();
-        let message = b"shared signing key".to_vec();
-        let proof = WedprSecp256k1Vrf::prove(&key, &message).unwrap();
-        let mut input = WedprSecp256k1Vrf::derive_public_key(&key);
-        input.extend_from_slice(&message);
-        let h = hash_to_scalar(&input).unwrap();
-        let ecdsa_nonce = rfc6979::generate_k::<Sha256, _>(
-            &private_key.to_bytes(),
-            &Secp256k1::ORDER.encode_field_bytes(),
-            &h.to_bytes(),
-            b"",
-        );
-        let actual_nonce = bytes_to_scalar(&proof.s_param).unwrap()
-            - bytes_to_scalar(&proof.c_param).unwrap() * x;
-        assert_ne!(actual_nonce.to_bytes(), ecdsa_nonce);
-    }
-
-    #[test]
-    fn test_secp256k1_vrf() {
-        let private_key = k256::SecretKey::random(&mut OsRng);
-        let public_key = private_key.public_key();
-        let message = "hello world".as_bytes().to_vec();
-
-        let proof = WedprSecp256k1Vrf::prove(
-            &private_key.to_bytes().to_vec(),
-            &message,
-        )
-        .unwrap();
-
-        assert_eq!(
-            proof.verify(&public_key.as_affine().to_bytes().to_vec(), &message),
-            true
-        );
-        println!("proof hash : {:?}", proof.proof_to_hash().unwrap());
-    }
-
-    #[test]
-    fn test_encode_proof() {
-        let private_key = k256::SecretKey::random(&mut OsRng);
-        // let public_key = private_key.public_key();
-        let message = "hello world".as_bytes().to_vec();
-
-        let proof = WedprSecp256k1Vrf::prove(
-            &private_key.to_bytes().to_vec(),
-            &message,
-        )
-        .unwrap();
-        let encoded_proof = proof.encode_proof();
-        // println!("encoded_proof : {:?}, length: {}", encoded_proof,
-        // encoded_proof.len());
-        let decoded_proof =
-            WedprSecp256k1Vrf::decode_proof(&encoded_proof).unwrap();
-        assert_eq!(decoded_proof, proof);
-
-        assert_eq!(
-            proof.verify(
-                &private_key.public_key().as_affine().to_bytes().to_vec(),
-                &message
-            ),
-            true
-        );
-    }
-
-    #[test]
-    fn test_utils() {
-        let private_key = k256::SecretKey::random(&mut OsRng);
-        let public_key = private_key.public_key();
-        let expected_pk = WedprSecp256k1Vrf::derive_public_key(
-            &private_key.to_bytes().to_vec(),
-        );
-        assert_eq!(public_key.as_affine().to_bytes().to_vec(), expected_pk);
-
-        assert_eq!(WedprSecp256k1Vrf::is_valid_public_key(&expected_pk), true);
+    fn key_tools_reject_invalid_and_noncanonical_inputs() {
+        for invalid in [
+            vec![],
+            vec![1u8; 31],
+            vec![0u8; 32],
+            vec![0xffu8; 32],
+            vec![1u8; 33],
+        ] {
+            assert!(WedprSecp256k1Vrf::derive_public_key(&invalid).is_empty());
+        }
+        for invalid in [
+            vec![],
+            vec![0u8],
+            vec![0u8; 33],
+            vec![4u8; 65],
+            vec![0xffu8; 33],
+        ] {
+            assert!(!WedprSecp256k1Vrf::is_valid_public_key(&invalid));
+        }
     }
 }

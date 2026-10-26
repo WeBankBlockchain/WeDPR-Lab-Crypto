@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_ot_base_ot"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2018"
 license = "Apache-2.0"
 description = "Library of WeDPR shared zkp Function implement base ot."

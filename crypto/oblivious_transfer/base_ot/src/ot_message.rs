@@ -1,215 +1,109 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
-//! Message oblivious transfer (OT) functions.
+//! Authenticated 1-out-of-2 message OT using the version 2 KV OT protocol.
+//! Security assumes semi-honest participants. The padded lengths are public;
+//! decryption failures must remain local to avoid selective-failure feedback.
 
-use curve25519_dalek::{
-    ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
-};
-use wedpr_l_crypto_zkp_utils::{
-    get_random_scalar, point_to_bytes, BASEPOINT_G1,
+use crate::ot_kv::{
+    OtCiphertextItemKOutOfN, OtKvKOutOfN, ReceiverCommitmentKOutOfN,
+    ReceiverSecretKOutOfN,
 };
 use wedpr_l_utils::error::WedprError;
 
-// TODO: Move the following structs to protos if necessary.
+// Fixed, distinct IDs separate this application from caller-chosen KV IDs.
+const ID_ZERO: &[u8] = b"WeDPR/1-out-of-2-OT/v2/zero";
+const ID_ONE: &[u8] = b"WeDPR/1-out-of-2-OT/v2/one";
 
-/// Sender's plaintext bytes collection of 1-out-of-2 OT.
+/// Sender's plaintext messages.
 #[derive(Default, Debug, Clone)]
 pub struct TwoOtMessages {
     pub message0: Vec<u8>,
     pub message1: Vec<u8>,
 }
 
-/// Sender's ciphertext item for a single encrypted message of 1-out-of-2 OT.
-#[derive(Default, Debug, Clone)]
-pub struct TwoOtCiphertextItem {
-    pub key_basepoint: RistrettoPoint,
-    pub encrypted_message: Vec<u8>,
-}
+/// Version 2 row containing one authenticated encrypted choice. The legacy
+/// raw XOR wire layout must not be accepted or translated automatically.
+pub type TwoOtCiphertextItem = OtCiphertextItemKOutOfN;
 
-/// Sender's ciphertext collection of 1-out-of-2 OT.
+/// Sender's two version 2 ciphertext rows, in fixed order.
 #[derive(Default, Debug, Clone)]
 pub struct TwoOtCiphertexts {
     pub ciphertext0: TwoOtCiphertextItem,
     pub ciphertext1: TwoOtCiphertextItem,
 }
 
-/// Receiver's secret to decrypt the chosen messages during 1-out-of-2 OT.
-#[derive(Default, Debug, Clone)]
+/// Private state, including the query transcript. Never transmit or log it.
+#[derive(Default, Clone)]
 pub struct ReceiverSecret1OutOf2 {
-    pub scalar_b: Scalar,
+    choose_zero: bool,
+    inner: ReceiverSecretKOutOfN,
 }
 
-/// Receiver's commitment for the chosen messages during 1-out-of-2 OT.
-#[derive(Default, Debug, Clone)]
-pub struct ReceiverCommitment1OutOf2 {
-    pub point_x: RistrettoPoint,
-    pub point_y: RistrettoPoint,
-    pub point_z: RistrettoPoint,
-}
+/// Version 2 query with exactly one independently blinded choice.
+pub type ReceiverCommitment1OutOf2 = ReceiverCommitmentKOutOfN;
 
-/// Implements a 1-out-of-2 message OT instance.
-/// Sender has two data messages, message0 and message1,
-/// 1-out-of-2 message OT can help receiver to get
-/// exactly one chosen message without disclosing receiver's actual choice and
-/// the rest of sender's messages.
+/// Semi-honest 1-out-of-2 OT with hashed DH keys and authenticated ciphertexts.
 #[derive(Default, Debug, Clone)]
 pub struct OtMessages1OutOf2 {}
 
 impl OtMessages1OutOf2 {
-    /// Generates an OT query based on receiver's choice. It will pick message0
-    /// if choose_zero is true otherwise message1.
-    /// It returns ReceiverSecret and ReceiverCommitment. ReceiverSecret will be
-    /// later used to decrypt the chosen message which should by kept secretly
-    /// by receiver. ReceiverCommitment is the actual query to be sent to
-    /// sender for generating OT response.
+    /// Create a fresh query and private state for one choice.
     pub fn receiver_init(
         &self,
         choose_zero: bool,
     ) -> (ReceiverSecret1OutOf2, ReceiverCommitment1OutOf2) {
-        let blinding_a = get_random_scalar();
-        let blinding_b = get_random_scalar();
-        let c_id = blinding_a * blinding_b;
-        let point_x =
-            RistrettoPoint::multiscalar_mul(&[blinding_a], &[*BASEPOINT_G1]);
-        let point_y =
-            RistrettoPoint::multiscalar_mul(&[blinding_b], &[*BASEPOINT_G1]);
-        let point_z: RistrettoPoint;
-        if choose_zero {
-            point_z =
-                RistrettoPoint::multiscalar_mul(&[c_id], &[*BASEPOINT_G1]);
-        } else {
-            point_z =
-                RistrettoPoint::multiscalar_mul(&[c_id - Scalar::one()], &[
-                    *BASEPOINT_G1,
-                ]);
-        }
-        (
-            ReceiverSecret1OutOf2 {
-                scalar_b: blinding_b,
-            },
-            ReceiverCommitment1OutOf2 {
-                point_x,
-                point_y,
-                point_z,
-            },
-        )
+        let id = if choose_zero { ID_ZERO } else { ID_ONE };
+        let (inner, commitment) =
+            OtKvKOutOfN::default().receiver_init(&vec![id.to_vec()]);
+        (ReceiverSecret1OutOf2 { choose_zero, inner }, commitment)
     }
 
-    /// Computes OT ciphertexts based on the ReceiverCommitment from receiver.
-    /// It returns ciphertext OT response for all available messages. It will
-    /// raise error if a plaintext message is too long.
+    /// Encrypt both messages using the checked KV OT implementation. Its KDF
+    /// binds the shared secret, query, row index and sender's ephemeral point.
     pub fn sender_init(
         &self,
         data: &TwoOtMessages,
         receiver_commitment: &ReceiverCommitment1OutOf2,
     ) -> Result<TwoOtCiphertexts, WedprError> {
-        let ReceiverCommitment1OutOf2 {
-            point_x,
-            point_y,
-            point_z,
-        } = receiver_commitment;
-
-        // Encrypt message 0.
-        let (key_basepoint0, encrypted_message0) =
-            OtMessages1OutOf2::sender_encrypt_message(
-                &data.message0,
-                point_x,
-                point_y,
-                point_z,
-            )?;
-        // Encrypt message 1.
-        let point_z1 = point_z + *BASEPOINT_G1;
-        let (key_basepoint1, encrypted_message1) =
-            OtMessages1OutOf2::sender_encrypt_message(
-                &data.message1,
-                point_x,
-                point_y,
-                &point_z1,
-            )?;
-
+        if receiver_commitment.choices.len() != 1 {
+            return Err(WedprError::ArgumentError);
+        }
+        let rows = OtKvKOutOfN::default().sender_init(
+            &vec![ID_ZERO.to_vec(), ID_ONE.to_vec()],
+            &vec![data.message0.clone(), data.message1.clone()],
+            receiver_commitment,
+        )?;
+        let mut rows = rows.into_iter();
         Ok(TwoOtCiphertexts {
-            ciphertext0: TwoOtCiphertextItem {
-                key_basepoint: key_basepoint0,
-                encrypted_message: encrypted_message0,
-            },
-            ciphertext1: TwoOtCiphertextItem {
-                key_basepoint: key_basepoint1,
-                encrypted_message: encrypted_message1,
-            },
+            ciphertext0: rows.next().ok_or(WedprError::FormatError)?,
+            ciphertext1: rows.next().ok_or(WedprError::FormatError)?,
         })
     }
 
-    /// Decrypts the ciphertext OT response based on receiver's choice and
-    /// ReceiverSecret. Receiver can only decrypt exactly one OT message. It
-    /// returns the decrypted message bytes.
+    /// Authenticate the selected message before releasing plaintext. A bad
+    /// tag, wrong query, wrong choice or malformed response returns an error.
     pub fn receiver_decrypt(
         &self,
         choose_zero: bool,
         receiver_secret: &ReceiverSecret1OutOf2,
         sender_ciphertexts: &TwoOtCiphertexts,
-    ) -> Vec<u8> {
-        let blinding_b = receiver_secret.scalar_b;
-        if choose_zero {
-            OtMessages1OutOf2::receiver_decrypt_message(
-                &sender_ciphertexts.ciphertext0,
-                &blinding_b,
-            )
-        } else {
-            OtMessages1OutOf2::receiver_decrypt_message(
-                &sender_ciphertexts.ciphertext1,
-                &blinding_b,
-            )
-        }
-    }
-
-    fn sender_encrypt_message(
-        message: &Vec<u8>,
-        point_x: &RistrettoPoint,
-        point_y: &RistrettoPoint,
-        point_z: &RistrettoPoint,
-    ) -> Result<(RistrettoPoint, Vec<u8>), WedprError> {
-        let blinding_r = get_random_scalar();
-        let blinding_s = get_random_scalar();
-        let key_basepoint =
-            RistrettoPoint::multiscalar_mul(&[blinding_s, blinding_r], &[
-                *point_x,
-                *BASEPOINT_G1,
-            ]);
-        let bytes_key = point_to_bytes(&RistrettoPoint::multiscalar_mul(
-            &[blinding_s, blinding_r],
-            &[*point_z, *point_y],
-        ));
-        // TODO: Add KDF function to extend the key size for long message.
-        if bytes_key.len() < message.len() {
+    ) -> Result<Vec<u8>, WedprError> {
+        if choose_zero != receiver_secret.choose_zero {
             return Err(WedprError::ArgumentError);
         }
-        let encrypted_message: Vec<u8> = message
-            .iter()
-            .zip(bytes_key.iter())
-            .map(|(&x1, &x2)| x1 ^ x2)
-            .collect();
-        Ok((key_basepoint, encrypted_message))
-    }
-
-    fn receiver_decrypt_message(
-        ciphertext: &TwoOtCiphertextItem,
-        blinding_b: &Scalar,
-    ) -> Vec<u8> {
-        let bytes_key =
-            point_to_bytes(&RistrettoPoint::multiscalar_mul([blinding_b], [
-                ciphertext.key_basepoint,
-            ]));
-        // TODO: Add KDF function to extend the key size for long message.
-        ciphertext
-            .encrypted_message
-            .iter()
-            .zip(bytes_key.iter())
-            .map(|(&x1, &x2)| x1 ^ x2)
-            .collect()
+        let mut messages = OtKvKOutOfN::default().receiver_decrypt(
+            &receiver_secret.inner,
+            &vec![
+                sender_ciphertexts.ciphertext0.clone(),
+                sender_ciphertexts.ciphertext1.clone(),
+            ],
+            1,
+        )?;
+        messages.pop().ok_or(WedprError::FormatError)
     }
 }
 
-/// Creates OT bytes message collection from strings.
+/// Creates OT message data from strings.
 pub fn make_two_ot_messages(message0: &str, message1: &str) -> TwoOtMessages {
     TwoOtMessages {
         message0: message0.as_bytes().to_vec(),
@@ -220,47 +114,114 @@ pub fn make_two_ot_messages(message0: &str, message1: &str) -> TwoOtMessages {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use curve25519_dalek::ristretto::RistrettoPoint;
 
     #[test]
-    fn test_ot_message_1_out_of_2() {
-        let message0 = "wedpr test 0";
-        let message1 = "wedpr test 1";
+    fn both_choices_support_empty_and_long_messages() {
         let ot = OtMessages1OutOf2::default();
-        let data = make_two_ot_messages(message0, message1);
+        for length in [0, 1, 32, 33, 1024] {
+            let data = TwoOtMessages {
+                message0: vec![0u8; length],
+                message1: vec![1u8; length + 1],
+            };
+            for choose_zero in [true, false] {
+                let (secret, query) = ot.receiver_init(choose_zero);
+                let response = ot.sender_init(&data, &query).unwrap();
+                let expected = if choose_zero {
+                    &data.message0
+                } else {
+                    &data.message1
+                };
+                assert_eq!(
+                    &ot.receiver_decrypt(choose_zero, &secret, &response)
+                        .unwrap(),
+                    expected
+                );
+                assert!(ot
+                    .receiver_decrypt(!choose_zero, &secret, &response)
+                    .is_err());
+            }
+        }
+    }
 
-        // Pick the first (index = 0) message.
-        let choose_zero = true;
-        let (receiver_secret, receiver_commitment) =
-            ot.receiver_init(choose_zero);
-        let sender_ciphertexts =
-            ot.sender_init(&data, &receiver_commitment).unwrap();
-        let decrypted_message = ot.receiver_decrypt(
-            choose_zero,
-            &receiver_secret,
-            &sender_ciphertexts,
-        );
-        assert_eq!(String::from_utf8(decrypted_message).unwrap(), message0);
+    #[test]
+    fn rejects_tampering_reordering_and_cross_query_replay() {
+        let ot = OtMessages1OutOf2::default();
+        let data =
+            make_two_ot_messages("selected message", "unselected message");
+        for choose_zero in [true, false] {
+            let (secret, query) = ot.receiver_init(choose_zero);
+            let response = ot.sender_init(&data, &query).unwrap();
+            let selected = if choose_zero {
+                &response.ciphertext0
+            } else {
+                &response.ciphertext1
+            };
+            for index in
+                0..selected.encrypted_choices[0].encrypted_message.len()
+            {
+                let mut changed = response.clone();
+                let row = if choose_zero {
+                    &mut changed.ciphertext0
+                } else {
+                    &mut changed.ciphertext1
+                };
+                row.encrypted_choices[0].encrypted_message[index] ^= 1;
+                assert!(ot
+                    .receiver_decrypt(choose_zero, &secret, &changed)
+                    .is_err());
+            }
+            let mut changed = response.clone();
+            let row = if choose_zero {
+                &mut changed.ciphertext0
+            } else {
+                &mut changed.ciphertext1
+            };
+            row.encrypted_choices[0].iv[0] ^= 1;
+            assert!(ot
+                .receiver_decrypt(choose_zero, &secret, &changed)
+                .is_err());
+            let mut changed = response.clone();
+            let row = if choose_zero {
+                &mut changed.ciphertext0
+            } else {
+                &mut changed.ciphertext1
+            };
+            row.encrypted_choices[0].key_basepoint = RistrettoPoint::default();
+            assert!(ot
+                .receiver_decrypt(choose_zero, &secret, &changed)
+                .is_err());
+            let mut changed = response.clone();
+            std::mem::swap(&mut changed.ciphertext0, &mut changed.ciphertext1);
+            assert!(ot
+                .receiver_decrypt(choose_zero, &secret, &changed)
+                .is_err());
+            let (other, _) = ot.receiver_init(choose_zero);
+            assert!(ot
+                .receiver_decrypt(choose_zero, &other, &response)
+                .is_err());
+        }
+    }
 
-        // Pick the second (index = 1) message.
-        let choose_zero = false;
-        let (receiver_secret, receiver_commitment) =
-            ot.receiver_init(choose_zero);
-        let sender_ciphertexts =
-            ot.sender_init(&data, &receiver_commitment).unwrap();
-        let decrypted_message = ot.receiver_decrypt(
-            choose_zero,
-            &receiver_secret,
-            &sender_ciphertexts,
-        );
-        assert_eq!(String::from_utf8(decrypted_message).unwrap(), message1);
-
-        // Test error condition when an input message is too long.
-        let too_long_data = make_two_ot_messages(
-            message0, "message123message123message123message123message123message123message123message123");
-        assert_eq!(
-            ot.sender_init(&too_long_data, &receiver_commitment)
-                .unwrap_err(),
-            WedprError::ArgumentError
-        );
+    #[test]
+    fn rejects_legacy_versions_and_invalid_query_shapes() {
+        let ot = OtMessages1OutOf2::default();
+        let data = make_two_ot_messages("zero", "one");
+        assert!(ot
+            .sender_init(&data, &ReceiverCommitment1OutOf2::default())
+            .is_err());
+        let (secret, query) = ot.receiver_init(true);
+        let mut invalid = query.clone();
+        invalid.version = 1;
+        assert!(ot.sender_init(&data, &invalid).is_err());
+        let mut invalid = query.clone();
+        invalid.choices[0].point_x = RistrettoPoint::default();
+        assert!(ot.sender_init(&data, &invalid).is_err());
+        let mut invalid = query.clone();
+        invalid.choices.push(invalid.choices[0].clone());
+        assert!(ot.sender_init(&data, &invalid).is_err());
+        let mut response = ot.sender_init(&data, &query).unwrap();
+        response.ciphertext0.version = 1;
+        assert!(ot.receiver_decrypt(true, &secret, &response).is_err());
     }
 }

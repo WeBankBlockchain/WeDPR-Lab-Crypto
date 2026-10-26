@@ -31,6 +31,7 @@ jobs:
           -p wedpr_l_crypto_signature_secp256k1
           -p wedpr_l_crypto_signature_sm2
           -p wedpr_l_crypto_vrf_curve25519
+          -p wedpr_l_crypto_vrf_secp256k1
           -p wedpr_l_crypto_zkp_discrete_logarithm_proof
           -p wedpr_ffi_common -p wedpr_ffi_c_zkp
           -p wedpr_l_crypto_block_cipher_aes
@@ -39,11 +40,11 @@ jobs:
       - name: Binary C boundaries
         run: >-
           cargo test --locked --lib -p ffi_c_crypto_binary --no-default-features
-          --features wedpr_f_signature_secp256k1,wedpr_f_signature_sm2,wedpr_f_signature_ed25519,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4,wedpr_f_hash_keccak256
+          --features wedpr_f_signature_secp256k1,wedpr_f_signature_sm2,wedpr_f_signature_ed25519,wedpr_f_vrf_secp256k1,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4,wedpr_f_hash_keccak256
       - name: Text C boundaries
         run: >-
           cargo test --locked --lib -p wedpr_ffi_c_crypto --no-default-features
-          --features wedpr_f_base64,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
+          --features wedpr_f_base64,wedpr_f_vrf_secp256k1,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
       - name: Text JNI cipher dependencies
         run: >-
           cargo test --locked --lib -p wedpr_ffi_java_crypto --no-default-features

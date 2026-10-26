@@ -24,6 +24,46 @@ use wedpr_ffi_common_hex::utils::{
 use wedpr_l_crypto_vrf_secp256k1::WedprSecp256k1Vrf;
 use wedpr_l_utils::{tool::string_to_bytes_utf8, traits::Vrf};
 
+#[cfg(test)]
+mod security_tests {
+    use super::*;
+
+    #[test]
+    fn legacy_proof_exports_fail_and_key_tools_remain_checked() {
+        let secret = CString::new(bytes_to_string(&[1u8; 32])).unwrap();
+        let invalid = CString::new(bytes_to_string(&[0u8; 32])).unwrap();
+        let proof = CString::new(bytes_to_string(&[0u8; 97])).unwrap();
+        let message = CString::new("test message").unwrap();
+        unsafe {
+            assert!(wedpr_secp256k1_vrf_derive_public_key(invalid.as_ptr())
+                .is_null());
+            let public = wedpr_secp256k1_vrf_derive_public_key(secret.as_ptr());
+            assert!(!public.is_null());
+            let public = CString::from_raw(public);
+            assert!(wedpr_secp256k1_vrf_prove_utf8(
+                secret.as_ptr(),
+                message.as_ptr()
+            )
+            .is_null());
+            assert!(wedpr_secp256k1_vrf_prove_fast_utf8(
+                secret.as_ptr(),
+                public.as_ptr(),
+                message.as_ptr()
+            )
+            .is_null());
+            assert!(wedpr_secp256k1_vrf_proof_to_hash(proof.as_ptr()).is_null());
+            assert_eq!(
+                wedpr_secp256k1_vrf_verify_utf8(
+                    public.as_ptr(),
+                    message.as_ptr(),
+                    proof.as_ptr()
+                ),
+                FAILURE
+            );
+        }
+    }
+}
+
 // secp256k1 implementation.
 
 #[no_mangle]
@@ -35,6 +75,9 @@ pub unsafe extern "C" fn wedpr_secp256k1_vrf_derive_public_key(
         let private_key = c_safe_c_char_pointer_to_bytes!(encoded_private_key);
 
         let encrypt_data = WedprSecp256k1Vrf::derive_public_key(&private_key);
+        if encrypt_data.len() != 33 {
+            return ptr::null_mut();
+        }
         c_safe_bytes_to_c_char_pointer!(&encrypt_data)
     });
     c_safe_return!(result)

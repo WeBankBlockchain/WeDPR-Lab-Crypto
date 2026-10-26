@@ -35,11 +35,13 @@ fn create_base_ot_message_1_out_of_2_helper(c: &mut Criterion, str_len: u64) {
                 ot.receiver_init(choose_zero);
             let sender_ciphertexts =
                 ot.sender_init(&data, &receiver_commitment).unwrap();
-            let decrypt_message = ot.receiver_decrypt(
-                choose_zero,
-                &receiver_secret,
-                &sender_ciphertexts,
-            );
+            let decrypt_message = ot
+                .receiver_decrypt(
+                    choose_zero,
+                    &receiver_secret,
+                    &sender_ciphertexts,
+                )
+                .unwrap();
             assert_eq!(decrypt_message, expected_message);
         })
     });

@@ -7,6 +7,76 @@ fn input(bytes: &[u8]) -> CInputBuffer {
     }
 }
 
+#[cfg(feature = "wedpr_f_vrf_secp256k1")]
+#[test]
+fn legacy_secp256k1_vrf_fails_without_releasing_outputs() {
+    use crate::vrf_secp256k1::*;
+    let secret = [1u8; 32];
+    let mut bytes = [99u8; 128];
+    let mut output = COutputBuffer {
+        data: bytes.as_mut_ptr().cast(),
+        len: bytes.len(),
+    };
+    unsafe {
+        assert_eq!(
+            wedpr_secp256k1_vrf_prove_utf8(
+                &input(&secret),
+                &input(b"message"),
+                &mut output
+            ),
+            FAILURE
+        );
+        assert_eq!(bytes, [99u8; 128]);
+        let proof = [0u8; 97];
+        assert_eq!(
+            wedpr_secp256k1_vrf_proof_to_hash(&input(&proof), &mut output),
+            FAILURE
+        );
+        assert_eq!(bytes, [99u8; 128]);
+        assert_eq!(
+            wedpr_secp256k1_vrf_derive_public_key(
+                &input(&[0u8; 32]),
+                &mut output
+            ),
+            FAILURE
+        );
+        assert_eq!(bytes, [99u8; 128]);
+        assert_eq!(
+            wedpr_secp256k1_vrf_derive_public_key(&input(&secret), &mut output),
+            SUCCESS
+        );
+        assert_eq!(output.len, 33);
+        let public = bytes[..33].to_vec();
+        bytes.fill(99);
+        output.len = 128;
+        assert_eq!(
+            wedpr_secp256k1_vrf_prove_fast_utf8(
+                &input(&secret),
+                &input(&public),
+                &input(b"message"),
+                &mut output
+            ),
+            FAILURE
+        );
+        assert_eq!(
+            wedpr_secp256k1_vrf_verify_utf8(
+                &input(&public),
+                &input(b"message"),
+                &input(&proof)
+            ),
+            FAILURE
+        );
+        assert_eq!(bytes, [99u8; 128]);
+        output.len = 1;
+        assert_eq!(
+            wedpr_secp256k1_vrf_derive_public_key(&input(&secret), &mut output),
+            FAILURE
+        );
+        assert_eq!(output.len, 33);
+        assert_eq!(bytes, [99u8; 128]);
+    }
+}
+
 #[cfg(feature = "wedpr_f_hash_keccak256")]
 #[test]
 fn hash_rejects_invalid_descriptors_and_null_output() {

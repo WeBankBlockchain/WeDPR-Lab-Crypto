@@ -130,6 +130,8 @@ int8_t wedpr_secp256k1_vrf_derive_public_key(
     const CInputBuffer* raw_private_key, COutputBuffer* output_public_key);
 
 /// C interface for 'wedpr_secp256k1_vrf_prove_utf8'.
+// Legacy secp256k1 VRF proof operations are disabled and return -1. Never use
+// output buffers after failure. Key derivation/validation remain available.
 int8_t wedpr_secp256k1_vrf_prove_utf8(const CInputBuffer* raw_private_key,
     const CInputBuffer* raw_utf8_message, COutputBuffer* output_proof);
 
