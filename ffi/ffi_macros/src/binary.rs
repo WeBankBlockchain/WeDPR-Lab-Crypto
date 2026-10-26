@@ -20,22 +20,35 @@ macro_rules! java_safe_set_byte_array_field {
     };
 }
 
-/// Converts Rust String to Java ByteBuffer, and returns an error object if
-/// failed.
+/// Copies Rust bytes into a Java-owned heap ByteBuffer. Never wrap temporary
+/// Rust memory in a direct buffer: Java can retain it after Rust frees it.
 #[macro_export]
 macro_rules! java_safe_bytes_to_jbytebuffer {
-    ($_env:expr, $result_jobject:expr, $rust_bytes:expr) => {
-        JObject::from(match $_env.new_direct_byte_buffer($rust_bytes) {
-            Ok(v) => v,
+    ($_env:expr, $result_jobject:expr, $rust_bytes:expr) => {{
+        let array = java_safe_bytes_to_jbyte_array!(
+            $_env,
+            $result_jobject,
+            $rust_bytes
+        );
+        match $_env
+            .call_static_method(
+                "java/nio/ByteBuffer",
+                "wrap",
+                "([B)Ljava/nio/ByteBuffer;",
+                &[JValue::from(array)],
+            )
+            .and_then(|value| value.l())
+        {
+            Ok(buffer) => buffer,
             Err(_) => {
                 return java_set_error_field_and_extract_jobject(
                     &$_env,
                     &$result_jobject,
-                    &format!("java_safe_bytes_to_jbytebuffer failed",),
+                    "Java ByteBuffer allocation failed",
                 )
             },
-        })
-    };
+        }
+    }};
 }
 
 /// Converts Rust String to Java byte array, and returns an error object if

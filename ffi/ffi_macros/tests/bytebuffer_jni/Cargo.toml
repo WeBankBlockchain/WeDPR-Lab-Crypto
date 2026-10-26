@@ -1,0 +1,15 @@
+[package]
+name = "wedpr_jni_bytebuffer_test"
+version = "0.0.0"
+edition = "2018"
+publish = false
+
+[workspace]
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+jni = "0.13.0"
+wedpr_ffi_macros = { path = "../.." }
+wedpr_ffi_common = { path = "../../../ffi_common" }

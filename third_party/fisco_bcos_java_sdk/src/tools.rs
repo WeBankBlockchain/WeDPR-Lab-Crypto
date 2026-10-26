@@ -2,7 +2,9 @@
 
 //! FISCO BCOS Java Sdk specific functions.
 
-use curve25519_dalek::{ristretto, ristretto::RistrettoPoint, scalar::Scalar};
+use curve25519_dalek::{
+    ristretto, ristretto::RistrettoPoint, scalar::Scalar, traits::IsIdentity,
+};
 use wedpr_l_crypto_zkp_utils;
 use wedpr_l_utils::error::WedprError;
 
@@ -18,6 +20,7 @@ pub fn scalar_to_string(number: &Scalar) -> String {
 
 /// Converts String into Scalar.
 pub fn string_to_scalar(num: &str) -> Result<Scalar, WedprError> {
+    check_canonical_hex(num)?;
     let scalar_bytes = crate::string_to_bytes(num)?;
     wedpr_l_crypto_zkp_utils::bytes_to_scalar(&scalar_bytes)
 }
@@ -26,6 +29,22 @@ pub fn string_to_scalar(num: &str) -> Result<Scalar, WedprError> {
 pub fn string_to_point(
     point: &str,
 ) -> Result<ristretto::RistrettoPoint, WedprError> {
+    check_canonical_hex(point)?;
     let point_bytes = crate::string_to_bytes(point)?;
-    wedpr_l_crypto_zkp_utils::bytes_to_point(&point_bytes)
+    let point = wedpr_l_crypto_zkp_utils::bytes_to_point(&point_bytes)?;
+    if point.is_identity() {
+        return Err(WedprError::FormatError);
+    }
+    Ok(point)
+}
+
+fn check_canonical_hex(value: &str) -> Result<(), WedprError> {
+    if value.len() != 64
+        || !value
+            .bytes()
+            .all(|b| b.is_ascii_digit() || (b'a'..=b'f').contains(&b))
+    {
+        return Err(WedprError::FormatError);
+    }
+    Ok(())
 }

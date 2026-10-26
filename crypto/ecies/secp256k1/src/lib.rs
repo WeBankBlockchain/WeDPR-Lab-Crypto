@@ -50,6 +50,38 @@ mod tests {
     };
 
     #[test]
+    fn rejects_invalid_keys_truncation_and_ciphertext_tampering() {
+        let ecies = WedprSecp256k1Ecies::default();
+        let secret = SECP256K1_TEST_SECRET_KEY.to_vec();
+        let public = SECP256K1_TEST_PUBLIC_KEY.to_vec();
+        let message = b"authenticated ECIES boundary".to_vec();
+        let ciphertext = ecies.encrypt(&public, &message).unwrap();
+        assert_eq!(ecies.decrypt(&secret, &ciphertext).unwrap(), message);
+        for length in 0..ciphertext.len() {
+            assert!(ecies
+                .decrypt(&secret, &ciphertext[..length].to_vec())
+                .is_err());
+        }
+        for index in 0..ciphertext.len() {
+            let mut modified = ciphertext.clone();
+            modified[index] ^= 1;
+            assert!(ecies.decrypt(&secret, &modified).is_err());
+        }
+        for invalid in [
+            vec![],
+            vec![0u8; 31],
+            vec![0u8; 32],
+            vec![0xffu8; 32],
+            vec![1u8; 33],
+        ] {
+            assert!(ecies.decrypt(&invalid, &ciphertext).is_err());
+        }
+        for invalid in [vec![], vec![0u8; 33], vec![0u8; 65]] {
+            assert!(ecies.encrypt(&invalid, &message).is_err());
+        }
+    }
+
+    #[test]
     fn test_secp256k1_ecies() {
         let secp256k1_ecies = WedprSecp256k1Ecies::default();
 

@@ -2,9 +2,6 @@
 
 //! BaseX encoding and decoding functions.
 
-#[macro_use]
-extern crate wedpr_l_macros;
-
 use wedpr_l_utils::{error::WedprError, traits::Coder};
 
 /// Implements Base64 as a Coder instance.
@@ -20,7 +17,7 @@ impl Coder for WedprBase64 {
         match base64::decode(input) {
             Ok(v) => return Ok(v),
             Err(_) => {
-                wedpr_println!("Base64 decoding failed, input was: {}", input);
+                // Encoded inputs may contain private keys or plaintext.
                 return Err(WedprError::DecodeError);
             },
         };
@@ -30,6 +27,29 @@ impl Coder for WedprBase64 {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn decoder_errors_do_not_log_sensitive_input() {
+        const CANARY: &str = "SYNTHETIC_SECRET_CANARY!do-not-log";
+        const CHILD: &str = "WEDPR_BASE64_LOG_REGRESSION_CHILD";
+        if std::env::var_os(CHILD).is_some() {
+            assert!(WedprBase64::default().decode(CANARY).is_err());
+            return;
+        }
+        let output =
+            std::process::Command::new(std::env::current_exe().unwrap())
+                .args([
+                    "--exact",
+                    "tests::decoder_errors_do_not_log_sensitive_input",
+                    "--nocapture",
+                ])
+                .env(CHILD, "1")
+                .output()
+                .unwrap();
+        assert!(output.status.success());
+        assert!(!String::from_utf8_lossy(&output.stdout).contains(CANARY));
+        assert!(!String::from_utf8_lossy(&output.stderr).contains(CANARY));
+    }
 
     #[test]
     fn test_base64() {

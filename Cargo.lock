@@ -2324,8 +2324,8 @@ dependencies = [
  "lazy_static 1.5.0",
  "libc",
  "wedpr_ffi_macros",
- "wedpr_l_common_coder_base64 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_common_coder_hex 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_common_coder_base64",
+ "wedpr_l_common_coder_hex",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -2392,7 +2392,7 @@ dependencies = [
 
 [[package]]
 name = "wedpr_ffi_macros"
-version = "1.1.1"
+version = "1.2.0"
 
 [[package]]
 name = "wedpr_l_bulletproofs"
@@ -2415,18 +2415,7 @@ dependencies = [
 
 [[package]]
 name = "wedpr_l_common_coder_base64"
-version = "1.1.0"
-dependencies = [
- "base64 0.13.1",
- "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "wedpr_l_common_coder_base64"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3b88557e080d65c803ebc369709843957a391c0700e921eb3c4e722c5788b0e4"
+version = "1.2.0"
 dependencies = [
  "base64 0.13.1",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2435,18 +2424,7 @@ dependencies = [
 
 [[package]]
 name = "wedpr_l_common_coder_hex"
-version = "1.1.0"
-dependencies = [
- "hex",
- "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "wedpr_l_common_coder_hex"
-version = "1.1.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0edd6158ba8daf393211de8ae029b15a59875758edde7e4e3288983ef4360319"
+version = "1.2.0"
 dependencies = [
  "hex",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2806,12 +2784,12 @@ dependencies = [
 
 [[package]]
 name = "wedpr_third_party_fisco_bcos_java_sdk"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "curve25519-dalek 1.2.6",
  "rand 0.6.5",
  "sha3 0.8.2",
- "wedpr_l_common_coder_hex 1.1.0",
+ "wedpr_l_common_coder_hex",
  "wedpr_l_crypto_hash_keccak256 1.1.0",
  "wedpr_l_crypto_zkp_utils 1.3.1",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",

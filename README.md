@@ -106,10 +106,13 @@ KV OT 的安全模型仍是半诚实参与方，公开选择数量和填充后�
 - `wedpr_ffi_common` 升至 **2.0.0**：Rust 读缓冲区辅助函数返回借用切片与 `Result`，不再用 `Vec::from_raw_parts` 接管 C 内存；写入前检查容量和空指针，失败不写数据。C ABI 与缓冲区结构布局不变，二进制入口会传播失败状态。使用这些 Rust 辅助函数的外部项目需要更新调用方式。非空原生指针仍须由调用方保证其实际内存范围有效。
 - C 字符串接口拒绝空指针；JNI 在结果类缺失、字段不匹配或分配失败时保留 Java 异常并返回空对象，避免 Rust panic 跨越 JNI。已包含真实 JVM 的缺失类、缺失字段、正常加解密及篡改拒绝回归脚本。
 - C 缓冲区描述符先以原生指针检查空值与对齐，再转换为 Rust 类型；JNI 错误对象及 C 诊断日志不再回显私钥、明文等输入。宏依赖统一使用本仓库修复后的版本，避免链接回旧错误处理实现。
+- `wedpr_ffi_macros` **1.2.0** 的 ByteBuffer 转换宏复制到 Java 字节数组并返回 Java 持有的堆缓冲区，避免引用已经失效的 Rust 临时内存；不再返回 direct buffer。现有生产入口没有使用该宏，外部使用方不能依赖 `isDirect()` 为 true。
+- Base64/Hex coder **1.2.0** 的解码失败不再输出原始输入，FFI common 固定使用本仓库修复后的 coder，避免异常格式的私钥或明文被底层依赖写入日志。回归测试会捕获子进程的 stdout/stderr 检查合成敏感标记是否泄露。
 - Ed25519 使用严格验签，拒绝小阶公钥、单位元签名及非规范标量。SM2 要求私钥在 `[1, n-2]`，拒绝零、`n-1` 及越界私钥；`sign_fast` 还会核对公私钥匹配。
 - ZKP 标量解码要求规范编码，五种固定格式证明要求精确长度，拒绝截断及追加字节。正常生成的证明格式保持不变。
 - Ed25519 crate 升至 **1.2.0**，内部采用 `ed25519-dalek 2.2` / `curve25519-dalek 4.1.3`；32 字节私钥种子、公钥和 64 字节签名格式保持不变，继续使用严格验签。secp256k1 签名 crate 升至 **1.2.0**，验签及公钥恢复均拒绝高 S 等价变形，不自动规范化攻击者提交的签名。
 - Curve25519 VRF crate 升至 **1.2.0**，拒绝单位元公钥和 Gamma、非规范标量，`prove_fast` 必须提供匹配的公钥。正常密钥对应的输出保持不变；`proof_to_hash` 的结构检查不能替代 `verify(public_key, message)`，使用输出前必须验证证明。
+- FISCO Java SDK 的独立字符串 VRF 实现（third-party crate **0.2.0**）同样拒绝单位元及非规范标量，证明要求精确的 `64位小写hex|64位小写hex|64位小写hex` 格式，并在分配前限制总长度为 194 字节。正常输出保持不变；大写 hex 等历史宽松编码会被拒绝。
 - 仍依赖 dalek v1 的 ZKP、OT 与 Curve25519 VRF，通过根 `Cargo.toml` 的 `[patch.crates-io]` 使用 `third_party/curve25519-dalek-legacy`，回移 RUSTSEC-2024-0344 的标量减法优化屏障，保持原有编码。来源、校验值和两处源码差异见该目录 `PATCHES.txt`。**Cargo 的 patch 不会被下游工作区自动继承**：集成方必须在自己的工作区根保留同样的映射并指向这份补丁源码；仅更新版本号或发布仍指向上游 v1 的依赖不能获得此修复。该回移不代表完成全面侧信道审计。
 
 这些改动收紧了历史上会接受的无效输入。用于链上或其他共识验证时，应协调验证规则的激活及历史数据兼容策略，不能仅在部分节点替换动态库。
@@ -123,9 +126,9 @@ python3 ffi/ffi_java/ffi_java_crypto_binary/tests/check_jni_failures.py \
 
 ### 安装Rust环境
 
-安装nightly版本的Rust开发环境，可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。
+本仓库固定使用 `nightly-2025-04-11`（Rust 1.88 nightly），以满足新版 Ed25519 至少 Rust 1.81 的要求，同时兼容旧范围证明依赖的 feature 声明；原 `nightly-2024-02-25` 不再满足要求。安全回归还在 Rust 1.94.1 上测试，旧范围证明在 stable 下需要仅对 `wedpr_l_bulletproofs` 设置 `RUSTC_BOOTSTRAP`；这不能解决独立的旧 BN128 依赖构建问题。可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。
 ```bash
-rustup default nightly
+rustup toolchain install nightly-2025-04-11
 ```
 
 ### 下载WeDPR-Lab-Crypto源代码

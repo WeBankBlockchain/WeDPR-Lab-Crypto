@@ -29,15 +29,28 @@ impl vrf_proof {
     }
 
     pub fn decode(proof: &str) -> Result<vrf_proof, WedprError> {
+        // Bound allocation before splitting a caller-controlled string.
+        if proof.len() != 194 {
+            return Err(WedprError::FormatError);
+        }
         let proof_vec: Vec<&str> = proof.split("|").collect();
         if proof_vec.len() != 3 {
             return Err(WedprError::FormatError);
         }
-        Ok(vrf_proof {
+        let decoded = vrf_proof {
             gamma: proof_vec[0].to_string(),
             c: proof_vec[1].to_string(),
             s: proof_vec[2].to_string(),
-        })
+        };
+        decoded.validate_encoding()?;
+        Ok(decoded)
+    }
+
+    fn validate_encoding(&self) -> Result<(), WedprError> {
+        tools::string_to_point(&self.gamma)?;
+        tools::string_to_scalar(&self.c)?;
+        tools::string_to_scalar(&self.s)?;
+        Ok(())
     }
 }
 
@@ -120,6 +133,7 @@ pub fn curve25519_vrf_gen_pubkey(private_message: &str) -> String {
 pub fn curve25519_vrf_proof_to_hash(
     proof: &vrf_proof,
 ) -> Result<String, WedprError> {
+    proof.validate_encoding()?;
     let gamma = &proof.gamma;
     let gamma = tools::string_to_point(gamma)?;
     // order 8
@@ -140,6 +154,34 @@ pub fn curve25519_vrf_is_valid_pubkey(pubkey: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn rejects_identity_public_key_and_keyless_proof() {
+        let y = "00".repeat(32);
+        let gamma = y.clone();
+        let alpha = "SDK identity proof";
+        let s = Scalar::from(7u64);
+        let h_string = y.clone() + "|" + alpha;
+        let h =
+            RistrettoPoint::hash_from_bytes::<Sha3_512>(h_string.as_bytes());
+        let transcript = h_string
+            + "|"
+            + &y
+            + &gamma
+            + &tools::point_to_string(&(*BASEPOINT_G1 * s))
+            + &tools::point_to_string(&(h * s));
+        let forged = vrf_proof {
+            gamma,
+            c: tools::scalar_to_string(&Scalar::hash_from_bytes::<Sha3_512>(
+                transcript.as_bytes(),
+            )),
+            s: tools::scalar_to_string(&s),
+        };
+        assert!(!curve25519_vrf_verify(&y, alpha, &forged));
+        assert!(!curve25519_vrf_is_valid_pubkey(&y));
+        assert!(curve25519_vrf_proof_to_hash(&forged).is_err());
+        assert!(vrf_proof::decode(&forged.encode()).is_err());
+    }
     #[test]
     fn test_vrf() {
         //        let x_scalar = Scalar::random(&mut thread_rng());
@@ -153,8 +195,11 @@ mod tests {
         let hash_proof = curve25519_vrf_proof_to_hash(&proof).unwrap();
         let result = curve25519_vrf_verify(&y, alpha, &proof);
         let hash_verify = curve25519_vrf_proof_to_hash(&proof).unwrap();
-        println!("hash_proof = {}", hash_proof);
-        println!("hash_verify = {}", hash_verify);
+        assert_eq!(
+            hash_proof,
+            "4563c19bd4c25d3912b7b4df4b98003cbbfbb65a0ec43589d498baf0998cdb19"
+        );
+        assert_eq!(hash_proof, hash_verify);
 
         assert_eq!(result, true);
         let proof_err = curve25519_vrf_prove("error x", alpha).unwrap();
@@ -162,9 +207,34 @@ mod tests {
         assert_eq!(result_err, false);
 
         let encode = proof.encode();
-        println!("encode = {}", encode);
+        assert_eq!(vrf_proof::decode(&encode).unwrap(), proof);
         let result = curve25519_vrf_verify(&y, alpha, &proof);
-        println!("result = {}", result);
+        assert!(result);
+    }
+
+    #[test]
+    fn rejects_alternate_encodings_and_invalid_proof_shapes() {
+        let public = curve25519_vrf_gen_pubkey("regression key");
+        let proof = curve25519_vrf_prove("regression key", "message").unwrap();
+        let encoded = proof.encode();
+        for length in 0..encoded.len() {
+            assert!(vrf_proof::decode(&encoded[..length]).is_err());
+        }
+        assert!(vrf_proof::decode(&(encoded.clone() + "00")).is_err());
+        assert!(vrf_proof::decode(&"|".repeat(10000)).is_err());
+        assert!(vrf_proof::decode(&"é".repeat(97)).is_err());
+        let mut noncanonical = proof.clone();
+        noncanonical.s = "ff".repeat(32);
+        assert!(!curve25519_vrf_verify(&public, "message", &noncanonical));
+        assert!(curve25519_vrf_proof_to_hash(&noncanonical).is_err());
+        let mut uppercase = proof.clone();
+        uppercase.gamma = uppercase.gamma.to_uppercase();
+        assert!(vrf_proof::decode(&uppercase.encode()).is_err());
+        assert!(!curve25519_vrf_verify(
+            &public.to_uppercase(),
+            "message",
+            &proof
+        ));
     }
 }
 
