@@ -29,6 +29,9 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
     utf8_message_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key_str = java_safe_jstring_to_string!(
         _env,
@@ -51,11 +54,7 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "WedprCurve25519Vrf prove failed, private_key_str={}, \
-                         input_bytes={}",
-                        private_key_str, message_str
-                    ),
+                    "WedprCurve25519Vrf prove failed",
                 )
             },
         };
@@ -80,6 +79,9 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
     encoded_proof_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key_str = java_safe_jstring_to_string!(
         _env,
@@ -104,10 +106,7 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf decode failed, proof_str={}",
-                    &proof_str,
-                ),
+                "WedprCurve25519Vrf decode failed",
             )
         },
     };
@@ -132,6 +131,9 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
     encoded_private_key_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key_str = java_safe_jstring_to_string!(
         _env,
@@ -157,6 +159,9 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
     encoded_proof_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let proof_str = java_safe_jstring_to_string!(
         _env,
@@ -171,10 +176,7 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf decode failed, proof_str={}",
-                    &proof_str,
-                ),
+                "WedprCurve25519Vrf decode failed",
             )
         },
     };
@@ -185,10 +187,7 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf proof_to_bytes failed, proof_str={}",
-                    &proof_str,
-                ),
+                "WedprCurve25519Vrf proof_to_bytes failed",
             )
         },
     };
@@ -207,6 +206,9 @@ pub extern "system" fn Java_com_webank_fisco_bcos_wedpr_sdk_NativeInterface_curv
     encoded_public_key_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key_str = java_safe_jstring_to_string!(
         _env,

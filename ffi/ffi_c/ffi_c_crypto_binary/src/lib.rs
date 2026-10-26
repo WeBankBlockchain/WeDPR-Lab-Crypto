@@ -22,4 +22,7 @@ pub mod signature;
 pub mod vrf;
 pub mod vrf_secp256k1;
 
+#[cfg(test)]
+mod security_tests;
+
 // C/C++ FFI: C-style interfaces will be generated.

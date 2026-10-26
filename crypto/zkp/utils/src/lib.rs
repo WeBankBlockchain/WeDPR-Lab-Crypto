@@ -19,6 +19,9 @@ use sha3::Sha3_512;
 use std::convert::TryInto;
 use wedpr_l_utils::{error::WedprError, traits::Hash};
 
+#[cfg(test)]
+mod security_tests;
+
 lazy_static! {
     /// A base point used by various crypto algorithms.
     pub static ref BASEPOINT_G1: RistrettoPoint = RISTRETTO_BASEPOINT_POINT;
@@ -78,7 +81,7 @@ impl Serialize for BalanceProof {
 
 impl Deserialize for BalanceProof {
     fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
-        if bytes.len() < 8 * SCALAR_SIZE_IN_BYTE {
+        if bytes.len() != 8 * SCALAR_SIZE_IN_BYTE {
             return Err(WedprError::ArgumentError);
         }
         // decode check1
@@ -140,7 +143,8 @@ impl Serialize for KnowledgeProof {
 
 impl Deserialize for KnowledgeProof {
     fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
-        if bytes.len() < 2 * SCALAR_SIZE_IN_BYTE + RISTRETTO_POINT_SIZE_IN_BYTES
+        if bytes.len()
+            != 2 * SCALAR_SIZE_IN_BYTE + RISTRETTO_POINT_SIZE_IN_BYTES
         {
             return Err(WedprError::ArgumentError);
         }
@@ -187,7 +191,7 @@ impl Serialize for FormatProof {
 impl Deserialize for FormatProof {
     fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
         if bytes.len()
-            < 2 * SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES
+            != 2 * SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES
         {
             return Err(WedprError::ArgumentError);
         }
@@ -248,7 +252,7 @@ impl Serialize for ArithmeticProof {
 impl Deserialize for ArithmeticProof {
     fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
         if bytes.len()
-            < 5 * SCALAR_SIZE_IN_BYTE + 3 * RISTRETTO_POINT_SIZE_IN_BYTES
+            != 5 * SCALAR_SIZE_IN_BYTE + 3 * RISTRETTO_POINT_SIZE_IN_BYTES
         {
             return Err(WedprError::ArgumentError);
         }
@@ -316,7 +320,8 @@ impl Serialize for EqualityProof {
 
 impl Deserialize for EqualityProof {
     fn deserialize(bytes: &[u8]) -> Result<Self, WedprError> {
-        if bytes.len() < SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES
+        if bytes.len()
+            != SCALAR_SIZE_IN_BYTE + 2 * RISTRETTO_POINT_SIZE_IN_BYTES
         {
             return Err(WedprError::ArgumentError);
         }
@@ -379,8 +384,7 @@ fn to_bytes32_slice(barry: &[u8]) -> Result<&[u8; 32], WedprError> {
 /// Converts a vector to Scalar.
 pub fn bytes_to_scalar(input: &[u8]) -> Result<Scalar, WedprError> {
     let get_num_u8 = to_bytes32_slice(&input)?;
-    let scalar_num = Scalar::from_bits(*get_num_u8);
-    Ok(scalar_num)
+    Scalar::from_canonical_bytes(*get_num_u8).ok_or(WedprError::FormatError)
 }
 
 /// Converts RistrettoPoint to a bytes vector.

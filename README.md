@@ -93,6 +93,25 @@ KV OT 的安全模型仍是半诚实参与方，公开选择数量和填充后�
 
 # 安装
 
+## 原生接口与签名校验加固
+
+本轮补丁基于官方 `fisco/main` 的 `3beca5a`，保留已有的 ZKP 批验证、OT 与认证加密修复。
+
+- `wedpr_ffi_common` 升至 **2.0.0**：Rust 读缓冲区辅助函数返回借用切片与 `Result`，不再用 `Vec::from_raw_parts` 接管 C 内存；写入前检查容量和空指针，失败不写数据。C ABI 与缓冲区结构布局不变，二进制入口会传播失败状态。使用这些 Rust 辅助函数的外部项目需要更新调用方式。非空原生指针仍须由调用方保证其实际内存范围有效。
+- C 字符串接口拒绝空指针；JNI 在结果类缺失、字段不匹配或分配失败时保留 Java 异常并返回空对象，避免 Rust panic 跨越 JNI。已包含真实 JVM 的缺失类、缺失字段、正常加解密及篡改拒绝回归脚本。
+- C 缓冲区描述符先以原生指针检查空值与对齐，再转换为 Rust 类型；JNI 错误对象及 C 诊断日志不再回显私钥、明文等输入。宏依赖统一使用本仓库修复后的版本，避免链接回旧错误处理实现。
+- Ed25519 使用严格验签，拒绝小阶公钥、单位元签名及非规范标量。SM2 要求私钥在 `[1, n-2]`，拒绝零、`n-1` 及越界私钥；`sign_fast` 还会核对公私钥匹配。
+- ZKP 标量解码要求规范编码，五种固定格式证明要求精确长度，拒绝截断及追加字节。正常生成的证明格式保持不变。
+
+这些改动收紧了历史上会接受的无效输入。用于链上或其他共识验证时，应协调验证规则的激活及历史数据兼容策略，不能仅在部分节点替换动态库。
+
+JNI 回归测试示例（先构建相应平台的二进制 JNI 库）：
+
+```bash
+python3 ffi/ffi_java/ffi_java_crypto_binary/tests/check_jni_failures.py \
+  --library target/debug/libffi_java_crypto_binary.so --java-home "$JAVA_HOME"
+```
+
 ### 安装Rust环境
 
 安装nightly版本的Rust开发环境，可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。

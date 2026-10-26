@@ -137,7 +137,7 @@ macro_rules! java_safe_string_to_bytes {
                 return java_set_error_field_and_extract_jobject(
                     &$_env,
                     &$result_jobject,
-                    &format!("string to bytes failed, input={}", $rust_string),
+                    "string to bytes failed",
                 )
             },
         }

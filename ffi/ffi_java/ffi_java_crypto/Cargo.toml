@@ -29,9 +29,9 @@ crate-type = [ "cdylib", "staticlib" ]
 [dependencies]
 jni = "0.13.0"
 lazy_static = "1.4.0"
-wedpr_ffi_common_base64 = { package = "wedpr_ffi_common", version = "1.1.0", features = [ "wedpr_f_base64" ], default-features = false, optional = true }
-wedpr_ffi_common_hex = { package = "wedpr_ffi_common", version = "1.1.0", features = [ "wedpr_f_hex" ], default-features = false, optional = true }
-wedpr_ffi_macros = "1.1.0"
+wedpr_ffi_common_base64 = { package = "wedpr_ffi_common", version = "2.0.0", path = "../../ffi_common", features = [ "wedpr_f_base64" ], default-features = false, optional = true }
+wedpr_ffi_common_hex = { package = "wedpr_ffi_common", version = "2.0.0", path = "../../ffi_common", features = [ "wedpr_f_hex" ], default-features = false, optional = true }
+wedpr_ffi_macros = { version = "1.1.1", path = "../../ffi_macros" }
 wedpr_l_crypto_block_cipher_aes = { version = "2.0.0", path = "../../../crypto/block_cipher/aes", optional = true }
 wedpr_l_crypto_block_cipher_sm4 = { version = "2.0.0", path = "../../../crypto/block_cipher/sm4", optional = true }
 

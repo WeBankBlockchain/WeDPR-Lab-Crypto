@@ -66,14 +66,13 @@ pub fn java_new_jobject<'a>(
     _env: &'a JNIEnv,
     java_class_name: &'a str,
 ) -> JObject<'a> {
-    let java_class = _env
-        .find_class(java_class_name)
-        .expect(&format!("Could not find Java class {}", java_class_name));
-    let java_object = _env.alloc_object(java_class).expect(&format!(
-        "Could not allocate Java object Ffor class {}",
-        java_class_name
-    ));
-    java_object
+    let java_class = match _env.find_class(java_class_name) {
+        Ok(class) => class,
+        Err(_) => return JObject::null(),
+    };
+    // Preserve the Java exception on failure instead of unwinding across JNI.
+    _env.alloc_object(java_class)
+        .unwrap_or_else(|_| JObject::null())
 }
 
 /// Sets the default error message field and extracts actual java object to
@@ -83,19 +82,26 @@ pub fn java_set_error_field_and_extract_jobject(
     java_object: &JObject,
     error_message: &str,
 ) -> jobject {
-    let java_string;
-    // Error message should not be empty.
-    // assert!(!error_message.is_empty());
-    java_string = _env
-        .new_string(error_message)
-        .expect("new_string should not fail");
-    _env.set_field(
-        *java_object,
-        DEFAULT_ERROR_FIELD,
-        "Ljava/lang/String;",
-        JValue::from(JObject::from(java_string)),
-    )
-    .expect("set_field should not fail");
+    if java_object.into_inner().is_null()
+        || _env.exception_check().unwrap_or(true)
+    {
+        return std::ptr::null_mut();
+    }
+    let java_string = match _env.new_string(error_message) {
+        Ok(value) => value,
+        Err(_) => return std::ptr::null_mut(),
+    };
+    if _env
+        .set_field(
+            *java_object,
+            DEFAULT_ERROR_FIELD,
+            "Ljava/lang/String;",
+            JValue::from(JObject::from(java_string)),
+        )
+        .is_err()
+    {
+        return std::ptr::null_mut();
+    }
 
     // Extract actual java object.
     java_object.into_inner()
@@ -155,6 +161,7 @@ pub const FAILURE: i8 = -1;
 
 // Input buffer for C/C++ FFI.
 #[repr(C)]
+#[derive(Clone, Copy)]
 pub struct CInputBuffer {
     pub data: *const c_char,
     pub len: usize,
@@ -167,10 +174,46 @@ pub struct COutputBuffer {
     pub len: usize,
 }
 
+/// Copy a C input descriptor before borrowing its data.
+///
+/// # Safety
+/// A nonnull, aligned pointer must refer to a readable descriptor.
+pub unsafe fn c_copy_input_buffer(
+    input: *const CInputBuffer,
+) -> Result<CInputBuffer, WedprError> {
+    if input.is_null()
+        || (input as usize) % std::mem::align_of::<CInputBuffer>() != 0
+    {
+        return Err(WedprError::ArgumentError);
+    }
+    Ok(input.read())
+}
+
+/// Validate a C output descriptor before creating a Rust mutable reference.
+///
+/// # Safety
+/// A nonnull, aligned pointer must refer to an exclusively writable descriptor.
+pub unsafe fn c_borrow_output_buffer<'a>(
+    output: *mut COutputBuffer,
+) -> Result<&'a mut COutputBuffer, WedprError> {
+    if output.is_null()
+        || (output as usize) % std::mem::align_of::<COutputBuffer>() != 0
+    {
+        return Err(WedprError::ArgumentError);
+    }
+    Ok(&mut *output)
+}
+
 /// Converts C char pointer to Rust string.
-pub fn c_char_pointer_to_string(
+///
+/// # Safety
+/// A nonnull pointer must refer to a valid NUL-terminated string.
+pub unsafe fn c_char_pointer_to_string(
     c_char_pointer: *const c_char,
 ) -> Result<String, WedprError> {
+    if c_char_pointer.is_null() {
+        return Err(WedprError::ArgumentError);
+    }
     let cstr = unsafe { CStr::from_ptr(c_char_pointer) };
     match cstr.to_str() {
         Ok(v) => Ok(v.to_owned()),
@@ -179,52 +222,96 @@ pub fn c_char_pointer_to_string(
 }
 
 /// Converts C char pointer to Rust bytes.
-pub fn c_char_pointer_to_bytes(c_char_pointer: *const c_char) -> Vec<u8> {
+///
+/// # Safety
+/// A nonnull pointer must refer to a valid NUL-terminated byte string.
+pub unsafe fn c_char_pointer_to_bytes(
+    c_char_pointer: *const c_char,
+) -> Result<Vec<u8>, WedprError> {
+    if c_char_pointer.is_null() {
+        return Err(WedprError::ArgumentError);
+    }
     let cstr = unsafe { CStr::from_ptr(c_char_pointer) };
-    cstr.to_bytes().to_vec()
+    Ok(cstr.to_bytes().to_vec())
 }
 
-/// Reads C raw pointer to Rust bytes.
-pub unsafe fn c_read_raw_data_pointer(
+/// Borrow a C buffer without taking ownership or freeing caller memory.
+///
+/// # Safety
+/// A nonempty buffer must point to readable memory valid for the returned
+/// borrow. A null pointer is accepted only for an empty buffer.
+pub unsafe fn c_read_raw_data_pointer<'a>(
     c_input_data: *const c_char,
     c_input_len: usize,
-) -> Vec<u8> {
-    Vec::from_raw_parts(c_input_data as *mut u8, c_input_len, c_input_len)
+) -> Result<&'a [u8], WedprError> {
+    if c_input_len == 0 {
+        return Ok(&[]);
+    }
+    if c_input_data.is_null() || c_input_len > isize::MAX as usize {
+        return Err(WedprError::ArgumentError);
+    }
+    Ok(std::slice::from_raw_parts(
+        c_input_data as *const u8,
+        c_input_len,
+    ))
 }
 
-pub unsafe fn c_read_raw_pointer(c_input_buffer: &CInputBuffer) -> Vec<u8> {
-    Vec::from_raw_parts(
-        c_input_buffer.data as *mut u8,
-        c_input_buffer.len,
-        c_input_buffer.len,
-    )
+/// Borrow a caller-owned C input buffer.
+///
+/// # Safety
+/// The declared memory must remain valid and readable for the borrow.
+pub unsafe fn c_read_raw_pointer(
+    c_input_buffer: &CInputBuffer,
+) -> Result<&[u8], WedprError> {
+    c_read_raw_data_pointer(c_input_buffer.data, c_input_buffer.len)
 }
 
-/// Writes C raw pointer buffer from Rust bytes.
+/// Copy bytes only after checking pointer, length and capacity. Failure writes
+/// nothing, and is reported to the caller rather than panicking across FFI.
+///
+/// # Safety
+/// Nonempty output must point to writable memory with the declared capacity;
+/// source and destination must not overlap.
 pub unsafe fn c_write_data_to_pointer<T: ?Sized + AsRef<[u8]>>(
     rust_bytes: &T,
     c_output_buffer: *mut c_char,
     c_output_len: usize,
-) -> usize {
-    let data_slice = std::slice::from_raw_parts_mut(
+) -> Result<usize, WedprError> {
+    let bytes = rust_bytes.as_ref();
+    if c_output_len > isize::MAX as usize || bytes.len() > c_output_len {
+        return Err(WedprError::ArgumentError);
+    }
+    if bytes.is_empty() {
+        return Ok(0);
+    }
+    if c_output_buffer.is_null() {
+        return Err(WedprError::ArgumentError);
+    }
+    std::ptr::copy_nonoverlapping(
+        bytes.as_ptr(),
         c_output_buffer as *mut u8,
-        c_output_len,
+        bytes.len(),
     );
-    data_slice[0..rust_bytes.as_ref().len()]
-        .copy_from_slice(&rust_bytes.as_ref());
-    // TODO: Find a better way other than std::mem::forget.
-    std::mem::forget(data_slice);
-    return rust_bytes.as_ref().len();
+    Ok(bytes.len())
 }
 
-/// Writes C raw pointer from Rust bytes.
+/// Write an output buffer. On failure, len reports the required capacity and
+/// caller memory remains unchanged.
+///
+/// # Safety
+/// The same pointer and non-overlap requirements as c_write_data_to_pointer.
 pub unsafe fn c_write_raw_pointer<T: ?Sized + AsRef<[u8]>>(
     rust_bytes: &T,
     c_output_buffer: &mut COutputBuffer,
-) {
-    c_output_buffer.len = c_write_data_to_pointer(
+) -> Result<(), WedprError> {
+    let result = c_write_data_to_pointer(
         rust_bytes,
         c_output_buffer.data,
         c_output_buffer.len,
     );
+    c_output_buffer.len = rust_bytes.as_ref().len();
+    result.map(|_| ())
 }
+
+#[cfg(test)]
+mod security_tests;

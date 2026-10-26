@@ -23,10 +23,28 @@ use wedpr_l_crypto_zkp_discrete_logarithm_proof::{
 #[no_mangle]
 /// C interface for 'wedpr_aggregate_ristretto_point'.
 pub unsafe extern "C" fn wedpr_aggregate_ristretto_point(
-    point_sum_data: &CInputBuffer,
-    point_share_data: &CInputBuffer,
-    result_data: &mut COutputBuffer,
+    point_sum_data: *const CInputBuffer,
+    point_share_data: *const CInputBuffer,
+    result_data: *mut COutputBuffer,
 ) -> i8 {
+    let point_sum_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(point_sum_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let point_sum_data = &point_sum_data;
+    let point_share_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(point_share_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let point_share_data = &point_share_data;
+    let result_data =
+        match wedpr_ffi_common::utils::c_borrow_output_buffer(result_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+
     // point_sum
     let point_sum_result = c_input_buffer_to_point(&point_sum_data);
     let point_sum = match point_sum_result {
@@ -46,11 +64,15 @@ pub unsafe extern "C" fn wedpr_aggregate_ristretto_point(
         Err(_) => return FAILURE,
     };
     // write the point_sum
-    c_write_data_to_pointer(
+    if c_write_data_to_pointer(
         &point_to_slice(&sum),
         result_data.data,
         result_data.len,
-    );
+    )
+    .is_err()
+    {
+        return FAILURE;
+    }
     SUCCESS
 }
 
@@ -59,13 +81,52 @@ pub unsafe extern "C" fn wedpr_aggregate_ristretto_point(
 pub unsafe extern "C" fn wedpr_generate_prove_either_equality_relationship_proof(
     c1_value: u64,
     c2_value: u64,
-    c1_blinding: &CInputBuffer,
-    c2_blinding: &CInputBuffer,
-    c3_blinding: &CInputBuffer,
-    c_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
-    c_balance_proof: &mut COutputBuffer,
+    c1_blinding: *const CInputBuffer,
+    c2_blinding: *const CInputBuffer,
+    c3_blinding: *const CInputBuffer,
+    c_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
+    c_balance_proof: *mut COutputBuffer,
 ) -> i8 {
+    let c1_blinding =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_blinding) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_blinding = &c1_blinding;
+    let c2_blinding =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_blinding) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_blinding = &c2_blinding;
+    let c3_blinding =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c3_blinding) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c3_blinding = &c3_blinding;
+    let c_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_basepoint_data = &c_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+    let c_balance_proof = match wedpr_ffi_common::utils::c_borrow_output_buffer(
+        c_balance_proof,
+    ) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+
     // c1_blinding
     let c1_blinding_result = c_input_buffer_to_scalar(&c1_blinding);
     let c1_blinding_value = match c1_blinding_result {
@@ -108,20 +169,60 @@ pub unsafe extern "C" fn wedpr_generate_prove_either_equality_relationship_proof
         &blinding_basepoint,
     );
     // write balance proof back to c_balance_proof
-    write_balance_proof(&proof, c_balance_proof);
+    if write_balance_proof(&proof, c_balance_proof).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_verify_either_equality_relationship_proof'.
 pub unsafe extern "C" fn wedpr_verify_either_equality_relationship_proof(
-    c1_point_data: &CInputBuffer,
-    c2_point_data: &CInputBuffer,
-    c3_point_data: &CInputBuffer,
-    proof: &CInputBuffer,
-    c_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
+    c1_point_data: *const CInputBuffer,
+    c2_point_data: *const CInputBuffer,
+    c3_point_data: *const CInputBuffer,
+    proof: *const CInputBuffer,
+    c_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
 ) -> i8 {
+    let c1_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_point_data = &c1_point_data;
+    let c2_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_point_data = &c2_point_data;
+    let c3_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c3_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c3_point_data = &c3_point_data;
+    let proof = match wedpr_ffi_common::utils::c_copy_input_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let proof = &proof;
+    let c_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_basepoint_data = &c_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+
     // c1_point
     let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
@@ -181,11 +282,38 @@ pub unsafe extern "C" fn wedpr_verify_either_equality_relationship_proof(
 /// C interface for 'wedpr_generate_prove_knowledge_proof'.
 pub unsafe extern "C" fn wedpr_generate_prove_knowledge_proof(
     c_value: u64,
-    c_blinding_data: &CInputBuffer,
-    c_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
-    generated_proof: &mut COutputBuffer,
+    c_blinding_data: *const CInputBuffer,
+    c_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
+    generated_proof: *mut COutputBuffer,
 ) -> i8 {
+    let c_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_blinding_data = &c_blinding_data;
+    let c_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_basepoint_data = &c_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+    let generated_proof = match wedpr_ffi_common::utils::c_borrow_output_buffer(
+        generated_proof,
+    ) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+
     // c_blinding
     let c_blinding_result = c_input_buffer_to_scalar(c_blinding_data);
     let c_blinding_value = match c_blinding_result {
@@ -213,18 +341,46 @@ pub unsafe extern "C" fn wedpr_generate_prove_knowledge_proof(
         &blinding_basepoint,
     );
     // write the KnowledgeProof
-    write_knowledger_proof(&proof, generated_proof);
+    if write_knowledger_proof(&proof, generated_proof).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_verify_knowledge_proof'.
 pub unsafe extern "C" fn wedpr_verify_knowledge_proof(
-    c_point_data: &CInputBuffer,
-    proof: &CInputBuffer,
-    c_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
+    c_point_data: *const CInputBuffer,
+    proof: *const CInputBuffer,
+    c_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
 ) -> i8 {
+    let c_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_point_data = &c_point_data;
+    let proof = match wedpr_ffi_common::utils::c_copy_input_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let proof = &proof;
+    let c_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_basepoint_data = &c_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+
     // c_point
     let c_point_result = c_input_buffer_to_point(c_point_data);
     let c_point = match c_point_result {
@@ -271,12 +427,46 @@ pub unsafe extern "C" fn wedpr_verify_knowledge_proof(
 /// C interface for 'wedpr_generate_prove_format_proof'.
 pub unsafe extern "C" fn wedpr_generate_prove_format_proof(
     c1_value: u64,
-    c_blinding_data: &CInputBuffer,
-    c1_basepoint_data: &CInputBuffer,
-    c2_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
-    generated_format_proof: &mut COutputBuffer,
+    c_blinding_data: *const CInputBuffer,
+    c1_basepoint_data: *const CInputBuffer,
+    c2_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
+    generated_format_proof: *mut COutputBuffer,
 ) -> i8 {
+    let c_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c_blinding_data = &c_blinding_data;
+    let c1_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_basepoint_data = &c1_basepoint_data;
+    let c2_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_basepoint_data = &c2_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+    let generated_format_proof =
+        match wedpr_ffi_common::utils::c_borrow_output_buffer(
+            generated_format_proof,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+
     // c_blinding
     let c_blinding_data_result = c_input_buffer_to_scalar(c_blinding_data);
     let c_blinding_value = match c_blinding_data_result {
@@ -309,20 +499,60 @@ pub unsafe extern "C" fn wedpr_generate_prove_format_proof(
         &c2_basepoint,
         &blinding_basepoint,
     );
-    write_format_proof(&proof, generated_format_proof);
+    if write_format_proof(&proof, generated_format_proof).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_verify_format_proof'.
 pub unsafe extern "C" fn wedpr_verify_format_proof(
-    c1_point_data: &CInputBuffer,
-    c2_point_data: &CInputBuffer,
-    proof: &CInputBuffer,
-    c1_basepoint_data: &CInputBuffer,
-    c2_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
+    c1_point_data: *const CInputBuffer,
+    c2_point_data: *const CInputBuffer,
+    proof: *const CInputBuffer,
+    c1_basepoint_data: *const CInputBuffer,
+    c2_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
 ) -> i8 {
+    let c1_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_point_data = &c1_point_data;
+    let c2_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_point_data = &c2_point_data;
+    let proof = match wedpr_ffi_common::utils::c_copy_input_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let proof = &proof;
+    let c1_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_basepoint_data = &c1_basepoint_data;
+    let c2_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_basepoint_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_basepoint_data = &c2_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+
     // c1_point
     let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
@@ -385,13 +615,51 @@ pub unsafe extern "C" fn wedpr_verify_format_proof(
 pub unsafe extern "C" fn wedpr_generate_prove_sum_relationship(
     c1_value: u64,
     c2_value: u64,
-    c1_blinding_data: &CInputBuffer,
-    c2_blinding_data: &CInputBuffer,
-    c3_blinding_data: &CInputBuffer,
-    value_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
-    proof: &mut COutputBuffer,
+    c1_blinding_data: *const CInputBuffer,
+    c2_blinding_data: *const CInputBuffer,
+    c3_blinding_data: *const CInputBuffer,
+    value_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
+    proof: *mut COutputBuffer,
 ) -> i8 {
+    let c1_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_blinding_data = &c1_blinding_data;
+    let c2_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_blinding_data = &c2_blinding_data;
+    let c3_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c3_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c3_blinding_data = &c3_blinding_data;
+    let value_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(value_basepoint_data)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let value_basepoint_data = &value_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+    let proof = match wedpr_ffi_common::utils::c_borrow_output_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+
     // c1_blinding
     let c1_blinding_result = c_input_buffer_to_scalar(c1_blinding_data);
     let c1_blinding = match c1_blinding_result {
@@ -432,20 +700,61 @@ pub unsafe extern "C" fn wedpr_generate_prove_sum_relationship(
         &value_basepoint,
         &blinding_basepoint,
     );
-    write_arithmetic_proof(&arithmetic_proof, proof);
+    if write_arithmetic_proof(&arithmetic_proof, proof).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_verify_sum_relationship'.
 pub unsafe extern "C" fn wedpr_verify_sum_relationship(
-    c1_point_data: &CInputBuffer,
-    c2_point_data: &CInputBuffer,
-    c3_point_data: &CInputBuffer,
-    proof: &CInputBuffer,
-    value_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
+    c1_point_data: *const CInputBuffer,
+    c2_point_data: *const CInputBuffer,
+    c3_point_data: *const CInputBuffer,
+    proof: *const CInputBuffer,
+    value_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
 ) -> i8 {
+    let c1_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_point_data = &c1_point_data;
+    let c2_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_point_data = &c2_point_data;
+    let c3_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c3_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c3_point_data = &c3_point_data;
+    let proof = match wedpr_ffi_common::utils::c_copy_input_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let proof = &proof;
+    let value_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(value_basepoint_data)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let value_basepoint_data = &value_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+
     // c1_point
     let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
@@ -506,13 +815,53 @@ pub unsafe extern "C" fn wedpr_verify_sum_relationship(
 pub unsafe extern "C" fn wedpr_generate_prove_product_relationship(
     c1_value: u64,
     c2_value: u64,
-    c1_blinding_data: &CInputBuffer,
-    c2_blinding_data: &CInputBuffer,
-    c3_blinding_data: &CInputBuffer,
-    value_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
-    generated_proof: &mut COutputBuffer,
+    c1_blinding_data: *const CInputBuffer,
+    c2_blinding_data: *const CInputBuffer,
+    c3_blinding_data: *const CInputBuffer,
+    value_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
+    generated_proof: *mut COutputBuffer,
 ) -> i8 {
+    let c1_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_blinding_data = &c1_blinding_data;
+    let c2_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_blinding_data = &c2_blinding_data;
+    let c3_blinding_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c3_blinding_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c3_blinding_data = &c3_blinding_data;
+    let value_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(value_basepoint_data)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let value_basepoint_data = &value_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+    let generated_proof = match wedpr_ffi_common::utils::c_borrow_output_buffer(
+        generated_proof,
+    ) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+
     // c1_blinding
     let c1_blinding_result = c_input_buffer_to_scalar(c1_blinding_data);
     let c1_blinding = match c1_blinding_result {
@@ -555,20 +904,61 @@ pub unsafe extern "C" fn wedpr_generate_prove_product_relationship(
         &value_basepoint,
         &blinding_basepoint,
     );
-    write_arithmetic_proof(&proof, generated_proof);
+    if write_arithmetic_proof(&proof, generated_proof).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_verify_product_relationship'.
 pub unsafe extern "C" fn wedpr_verify_product_relationship(
-    c1_point_data: &CInputBuffer,
-    c2_point_data: &CInputBuffer,
-    c3_point_data: &CInputBuffer,
-    proof: &CInputBuffer,
-    value_basepoint_data: &CInputBuffer,
-    blinding_basepoint_data: &CInputBuffer,
+    c1_point_data: *const CInputBuffer,
+    c2_point_data: *const CInputBuffer,
+    c3_point_data: *const CInputBuffer,
+    proof: *const CInputBuffer,
+    value_basepoint_data: *const CInputBuffer,
+    blinding_basepoint_data: *const CInputBuffer,
 ) -> i8 {
+    let c1_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_point_data = &c1_point_data;
+    let c2_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_point_data = &c2_point_data;
+    let c3_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c3_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c3_point_data = &c3_point_data;
+    let proof = match wedpr_ffi_common::utils::c_copy_input_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let proof = &proof;
+    let value_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(value_basepoint_data)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let value_basepoint_data = &value_basepoint_data;
+    let blinding_basepoint_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(
+            blinding_basepoint_data,
+        ) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let blinding_basepoint_data = &blinding_basepoint_data;
+
     // c1_point
     let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {
@@ -627,11 +1017,36 @@ pub unsafe extern "C" fn wedpr_verify_product_relationship(
 #[no_mangle]
 /// C interface for 'wedpr_generate_prove_equality_relationship_proof'.
 pub unsafe extern "C" fn wedpr_generate_prove_equality_relationship_proof(
-    c1_value_data: &CInputBuffer,
-    basepoint1_data: &CInputBuffer,
-    basepoint2_data: &CInputBuffer,
-    generated_proof: &mut COutputBuffer,
+    c1_value_data: *const CInputBuffer,
+    basepoint1_data: *const CInputBuffer,
+    basepoint2_data: *const CInputBuffer,
+    generated_proof: *mut COutputBuffer,
 ) -> i8 {
+    let c1_value_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_value_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_value_data = &c1_value_data;
+    let basepoint1_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(basepoint1_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let basepoint1_data = &basepoint1_data;
+    let basepoint2_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(basepoint2_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let basepoint2_data = &basepoint2_data;
+    let generated_proof = match wedpr_ffi_common::utils::c_borrow_output_buffer(
+        generated_proof,
+    ) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+
     // c1_value
     let c1_value_result = c_input_buffer_to_scalar(c1_value_data);
     let c1_value = match c1_value_result {
@@ -652,19 +1067,51 @@ pub unsafe extern "C" fn wedpr_generate_prove_equality_relationship_proof(
     };
     let equality_proof =
         prove_equality_relationship_proof(&c1_value, &basepoint1, &basepoint2);
-    write_equality_proof(&equality_proof, generated_proof);
+    if write_equality_proof(&equality_proof, generated_proof).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
 #[no_mangle]
 /// C interface for 'wedpr_verify_equality_relationship_proof'.
 pub unsafe extern "C" fn wedpr_verify_equality_relationship_proof(
-    c1_point_data: &CInputBuffer,
-    c2_point_data: &CInputBuffer,
-    proof: &CInputBuffer,
-    basepoint1_data: &CInputBuffer,
-    basepoint2_data: &CInputBuffer,
+    c1_point_data: *const CInputBuffer,
+    c2_point_data: *const CInputBuffer,
+    proof: *const CInputBuffer,
+    basepoint1_data: *const CInputBuffer,
+    basepoint2_data: *const CInputBuffer,
 ) -> i8 {
+    let c1_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c1_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c1_point_data = &c1_point_data;
+    let c2_point_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(c2_point_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let c2_point_data = &c2_point_data;
+    let proof = match wedpr_ffi_common::utils::c_copy_input_buffer(proof) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let proof = &proof;
+    let basepoint1_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(basepoint1_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let basepoint1_data = &basepoint1_data;
+    let basepoint2_data =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(basepoint2_data) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let basepoint2_data = &basepoint2_data;
+
     // c1_point
     let c1_point_result = c_input_buffer_to_point(c1_point_data);
     let c1_point = match c1_point_result {

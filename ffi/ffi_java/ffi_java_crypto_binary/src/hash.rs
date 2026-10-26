@@ -56,6 +56,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_keccak256Has
     message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
 
@@ -77,6 +80,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm3Hash(
     message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
@@ -99,6 +105,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ripemd160Has
     message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
@@ -121,6 +130,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sha3Hash(
     message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
@@ -143,6 +155,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_blake2bHash(
     message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);

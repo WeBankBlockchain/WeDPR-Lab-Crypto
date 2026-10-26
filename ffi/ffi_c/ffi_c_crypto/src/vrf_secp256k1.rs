@@ -28,7 +28,7 @@ use wedpr_l_utils::{tool::string_to_bytes_utf8, traits::Vrf};
 
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_vrf_derive_public_key'.
-pub extern "C" fn wedpr_secp256k1_vrf_derive_public_key(
+pub unsafe extern "C" fn wedpr_secp256k1_vrf_derive_public_key(
     encoded_private_key: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
@@ -42,7 +42,7 @@ pub extern "C" fn wedpr_secp256k1_vrf_derive_public_key(
 
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_vrf_prove_utf8'.
-pub extern "C" fn wedpr_secp256k1_vrf_prove_utf8(
+pub unsafe extern "C" fn wedpr_secp256k1_vrf_prove_utf8(
     encoded_private_key: *const c_char,
     utf8_message: *const c_char,
 ) -> *mut c_char {
@@ -63,7 +63,7 @@ pub extern "C" fn wedpr_secp256k1_vrf_prove_utf8(
 
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_vrf_prove_fast_utf8'.
-pub extern "C" fn wedpr_secp256k1_vrf_prove_fast_utf8(
+pub unsafe extern "C" fn wedpr_secp256k1_vrf_prove_fast_utf8(
     encoded_private_key: *const c_char,
     encoded_public_key: *const c_char,
     utf8_message: *const c_char,
@@ -90,7 +90,7 @@ pub extern "C" fn wedpr_secp256k1_vrf_prove_fast_utf8(
 
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_vrf_verify_utf8'.
-pub extern "C" fn wedpr_secp256k1_vrf_verify_utf8(
+pub unsafe extern "C" fn wedpr_secp256k1_vrf_verify_utf8(
     encoded_public_key: *const c_char,
     utf8_message: *const c_char,
     encoded_proof: *const c_char,
@@ -125,7 +125,7 @@ pub extern "C" fn wedpr_secp256k1_vrf_verify_utf8(
 
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_vrf_proof_to_hash'.
-pub extern "C" fn wedpr_secp256k1_vrf_proof_to_hash(
+pub unsafe extern "C" fn wedpr_secp256k1_vrf_proof_to_hash(
     encoded_proof: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
@@ -150,7 +150,7 @@ pub extern "C" fn wedpr_secp256k1_vrf_proof_to_hash(
 
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_vrf_is_valid_public_key'.
-pub extern "C" fn wedpr_secp256k1_vrf_is_valid_public_key(
+pub unsafe extern "C" fn wedpr_secp256k1_vrf_is_valid_public_key(
     encoded_public_key: *const c_char,
 ) -> i8 {
     let result = panic::catch_unwind(|| {

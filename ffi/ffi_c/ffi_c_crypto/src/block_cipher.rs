@@ -10,6 +10,21 @@
 
 use wedpr_l_utils::traits::BlockCipher;
 
+#[cfg(all(test, feature = "wedpr_f_crypto_block_cipher_aes"))]
+mod security_tests {
+    #[test]
+    fn null_c_strings_are_rejected_at_the_exported_boundary() {
+        assert!(unsafe {
+            super::wedpr_aes256_encrypt(
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+                std::ptr::null_mut(),
+            )
+        }
+        .is_null());
+    }
+}
+
 #[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 use crate::config::BLOCK_CIPHER_AES256;
 
@@ -34,7 +49,7 @@ use wedpr_ffi_common_hex::utils::{
 #[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 #[no_mangle]
 /// C interface for 'wedpr_aes256_encrypt'.
-pub extern "C" fn wedpr_aes256_encrypt(
+pub unsafe extern "C" fn wedpr_aes256_encrypt(
     encoded_plaintext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
@@ -44,19 +59,14 @@ pub extern "C" fn wedpr_aes256_encrypt(
         let key = c_safe_c_char_pointer_to_bytes!(encoded_key);
         let iv = c_safe_c_char_pointer_to_bytes!(encoded_iv);
 
-        let ciphertext = match BLOCK_CIPHER_AES256
-            .encrypt(&plaintext, &key, &iv)
-        {
-            Ok(v) => v,
-            Err(_) => {
-                wedpr_println!(
-                    "AES encrypt failed, encoded_plaintext={}, public_key={}",
-                    bytes_to_string(&plaintext),
-                    bytes_to_string(&key)
-                );
-                return ptr::null_mut();
-            },
-        };
+        let ciphertext =
+            match BLOCK_CIPHER_AES256.encrypt(&plaintext, &key, &iv) {
+                Ok(v) => v,
+                Err(_) => {
+                    wedpr_println!("AES encrypt failed");
+                    return ptr::null_mut();
+                },
+            };
         c_safe_bytes_to_c_char_pointer!(&ciphertext)
     });
     c_safe_return!(result)
@@ -65,7 +75,7 @@ pub extern "C" fn wedpr_aes256_encrypt(
 #[cfg(feature = "wedpr_f_crypto_block_cipher_aes")]
 #[no_mangle]
 /// C interface for 'wedpr_aes256_decrypt'.
-pub extern "C" fn wedpr_aes256_decrypt(
+pub unsafe extern "C" fn wedpr_aes256_decrypt(
     encoded_ciphertext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
@@ -79,10 +89,7 @@ pub extern "C" fn wedpr_aes256_decrypt(
             match BLOCK_CIPHER_AES256.decrypt(&ciphertext, &key, &iv) {
                 Ok(v) => v,
                 Err(_) => {
-                    wedpr_println!(
-                        "AES decrypt failed, ciphertext={}",
-                        bytes_to_string(&ciphertext)
-                    );
+                    wedpr_println!("AES decrypt failed");
                     return ptr::null_mut();
                 },
             };
@@ -96,7 +103,7 @@ pub extern "C" fn wedpr_aes256_decrypt(
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
 #[no_mangle]
 /// C interface for 'wedpr_sm4_encrypt'.
-pub extern "C" fn wedpr_sm4_encrypt(
+pub unsafe extern "C" fn wedpr_sm4_encrypt(
     encoded_plaintext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
@@ -109,11 +116,7 @@ pub extern "C" fn wedpr_sm4_encrypt(
         let ciphertext = match BLOCK_CIPHER_SM4.encrypt(&plaintext, &key, &iv) {
             Ok(v) => v,
             Err(_) => {
-                wedpr_println!(
-                    "AES encrypt failed, encoded_plaintext={}, public_key={}",
-                    bytes_to_string(&plaintext),
-                    bytes_to_string(&key)
-                );
+                wedpr_println!("AES encrypt failed");
                 return ptr::null_mut();
             },
         };
@@ -125,7 +128,7 @@ pub extern "C" fn wedpr_sm4_encrypt(
 #[cfg(feature = "wedpr_f_crypto_block_cipher_sm4")]
 #[no_mangle]
 /// C interface for 'wedpr_sm4_decrypt'.
-pub extern "C" fn wedpr_sm4_decrypt(
+pub unsafe extern "C" fn wedpr_sm4_decrypt(
     encoded_ciphertext: *mut c_char,
     encoded_key: *mut c_char,
     encoded_iv: *mut c_char,
@@ -139,10 +142,7 @@ pub extern "C" fn wedpr_sm4_decrypt(
             match BLOCK_CIPHER_SM4.decrypt(&ciphertext, &key, &iv) {
                 Ok(v) => v,
                 Err(_) => {
-                    wedpr_println!(
-                        "SM4 decrypt failed, ciphertext={}",
-                        bytes_to_string(&ciphertext)
-                    );
+                    wedpr_println!("SM4 decrypt failed");
                     return ptr::null_mut();
                 },
             };

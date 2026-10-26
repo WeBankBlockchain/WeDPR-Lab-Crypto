@@ -45,6 +45,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Encryp
     iv_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
@@ -63,10 +66,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Encryp
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "AES encrypt failed, message_bytes={:?}",
-                    &message_bytes
-                ),
+                "AES encrypt failed",
             )
         },
     };
@@ -92,6 +92,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Decryp
     iv_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let encrypted_data = java_safe_jbytes_to_bytes!(
         _env,
@@ -108,10 +111,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_aes256Decryp
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "AES decrypt failed, ciphertext={:?}",
-                        &encrypted_data
-                    ),
+                    "AES decrypt failed",
                 )
             },
         };
@@ -139,6 +139,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Encrypt(
     iv_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let message_bytes =
         java_safe_jbytes_to_bytes!(_env, result_jobject, message_jbyte_array);
@@ -154,10 +157,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Encrypt(
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "sm4 encrypt failed, message_bytes={:?}",
-                        &message_bytes
-                    ),
+                    "sm4 encrypt failed",
                 )
             },
         };
@@ -183,6 +183,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Decrypt(
     iv_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let encrypted_data = java_safe_jbytes_to_bytes!(
         _env,
@@ -199,10 +202,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm4Decrypt(
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "AES decrypt failed, ciphertext={:?}",
-                        &encrypted_data
-                    ),
+                    "AES decrypt failed",
                 )
             },
         };

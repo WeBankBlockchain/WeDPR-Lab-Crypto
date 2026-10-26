@@ -51,6 +51,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Gen
     _class: JClass,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
 
@@ -79,6 +82,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Der
     private_key_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -89,10 +95,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Der
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "secp256k1 derive_public_key failed, private_key={}",
-                    bytes_to_string(&private_key)
-                ),
+                "secp256k1 derive_public_key failed",
             )
         },
     };
@@ -124,6 +127,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sig
     msg_hash_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -136,10 +142,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Sig
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "secp256k1 sign failed, msg_hash={}",
-                    bytes_to_string(&msg_hash)
-                ),
+                "secp256k1 sign failed",
             )
         },
     };
@@ -165,6 +168,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Ver
     signature_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, public_key_jstring);
@@ -190,6 +196,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
     signature_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let msg_hash =
         java_safe_jstring_to_bytes!(_env, result_jobject, msg_hash_jstring);
@@ -203,10 +212,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Rec
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "secp256k1 recover failed, msg_hash={}",
-                        bytes_to_string(&msg_hash)
-                    ),
+                    "secp256k1 recover failed",
                 )
             },
         };
@@ -231,6 +237,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2GenKeyPai
     _class: JClass,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let (pk, sk) = SIGNATURE_SM2.generate_keypair();
 
@@ -259,6 +268,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2DerivePub
     private_key_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -269,10 +281,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2DerivePub
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "sm2 derive_public_key failed, private_key={}",
-                    bytes_to_string(&private_key)
-                ),
+                "sm2 derive_public_key failed",
             )
         },
     };
@@ -303,6 +312,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
     msg_hash_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -315,10 +327,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Sign(
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "sm2 sign failed, msg_hash={}",
-                    bytes_to_string(&msg_hash)
-                ),
+                "sm2 sign failed",
             )
         },
     };
@@ -344,6 +353,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignFast(
     msg_hash_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -359,10 +371,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2SignFast(
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "sm2 sign failed, msg_hash={}",
-                        bytes_to_string(&msg_hash)
-                    ),
+                    "sm2 sign failed",
                 )
             },
         };
@@ -388,6 +397,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2Verify(
     signature_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, public_key_jstring);
@@ -413,6 +425,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_sm2ComputeHa
     msg_hash_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, public_key_jstring);
@@ -453,6 +468,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519GenKe
     _class: JClass,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
 
@@ -481,6 +499,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Deriv
     private_key_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -491,10 +512,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Deriv
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "sm2 derive_public_key failed, private_key={}",
-                    bytes_to_string(&private_key)
-                ),
+                "sm2 derive_public_key failed",
             )
         },
     };
@@ -525,6 +543,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Sign(
     msg_hash_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -537,10 +558,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Sign(
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "sm2 sign failed, msg_hash={}",
-                    bytes_to_string(&msg_hash)
-                ),
+                "sm2 sign failed",
             )
         },
     };
@@ -566,6 +584,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_ed25519Verif
     signature_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, public_key_jstring);

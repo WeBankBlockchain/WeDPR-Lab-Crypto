@@ -37,6 +37,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
         _env,
@@ -53,11 +56,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "WedprCurve25519Vrf prove failed, \
-                         private_key_bytes={:?}, input_bytes={:?}",
-                        &private_key_bytes, &message_bytes
-                    ),
+                    "WedprCurve25519Vrf prove failed",
                 )
             },
         };
@@ -83,6 +82,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     utf8_message_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
         _env,
@@ -110,11 +112,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf prove failed, private_key_bytes={:?}, \
-                     input_bytes={:?}",
-                    &private_key_bytes, &message_bytes
-                ),
+                "WedprCurve25519Vrf prove failed",
             )
         },
     };
@@ -140,6 +138,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_proof_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key_bytes = java_safe_jbytes_to_bytes!(
         _env,
@@ -162,10 +163,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf decode failed, proof_bytes={:?}",
-                    &proof_bytes,
-                ),
+                "WedprCurve25519Vrf decode failed",
             )
         },
     };
@@ -186,6 +184,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_private_key_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key_bytes = java_safe_jbytes_to_bytes!(
         _env,
@@ -214,6 +215,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_proof_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let proof_bytes = java_safe_jbytes_to_bytes!(
         _env,
@@ -226,10 +230,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf decode failed, proof_bytes={:?}",
-                    &proof_bytes,
-                ),
+                "WedprCurve25519Vrf decode failed",
             )
         },
     };
@@ -240,11 +241,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
             return java_set_error_field_and_extract_jobject(
                 &_env,
                 &result_jobject,
-                &format!(
-                    "WedprCurve25519Vrf proof_to_bytes failed, \
-                     proof_bytes={:?}",
-                    &proof_bytes,
-                ),
+                "WedprCurve25519Vrf proof_to_bytes failed",
             )
         },
     };
@@ -263,6 +260,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_curve25519Vr
     encoded_public_key_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key_bytes = java_safe_jbytes_to_bytes!(
         _env,

@@ -54,28 +54,26 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     message_hash_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, public_key_jstring);
     let encoded_message =
         java_safe_jstring_to_bytes!(_env, result_jobject, message_hash_jstring);
 
-    let encrypted_data = match ECIES_SECP256K1
-        .encrypt(&public_key, &encoded_message)
-    {
-        Ok(v) => v,
-        Err(_) => {
-            return java_set_error_field_and_extract_jobject(
-                &_env,
-                &result_jobject,
-                &format!(
-                    "ECIES encrypt failed, encoded_message={}, public_key={}",
-                    bytes_to_string(&encoded_message),
-                    bytes_to_string(&public_key)
-                ),
-            )
-        },
-    };
+    let encrypted_data =
+        match ECIES_SECP256K1.encrypt(&public_key, &encoded_message) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    "ECIES encrypt failed",
+                )
+            },
+        };
 
     java_safe_set_string_field!(
         _env,
@@ -97,6 +95,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     ciphertext_jstring: JString,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key =
         java_safe_jstring_to_bytes!(_env, result_jobject, private_key_jstring);
@@ -110,10 +111,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "ECIES decrypt failed, ciphertext={}",
-                        bytes_to_string(&ciphertext)
-                    ),
+                    "ECIES decrypt failed",
                 )
             },
         };

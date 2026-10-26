@@ -40,6 +40,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     message_hash_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let public_key = java_safe_jbytes_to_bytes!(
         _env,
@@ -59,11 +62,7 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
                 return java_set_error_field_and_extract_jobject(
                     &_env,
                     &result_jobject,
-                    &format!(
-                        "ECIES encrypt failed, encoded_message={:?}, \
-                         public_key={:?}",
-                        &encoded_message, &public_key
-                    ),
+                    "ECIES encrypt failed",
                 )
             },
         };
@@ -88,6 +87,9 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
     ciphertext_jbyte_array: jbyteArray,
 ) -> jobject {
     let result_jobject = get_result_jobject(&_env);
+    if result_jobject.into_inner().is_null() {
+        return std::ptr::null_mut();
+    }
 
     let private_key = java_safe_jbytes_to_bytes!(
         _env,
@@ -100,18 +102,17 @@ pub extern "system" fn Java_com_webank_wedpr_crypto_NativeInterface_secp256k1Eci
         ciphertext_jbyte_array
     );
 
-    let decrypted_data = match ECIES_SECP256K1
-        .decrypt(&private_key, &ciphertext)
-    {
-        Ok(v) => v,
-        Err(_) => {
-            return java_set_error_field_and_extract_jobject(
-                &_env,
-                &result_jobject,
-                &format!("ECIES decrypt failed, ciphertext={:?}", &ciphertext),
-            )
-        },
-    };
+    let decrypted_data =
+        match ECIES_SECP256K1.decrypt(&private_key, &ciphertext) {
+            Ok(v) => v,
+            Err(_) => {
+                return java_set_error_field_and_extract_jobject(
+                    &_env,
+                    &result_jobject,
+                    "ECIES decrypt failed",
+                )
+            },
+        };
 
     java_safe_set_byte_array_field!(
         _env,

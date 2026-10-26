@@ -4,7 +4,7 @@
 
 use ed25519_dalek::{
     ed25519::signature::Signature as ed25519_signature_try, Keypair, PublicKey,
-    SecretKey, Signature as ed25519_signature, Signer, Verifier,
+    SecretKey, Signature as ed25519_signature, Signer,
 };
 use rand::rngs::OsRng;
 use wedpr_l_utils::{error::WedprError, traits::Signature};
@@ -50,7 +50,7 @@ impl Signature for WedprEd25519 {
                 Err(_) => return false,
             };
         return match public_key_parser
-            .verify(msg_hash.as_ref(), &signature_parser)
+            .verify_strict(msg_hash.as_ref(), &signature_parser)
         {
             Ok(_) => true,
             Err(_) => false,
@@ -88,6 +88,39 @@ impl WedprEd25519 {
 mod tests {
     use super::*;
     use wedpr_l_utils::constant::tests::BASE64_ENCODED_TEST_MESSAGE;
+
+    #[test]
+    fn rejects_identity_public_key_and_universal_identity_signature() {
+        let ed25519 = WedprEd25519::default();
+        let mut identity = vec![0u8; 32];
+        identity[0] = 1;
+        let mut forged_signature = vec![0u8; 64];
+        forged_signature[..32].copy_from_slice(&identity);
+        for message in &[b"first message".to_vec(), b"second message".to_vec()]
+        {
+            assert!(!ed25519.verify(&identity, message, &forged_signature));
+        }
+    }
+
+    #[test]
+    fn rejects_noncanonical_scalars_and_malformed_encodings() {
+        let ed25519 = WedprEd25519::default();
+        let (public, secret) = ed25519.generate_keypair();
+        let message = b"signature validation".to_vec();
+        let signature = ed25519.sign(&secret, &message).unwrap();
+        assert!(ed25519.verify(&public, &message, &signature));
+        let mut malformed = signature.clone();
+        malformed[32..].fill(0xff);
+        assert!(!ed25519.verify(&public, &message, &malformed));
+        for length in 0..64 {
+            assert!(!ed25519.verify(
+                &public,
+                &message,
+                &signature[..length].to_vec()
+            ));
+        }
+        assert!(!ed25519.verify(&vec![0u8; 31], &message, &signature));
+    }
 
     #[test]
     fn test_ed25519() {

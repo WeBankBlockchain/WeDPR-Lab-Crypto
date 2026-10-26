@@ -1,0 +1,56 @@
+name: Security regressions
+
+on: [push, pull_request]
+
+permissions:
+  contents: read
+
+jobs:
+  crypto-and-native-interfaces:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      RUSTUP_TOOLCHAIN: "1.94.1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: "1.94.1"
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: ZKP utility encoding regressions
+        run: cargo test --locked --manifest-path crypto/zkp/utils/Cargo.toml --lib
+      - name: Cryptographic and buffer regressions
+        run: >-
+          cargo test --locked --lib
+          -p wedpr_l_crypto_signature_ed25519
+          -p wedpr_l_crypto_signature_sm2
+          -p wedpr_l_crypto_zkp_discrete_logarithm_proof
+          -p wedpr_ffi_common -p wedpr_ffi_c_zkp
+          -p wedpr_l_crypto_block_cipher_aes
+          -p wedpr_l_crypto_block_cipher_sm4
+          -p wedpr_l_crypto_ot_base_ot
+      - name: Binary C boundaries
+        run: >-
+          cargo test --locked --lib -p ffi_c_crypto_binary --no-default-features
+          --features wedpr_f_signature_secp256k1,wedpr_f_signature_sm2,wedpr_f_signature_ed25519,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4,wedpr_f_hash_keccak256
+      - name: Text C boundaries
+        run: >-
+          cargo test --locked --lib -p wedpr_ffi_c_crypto --no-default-features
+          --features wedpr_f_base64,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
+      - name: Text JNI cipher dependencies
+        run: >-
+          cargo test --locked --lib -p wedpr_ffi_java_crypto --no-default-features
+          --features wedpr_f_base64,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
+      - name: Build binary JNI library
+        run: >-
+          cargo build --locked -p wedpr_ffi_java_crypto_binary --no-default-features
+          --features wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
+      - name: Real JVM failure paths
+        run: >-
+          python3 ffi/ffi_java/ffi_java_crypto_binary/tests/check_jni_failures.py
+          --library target/debug/libffi_java_crypto_binary.so --java-home "$JAVA_HOME"

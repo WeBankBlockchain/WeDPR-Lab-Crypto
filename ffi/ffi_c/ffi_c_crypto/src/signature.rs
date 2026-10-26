@@ -43,7 +43,7 @@ use wedpr_ffi_common_hex::utils::{
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_gen_key_pair'.
-pub extern "C" fn wedpr_secp256k1_gen_key_pair() -> *mut c_char {
+pub unsafe extern "C" fn wedpr_secp256k1_gen_key_pair() -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let (pk, sk) = SIGNATURE_SECP256K1.generate_keypair();
         let mut keypair = common::Keypair::new();
@@ -62,7 +62,7 @@ pub extern "C" fn wedpr_secp256k1_gen_key_pair() -> *mut c_char {
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_derive_public_key'.
-pub extern "C" fn wedpr_secp256k1_derive_public_key(
+pub unsafe extern "C" fn wedpr_secp256k1_derive_public_key(
     encoded_private_key: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
@@ -89,7 +89,7 @@ pub extern "C" fn wedpr_secp256k1_derive_public_key(
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_sign'.
-pub extern "C" fn wedpr_secp256k1_sign(
+pub unsafe extern "C" fn wedpr_secp256k1_sign(
     encoded_private_key: *const c_char,
     encoded_message_hash: *const c_char,
 ) -> *mut c_char {
@@ -113,7 +113,7 @@ pub extern "C" fn wedpr_secp256k1_sign(
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_verify'.
-pub extern "C" fn wedpr_secp256k1_verify(
+pub unsafe extern "C" fn wedpr_secp256k1_verify(
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
@@ -144,7 +144,7 @@ pub extern "C" fn wedpr_secp256k1_verify(
 #[cfg(feature = "wedpr_f_signature_secp256k1")]
 #[no_mangle]
 /// C interface for 'wedpr_secp256k1_recover_public_key'.
-pub extern "C" fn wedpr_secp256k1_recover_public_key(
+pub unsafe extern "C" fn wedpr_secp256k1_recover_public_key(
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
 ) -> *mut c_char {
@@ -169,7 +169,7 @@ pub extern "C" fn wedpr_secp256k1_recover_public_key(
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_gen_key_pair'.
-pub extern "C" fn wedpr_sm2_gen_key_pair() -> *mut c_char {
+pub unsafe extern "C" fn wedpr_sm2_gen_key_pair() -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let (pk, sk) = SIGNATURE_SM2.generate_keypair();
         let mut keypair = common::Keypair::new();
@@ -188,7 +188,7 @@ pub extern "C" fn wedpr_sm2_gen_key_pair() -> *mut c_char {
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_derive_public_key'.
-pub extern "C" fn wedpr_sm2_derive_public_key(
+pub unsafe extern "C" fn wedpr_sm2_derive_public_key(
     encoded_private_key: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
@@ -215,7 +215,7 @@ pub extern "C" fn wedpr_sm2_derive_public_key(
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_sign'.
-pub extern "C" fn wedpr_sm2_sign(
+pub unsafe extern "C" fn wedpr_sm2_sign(
     encoded_private_key: *const c_char,
     encoded_message_hash: *const c_char,
 ) -> *mut c_char {
@@ -238,7 +238,7 @@ pub extern "C" fn wedpr_sm2_sign(
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_sign_fast'.
-pub extern "C" fn wedpr_sm2_sign_fast(
+pub unsafe extern "C" fn wedpr_sm2_sign_fast(
     encoded_private_key: *const c_char,
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
@@ -267,7 +267,7 @@ pub extern "C" fn wedpr_sm2_sign_fast(
 #[cfg(feature = "wedpr_f_signature_sm2")]
 #[no_mangle]
 /// C interface for 'wedpr_sm2_verify'.
-pub extern "C" fn wedpr_sm2_verify(
+pub unsafe extern "C" fn wedpr_sm2_verify(
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,
@@ -299,7 +299,7 @@ pub extern "C" fn wedpr_sm2_verify(
 #[cfg(feature = "wedpr_f_signature_ed25519")]
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_gen_key_pair'.
-pub extern "C" fn wedpr_ed25519_gen_key_pair() -> *mut c_char {
+pub unsafe extern "C" fn wedpr_ed25519_gen_key_pair() -> *mut c_char {
     let result = panic::catch_unwind(|| {
         let (pk, sk) = SIGNATURE_ED25519.generate_keypair();
         let mut keypair = common::Keypair::new();
@@ -318,7 +318,7 @@ pub extern "C" fn wedpr_ed25519_gen_key_pair() -> *mut c_char {
 #[cfg(feature = "wedpr_f_signature_ed25519")]
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_derive_public_key'.
-pub extern "C" fn wedpr_ed25519_derive_public_key(
+pub unsafe extern "C" fn wedpr_ed25519_derive_public_key(
     encoded_private_key: *const c_char,
 ) -> *mut c_char {
     let result = panic::catch_unwind(|| {
@@ -345,7 +345,7 @@ pub extern "C" fn wedpr_ed25519_derive_public_key(
 #[cfg(feature = "wedpr_f_signature_ed25519")]
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_sign'.
-pub extern "C" fn wedpr_ed25519_sign(
+pub unsafe extern "C" fn wedpr_ed25519_sign(
     encoded_private_key: *const c_char,
     encoded_message_hash: *const c_char,
 ) -> *mut c_char {
@@ -369,7 +369,7 @@ pub extern "C" fn wedpr_ed25519_sign(
 #[cfg(feature = "wedpr_f_signature_ed25519")]
 #[no_mangle]
 /// C interface for 'wedpr_ed25519_verify'.
-pub extern "C" fn wedpr_ed25519_verify(
+pub unsafe extern "C" fn wedpr_ed25519_verify(
     encoded_public_key: *const c_char,
     encoded_message_hash: *const c_char,
     encoded_signature: *const c_char,

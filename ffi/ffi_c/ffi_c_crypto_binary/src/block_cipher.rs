@@ -67,7 +67,9 @@ unsafe fn transform<C: BlockCipher>(
         output.len = bytes.len();
         return FAILURE;
     }
-    c_write_raw_pointer(&bytes, output);
+    if c_write_raw_pointer(&bytes, output).is_err() {
+        return FAILURE;
+    }
     SUCCESS
 }
 
@@ -77,11 +79,34 @@ unsafe fn transform<C: BlockCipher>(
 #[no_mangle]
 /// C interface for 'wedpr_aes256_encrypt'.
 pub unsafe extern "C" fn wedpr_aes256_encrypt(
-    raw_plaintext: &CInputBuffer,
-    raw_key: &CInputBuffer,
-    raw_iv: &CInputBuffer,
-    output_ciphertext: &mut COutputBuffer,
+    raw_plaintext: *const CInputBuffer,
+    raw_key: *const CInputBuffer,
+    raw_iv: *const CInputBuffer,
+    output_ciphertext: *mut COutputBuffer,
 ) -> i8 {
+    let raw_plaintext =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(raw_plaintext) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let raw_plaintext = &raw_plaintext;
+    let raw_key = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_key) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_key = &raw_key;
+    let raw_iv = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_iv) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_iv = &raw_iv;
+    let output_ciphertext =
+        match wedpr_ffi_common::utils::c_borrow_output_buffer(output_ciphertext)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+
     transform(
         &*BLOCK_CIPHER_AES256,
         raw_plaintext,
@@ -96,11 +121,34 @@ pub unsafe extern "C" fn wedpr_aes256_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_aes256_decrypt'.
 pub unsafe extern "C" fn wedpr_aes256_decrypt(
-    raw_ciphertext: &CInputBuffer,
-    raw_key: &CInputBuffer,
-    raw_iv: &CInputBuffer,
-    output_plaintext: &mut COutputBuffer,
+    raw_ciphertext: *const CInputBuffer,
+    raw_key: *const CInputBuffer,
+    raw_iv: *const CInputBuffer,
+    output_plaintext: *mut COutputBuffer,
 ) -> i8 {
+    let raw_ciphertext =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(raw_ciphertext) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let raw_ciphertext = &raw_ciphertext;
+    let raw_key = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_key) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_key = &raw_key;
+    let raw_iv = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_iv) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_iv = &raw_iv;
+    let output_plaintext =
+        match wedpr_ffi_common::utils::c_borrow_output_buffer(output_plaintext)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+
     transform(
         &*BLOCK_CIPHER_AES256,
         raw_ciphertext,
@@ -117,11 +165,34 @@ pub unsafe extern "C" fn wedpr_aes256_decrypt(
 #[no_mangle]
 /// C interface for 'wedpr_sm4_encrypt'.
 pub unsafe extern "C" fn wedpr_sm4_encrypt(
-    raw_plaintext: &CInputBuffer,
-    raw_key: &CInputBuffer,
-    raw_iv: &CInputBuffer,
-    output_ciphertext: &mut COutputBuffer,
+    raw_plaintext: *const CInputBuffer,
+    raw_key: *const CInputBuffer,
+    raw_iv: *const CInputBuffer,
+    output_ciphertext: *mut COutputBuffer,
 ) -> i8 {
+    let raw_plaintext =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(raw_plaintext) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let raw_plaintext = &raw_plaintext;
+    let raw_key = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_key) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_key = &raw_key;
+    let raw_iv = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_iv) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_iv = &raw_iv;
+    let output_ciphertext =
+        match wedpr_ffi_common::utils::c_borrow_output_buffer(output_ciphertext)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+
     transform(
         &*BLOCK_CIPHER_SM4,
         raw_plaintext,
@@ -136,11 +207,34 @@ pub unsafe extern "C" fn wedpr_sm4_encrypt(
 #[no_mangle]
 /// C interface for 'wedpr_sm4_decrypt'.
 pub unsafe extern "C" fn wedpr_sm4_decrypt(
-    raw_ciphertext: &CInputBuffer,
-    raw_key: &CInputBuffer,
-    raw_iv: &CInputBuffer,
-    output_plaintext: &mut COutputBuffer,
+    raw_ciphertext: *const CInputBuffer,
+    raw_key: *const CInputBuffer,
+    raw_iv: *const CInputBuffer,
+    output_plaintext: *mut COutputBuffer,
 ) -> i8 {
+    let raw_ciphertext =
+        match wedpr_ffi_common::utils::c_copy_input_buffer(raw_ciphertext) {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+    let raw_ciphertext = &raw_ciphertext;
+    let raw_key = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_key) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_key = &raw_key;
+    let raw_iv = match wedpr_ffi_common::utils::c_copy_input_buffer(raw_iv) {
+        Ok(buffer) => buffer,
+        Err(_) => return FAILURE,
+    };
+    let raw_iv = &raw_iv;
+    let output_plaintext =
+        match wedpr_ffi_common::utils::c_borrow_output_buffer(output_plaintext)
+        {
+            Ok(buffer) => buffer,
+            Err(_) => return FAILURE,
+        };
+
     transform(
         &*BLOCK_CIPHER_SM4,
         raw_ciphertext,
@@ -159,10 +253,10 @@ pub unsafe extern "C" fn wedpr_sm4_decrypt(
 mod security_tests {
     use super::*;
     type Operation = unsafe extern "C" fn(
-        &CInputBuffer,
-        &CInputBuffer,
-        &CInputBuffer,
-        &mut COutputBuffer,
+        *const CInputBuffer,
+        *const CInputBuffer,
+        *const CInputBuffer,
+        *mut COutputBuffer,
     ) -> i8;
 
     fn input(bytes: &[u8]) -> CInputBuffer {
