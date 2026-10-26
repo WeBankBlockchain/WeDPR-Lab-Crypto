@@ -14,6 +14,9 @@ use wedpr_l_crypto_zkp_utils::{
 
 use wedpr_l_utils::error::WedprError;
 
+#[cfg(test)]
+mod security_tests;
+
 pub fn aggregate_ristretto_point(
     point_sum: &RistrettoPoint,
     point_share: &RistrettoPoint,
@@ -274,7 +277,7 @@ pub fn verify_knowledge_proof_in_batch(
     c_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
 ) -> Result<bool, WedprError> {
-    if c_point_list.len() != proof_list.len() {
+    if c_point_list.is_empty() || c_point_list.len() != proof_list.len() {
         return Err(WedprError::FormatError);
     }
     let mut t1_sum_expected: RistrettoPoint = Default::default();
@@ -283,9 +286,8 @@ pub fn verify_knowledge_proof_in_batch(
     let mut m2_expected: Scalar = Scalar::zero();
 
     for i in 0..c_point_list.len() {
-        // 8 bit random scalar
-        let random_scalar = get_random_u8();
-        let blinding_factor = Scalar::from(random_scalar);
+        // Full-field, nonzero coefficients retain cryptographic soundness.
+        let blinding_factor = nonzero_batch_coefficient(get_random_scalar);
         let c_point = c_point_list[i];
 
         let mut hash_vec = Vec::new();
@@ -299,7 +301,7 @@ pub fn verify_knowledge_proof_in_batch(
         m1_expected += blinding_factor * proof_list[i].m1;
         m2_expected += blinding_factor * proof_list[i].m2;
         t1_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t1);
+            blinding_factor * proof_list[i].t1;
         c1_c_expected += c_factor * c_point;
     }
     let t1_compute_sum_final = m1_expected * c_basepoint
@@ -409,7 +411,8 @@ pub fn verify_format_proof_in_batch(
     c2_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
 ) -> Result<bool, WedprError> {
-    if c1_point_list.len() != c1_point_list.len()
+    if c1_point_list.is_empty()
+        || c1_point_list.len() != c2_point_list.len()
         || c1_point_list.len() != proof_list.len()
     {
         return Err(WedprError::FormatError);
@@ -422,9 +425,8 @@ pub fn verify_format_proof_in_batch(
     let mut m2_expected: Scalar = Scalar::zero();
 
     for i in 0..c1_point_list.len() {
-        // 8 bit random scalar
-        let random_scalar = get_random_u8();
-        let blinding_factor = Scalar::from(random_scalar);
+        // Full-field, nonzero coefficients retain cryptographic soundness.
+        let blinding_factor = nonzero_batch_coefficient(get_random_scalar);
         let c1_point = c1_point_list[i];
         let c2_point = c2_point_list[i];
 
@@ -442,9 +444,9 @@ pub fn verify_format_proof_in_batch(
         m1_expected += blinding_factor * proof_list[i].m1;
         m2_expected += blinding_factor * proof_list[i].m2;
         t1_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t1);
+            blinding_factor * proof_list[i].t1;
         t2_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t2);
+            blinding_factor * proof_list[i].t2;
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
     }
@@ -594,9 +596,10 @@ pub fn verify_sum_relationship_in_batch(
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
 ) -> Result<bool, WedprError> {
-    if c1_point_list.len() != c2_point_list.len()
-        && c1_point_list.len() != c3_point_list.len()
-        && c1_point_list.len() != proof_list.len()
+    if c1_point_list.is_empty()
+        || c1_point_list.len() != c2_point_list.len()
+        || c1_point_list.len() != c3_point_list.len()
+        || c1_point_list.len() != proof_list.len()
     {
         return Ok(false);
     };
@@ -612,9 +615,8 @@ pub fn verify_sum_relationship_in_batch(
     let mut m4_expected: Scalar = Scalar::zero();
     let mut m5_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
-        // 8 bit random scalar
-        let random_scalar = get_random_u8();
-        let blinding_factor = Scalar::from(random_scalar);
+        // Full-field, nonzero coefficients retain cryptographic soundness.
+        let blinding_factor = nonzero_batch_coefficient(get_random_scalar);
         let c1_point = c1_point_list[i];
         let c2_point = c2_point_list[i];
         let c3_point = c3_point_list[i];
@@ -634,11 +636,11 @@ pub fn verify_sum_relationship_in_batch(
         m4_expected += blinding_factor * proof_list[i].m4;
         m5_expected += blinding_factor * proof_list[i].m5;
         t1_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t1);
+            blinding_factor * proof_list[i].t1;
         t2_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t2);
+            blinding_factor * proof_list[i].t2;
         t3_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t3);
+            blinding_factor * proof_list[i].t3;
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
         c3_c_expected += c_factor * c3_point;
@@ -817,9 +819,10 @@ pub fn verify_product_relationship_in_batch(
     value_basepoint: &RistrettoPoint,
     blinding_basepoint: &RistrettoPoint,
 ) -> Result<bool, WedprError> {
-    if c1_point_list.len() != c2_point_list.len()
-        && c1_point_list.len() != c3_point_list.len()
-        && c1_point_list.len() != proof_list.len()
+    if c1_point_list.is_empty()
+        || c1_point_list.len() != c2_point_list.len()
+        || c1_point_list.len() != c3_point_list.len()
+        || c1_point_list.len() != proof_list.len()
     {
         return Ok(false);
     };
@@ -839,9 +842,8 @@ pub fn verify_product_relationship_in_batch(
     let mut m4_expected: Scalar = Scalar::zero();
     let mut m5_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
-        // 8 bit random scalar
-        let random_scalar = get_random_u8();
-        let blinding_factor = Scalar::from(random_scalar);
+        // Full-field, nonzero coefficients retain cryptographic soundness.
+        let blinding_factor = nonzero_batch_coefficient(get_random_scalar);
         let c1_point = c1_point_list[i];
         let c2_point = c2_point_list[i];
         let c3_point = c3_point_list[i];
@@ -862,11 +864,11 @@ pub fn verify_product_relationship_in_batch(
         m4_expected += blinding_factor * proof_list[i].m4;
         m5_expected += blinding_factor * proof_list[i].m5;
         t1_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t1);
+            blinding_factor * proof_list[i].t1;
         t2_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t2);
+            blinding_factor * proof_list[i].t2;
         t3_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t3);
+            blinding_factor * proof_list[i].t3;
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
         c3_c_expected += c_factor * c3_point;
@@ -979,8 +981,9 @@ pub fn verify_equality_relationship_proof_in_batch(
     basepoint1: &RistrettoPoint,
     basepoint2: &RistrettoPoint,
 ) -> Result<bool, WedprError> {
-    if c1_point_list.len() != c2_point_list.len()
-        && c1_point_list.len() != proof_list.len()
+    if c1_point_list.is_empty()
+        || c1_point_list.len() != c2_point_list.len()
+        || c1_point_list.len() != proof_list.len()
     {
         return Ok(false);
     };
@@ -990,9 +993,8 @@ pub fn verify_equality_relationship_proof_in_batch(
     let mut c2_c_expected: RistrettoPoint = Default::default();
     let mut m1_expected: Scalar = Scalar::zero();
     for i in 0..c1_point_list.len() {
-        // 8 bit random scalar
-        let random_scalar = get_random_u8();
-        let blinding_factor = Scalar::from(random_scalar);
+        // Full-field, nonzero coefficients retain cryptographic soundness.
+        let blinding_factor = nonzero_batch_coefficient(get_random_scalar);
         let c1_point = c1_point_list[i];
         let c2_point = c2_point_list[i];
         let mut hash_vec = Vec::new();
@@ -1008,9 +1010,9 @@ pub fn verify_equality_relationship_proof_in_batch(
         c1_c_expected += c_factor * c1_point;
         c2_c_expected += c_factor * c2_point;
         t1_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t1);
+            blinding_factor * proof_list[i].t1;
         t2_sum_expected +=
-            small_scalar_point_mul(random_scalar, proof_list[i].t2);
+            blinding_factor * proof_list[i].t2;
     }
     let t1_compute_sum_final = m1_expected * basepoint1 + c1_c_expected;
     let t2_compute_sum_final = m1_expected * basepoint2 + c2_c_expected;
@@ -1022,6 +1024,17 @@ pub fn verify_equality_relationship_proof_in_batch(
     Ok(false)
 }
 
+// Sampling is internal: callers cannot choose or reuse batch coefficients.
+fn nonzero_batch_coefficient(mut sample: impl FnMut() -> Scalar) -> Scalar {
+    loop {
+        let coefficient = sample();
+        if coefficient != Scalar::zero() {
+            return coefficient;
+        }
+    }
+}
+
+#[cfg(test)]
 fn small_scalar_point_mul(scalar: u8, point: RistrettoPoint) -> RistrettoPoint {
     let mut rbyte = scalar;
     let mut base_point = point;

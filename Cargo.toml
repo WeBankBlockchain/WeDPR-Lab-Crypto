@@ -5,6 +5,7 @@ members = [
     "common/macros",
     "common/utils",
     "crypto/block_cipher/aes",
+    "crypto/block_cipher/authenticated_cbc",
     "crypto/block_cipher/sm4",
     "crypto/ecies/secp256k1",
     "crypto/hash/blake2b",

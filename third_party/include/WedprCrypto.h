@@ -4,6 +4,14 @@
 
 extern "C" {
 
+// AES/SM4 crate v2: encrypt/decrypt use a versioned CBC-HMAC-SHA256
+// encrypt-then-MAC envelope. Bare legacy CBC ciphertexts are rejected.
+// A fresh unpredictable 16-byte IV is required for every encryption.
+// Encryption output capacity: 16 * (plaintext_length / 16 + 1) + 40 bytes.
+// IV, version and ciphertext are authenticated before any plaintext is returned.
+// For these four binary APIs, insufficient output capacity returns -1, writes
+// the required capacity to output->len, and leaves output->data untouched.
+
 /// C interface for 'wedpr_aes256_encrypt'.
 int8_t wedpr_aes256_encrypt(const CInputBuffer* raw_plaintext, const CInputBuffer* raw_key,
     const CInputBuffer* raw_iv, COutputBuffer* output_ciphertext);

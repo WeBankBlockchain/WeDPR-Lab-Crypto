@@ -24,6 +24,30 @@ use jni::{
     JNIEnv,
 };
 
+#[cfg(all(test, feature = "wedpr_f_crypto_block_cipher_aes", feature = "wedpr_f_crypto_block_cipher_sm4"))]
+mod security_tests {
+    use super::*;
+
+    // Exercise the exact cipher instances used by JNI. This also prevents a
+    // manifest change from silently restoring the vulnerable registry crates.
+    #[test]
+    fn jni_cipher_instances_reject_iv_tampering() {
+        fn check<C: BlockCipher>(cipher: &C, key_size: usize) {
+            let message = b"amount=00000100".to_vec();
+            let key = vec![42u8; key_size];
+            let iv = vec![17u8; 16];
+            let encoded = cipher.encrypt(&message, &key, &iv).unwrap();
+            assert_eq!(encoded.len(), 56);
+            assert_eq!(cipher.decrypt(&encoded, &key, &iv).unwrap(), message);
+            let mut changed = iv;
+            changed[7] ^= b'0' ^ b'9';
+            assert!(cipher.decrypt(&encoded, &key, &changed).is_err());
+        }
+        check(&*BLOCK_CIPHER_AES256, 32);
+        check(&*BLOCK_CIPHER_SM4, 16);
+    }
+}
+
 #[cfg(feature = "wedpr_f_base64")]
 use wedpr_ffi_common_base64::utils::{
     bytes_to_string, java_jstring_to_bytes,
