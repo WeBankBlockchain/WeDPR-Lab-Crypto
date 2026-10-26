@@ -45,6 +45,7 @@ jobs:
           -p wedpr_l_crypto_vrf_curve25519
           -p wedpr_l_crypto_vrf_secp256k1
           -p wedpr_third_party_fisco_bcos_java_sdk
+          -p wedpr_third_party_fisco_bcos -p wedpr_ffi_c_fisco_bcos
           -p wedpr_l_crypto_zkp_discrete_logarithm_proof
           -p wedpr_ffi_common -p wedpr_ffi_c_zkp
           -p wedpr_l_crypto_block_cipher_aes

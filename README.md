@@ -116,9 +116,11 @@ KV OT 的安全模型仍是半诚实参与方，公开选择数量和填充后�
 - FISCO Java SDK 的独立字符串 VRF 实现（third-party crate **0.2.0**）同样拒绝单位元及非规范标量，证明要求精确的 `hex[64]|hex[64]|hex[64]` 格式（每段为 64 个小写十六进制字符），并在分配前限制总长度为 194 字节。正常输出保持不变；大写 hex 等历史宽松编码会被拒绝。
 - 仍依赖 dalek v1 的 ZKP、OT 与 Curve25519 VRF，通过根 `Cargo.toml` 的 `[patch.crates-io]` 使用 `third_party/curve25519-dalek-legacy`，回移 RUSTSEC-2024-0344 的标量减法优化屏障，保持原有编码。来源、校验值和两处源码差异见该目录 `PATCHES.txt`。**Cargo 的 patch 不会被下游工作区自动继承**：集成方必须在自己的工作区根保留同样的映射并指向这份补丁源码；仅更新版本号或发布仍指向上游 v1 的依赖不能获得此修复。该回移不代表完成全面侧信道审计。
 
+BN128 third-party crate **1.1.0** 使用固定版本 `substrate-bn 0.6.0`，移除 `sputnikvm` / `bn-plus` 的旧依赖链。接口仍按 [EIP-196](https://eips.ethereum.org/EIPS/eip-196) 对 ADD/MUL 短输入补零、忽略尾部，标量接受完整 256 位输入；按 [EIP-197](https://eips.ethereum.org/EIPS/eip-197) 严格检查配对长度、坐标范围、曲线方程及 G2 子群。已覆盖现有向量、独立整数运算向量、非平凡配对抵消、曲线上错误子群点及原生输出边界。
+
 这些改动收紧了历史上会接受的无效输入。用于链上或其他共识验证时，应协调验证规则的激活及历史数据兼容策略，不能仅在部分节点替换动态库。
 
-本轮审查仍有明确边界：BN128 的 `bn-plus 0.4.4` 依赖在本轮工具链上存在旧序列化 trait 构建错误，相关模块没有通过全量构建及运行验证，不能从安全回归任务通过推断整个工作区已通过。新增 CI 的 Linux 运行结果也需要以实际远端状态为准。上述修复与功能测试不构成完整密码学安全证明。
+本轮审查仍有明确边界：本地功能及互操作测试不构成完整密码学安全证明，新增 CI 的 Linux 运行结果需要以实际远端状态为准。
 
 JNI 回归测试示例（先构建相应平台的二进制 JNI 库）：
 
@@ -129,7 +131,7 @@ python3 ffi/ffi_java/ffi_java_crypto_binary/tests/check_jni_failures.py \
 
 ### 安装Rust环境
 
-本仓库固定使用 `nightly-2025-04-11`（Rust 1.88 nightly），以满足新版 Ed25519 至少 Rust 1.81 的要求，同时兼容旧范围证明依赖的 feature 声明；原 `nightly-2024-02-25` 不再满足要求。安全回归还在 Rust 1.94.1 上测试，旧范围证明在 stable 下需要仅对 `wedpr_l_bulletproofs` 设置 `RUSTC_BOOTSTRAP`；这不能解决独立的旧 BN128 依赖构建问题。可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。
+本仓库固定使用 `nightly-2025-04-11`（Rust 1.88 nightly），以满足新版 Ed25519 至少 Rust 1.81 的要求，同时兼容旧范围证明依赖的 feature 声明；原 `nightly-2024-02-25` 不再满足要求。安全回归还在 Rust 1.94.1 上测试，旧范围证明在 stable 下需要仅对 `wedpr_l_bulletproofs` 设置 `RUSTC_BOOTSTRAP`；BN128 已移除阻塞构建的旧依赖链。可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。
 ```bash
 rustup toolchain install nightly-2025-04-11
 ```
