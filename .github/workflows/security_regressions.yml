@@ -28,7 +28,9 @@ jobs:
         run: >-
           cargo test --locked --lib
           -p wedpr_l_crypto_signature_ed25519
+          -p wedpr_l_crypto_signature_secp256k1
           -p wedpr_l_crypto_signature_sm2
+          -p wedpr_l_crypto_vrf_curve25519
           -p wedpr_l_crypto_zkp_discrete_logarithm_proof
           -p wedpr_ffi_common -p wedpr_ffi_c_zkp
           -p wedpr_l_crypto_block_cipher_aes

@@ -8,12 +8,10 @@ extern crate wedpr_l_macros;
 extern crate lazy_static;
 
 extern crate secp256k1;
-use secp256k1::{
-    All, Message, PublicKey, Secp256k1, SecretKey, VerifyOnly,
-};
 use secp256k1::ecdsa::{RecoverableSignature, RecoveryId};
-use wedpr_l_utils::{error::WedprError, traits::Signature};
 use secp256k1::rand::rngs::OsRng;
+use secp256k1::{All, Message, PublicKey, Secp256k1, SecretKey, VerifyOnly};
+use wedpr_l_utils::{error::WedprError, traits::Signature};
 
 lazy_static! {
     // Shared secp256k1 instance initialized for verification function only.
@@ -21,7 +19,6 @@ lazy_static! {
     // Shared secp256k1 instance initialized for all functions.
     static ref SECP256K1_ALL: Secp256k1<All> = Secp256k1::new();
 }
-
 
 /// Implements FISCO-BCOS-compatible Secp256k1 as a Signature instance.
 #[derive(Default, Debug, Clone, Copy)]
@@ -99,7 +96,6 @@ impl Signature for WedprSecp256k1Recover {
 
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
         loop {
-
             let (secret_key, public_key) =
                 SECP256K1_ALL.generate_keypair(&mut OsRng);
 
@@ -155,14 +151,24 @@ impl WedprSecp256k1Recover {
                     return Err(WedprError::FormatError);
                 },
             };
-        let recovered_public_key =
-            match SECP256K1_VERIFY.recover_ecdsa(&msg_hash_obj, &get_sign_final) {
-                Ok(v) => v,
-                Err(_) => {
-                    wedpr_println!("Signature recover failed");
-                    return Err(WedprError::FormatError);
-                },
-            };
+        // Recovery alone also accepts the equivalent high-S signature. Require
+        // one canonical representation so a third party cannot change a signed
+        // transaction's signature without invalidating it.
+        let standard = get_sign_final.to_standard();
+        let mut normalized = standard;
+        normalized.normalize_s();
+        if normalized != standard {
+            return Err(WedprError::FormatError);
+        }
+        let recovered_public_key = match SECP256K1_VERIFY
+            .recover_ecdsa(&msg_hash_obj, &get_sign_final)
+        {
+            Ok(v) => v,
+            Err(_) => {
+                wedpr_println!("Signature recover failed");
+                return Err(WedprError::FormatError);
+            },
+        };
         return Ok(recovered_public_key.serialize_uncompressed().to_vec());
     }
 
@@ -189,6 +195,33 @@ impl WedprSecp256k1Recover {
 mod tests {
     use super::*;
     use wedpr_l_utils::constant::tests::BASE64_ENCODED_TEST_MESSAGE;
+
+    #[test]
+    fn rejects_high_s_signature_malleability() {
+        let signer = WedprSecp256k1Recover::default();
+        let secret = vec![1u8; 32];
+        let message = vec![42u8; 32];
+        let public = signer.derive_public_key(&secret).unwrap();
+        let signature = signer.sign(&secret, &message).unwrap();
+        assert!(signer.verify(&public, &message, &signature));
+        // (r, n-s, recovery_id XOR 1) recovers the same key and message.
+        let order = [
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            0xff, 0xff, 0xff, 0xff, 0xfe, 0xba, 0xae, 0xdc, 0xe6, 0xaf, 0x48,
+            0xa0, 0x3b, 0xbf, 0xd2, 0x5e, 0x8c, 0xd0, 0x36, 0x41, 0x41,
+        ];
+        let mut malleated = signature.clone();
+        let mut borrow = 0i16;
+        for i in (0..32).rev() {
+            let value = order[i] as i16 - signature[32 + i] as i16 - borrow;
+            malleated[32 + i] = value as u8;
+            borrow = if value < 0 { 1 } else { 0 };
+        }
+        malleated[64] ^= 1;
+        assert_ne!(signature, malleated);
+        assert!(!signer.verify(&public, &message, &malleated));
+        assert!(signer.recover_public_key(&message, &malleated).is_err());
+    }
 
     #[test]
     fn test_secp256k1_recover() {
