@@ -10,12 +10,20 @@ extern crate lazy_static;
 
 use wedpr_l_utils::{error::WedprError, traits::Signature};
 
-use wedpr_l_libsm::sm2::signature::{
-    Seckey, SigCtx, Signature as sm2Signature,
+use rand::rngs::OsRng;
+use sm2::{
+    dsa::{
+        signature::{RandomizedSigner, Verifier},
+        Signature as Sm2Signature, SigningKey, VerifyingKey,
+    },
+    elliptic_curve::{sec1::ToEncodedPoint, subtle::ConstantTimeEq},
+    SecretKey,
 };
+use wedpr_l_libsm::sm2::signature::SigCtx;
 
 lazy_static! {
-    // Shared sm2 instance initialized for all functions.
+    // Legacy context is retained only for hashing public protocol parameters.
+    // Production private-key operations use the RustCrypto backend below.
     static ref SM2_CTX: SigCtx = SigCtx::new();
 }
 
@@ -28,16 +36,26 @@ const ORDER_MINUS_ONE: [u8; 32] = [
     0x53, 0xbb, 0xf4, 0x09, 0x39, 0xd5, 0x41, 0x22,
 ];
 
-fn checked_secret_key(bytes: &[u8]) -> Result<Seckey, WedprError> {
-    if bytes.len() != 32
-        || bytes.iter().all(|byte| *byte == 0)
-        || bytes >= ORDER_MINUS_ONE.as_ref()
-    {
+fn checked_signing_key(bytes: &[u8]) -> Result<SigningKey, WedprError> {
+    if bytes.len() != 32 || bool::from(bytes.ct_eq(ORDER_MINUS_ONE.as_ref())) {
         return Err(WedprError::FormatError);
     }
-    SM2_CTX
-        .load_seckey(bytes)
+    // NonZeroScalar parsing checks 1 <= d < n without variable-time BigUint
+    // operations. The additional constant-time check above excludes d=n-1.
+    SigningKey::from_slice(SM2_STANDARD_ID, bytes)
         .map_err(|_| WedprError::FormatError)
+}
+
+fn sign_with_key(
+    key: &SigningKey,
+    message: &[u8],
+) -> Result<Vec<u8>, WedprError> {
+    // Mix fresh OS randomness into RFC6979. This also avoids deterministic
+    // nonce reuse with another protocol if a caller incorrectly reuses a key.
+    let signature: Sm2Signature = key
+        .try_sign_with_rng(&mut OsRng, message)
+        .map_err(|_| WedprError::FormatError)?;
+    Ok(signature.to_bytes().to_vec())
 }
 
 /// Implements FISCO-BCOS-compatible SM2 as a Signature instance.
@@ -50,19 +68,8 @@ impl Signature for WedprSm2p256v1 {
         private_key: &T,
         msg_hash: &T,
     ) -> Result<Vec<u8>, WedprError> {
-        let secret_key = match checked_secret_key(private_key.as_ref()) {
-            Ok(v) => v,
-            Err(_) => {
-                return Err(WedprError::FormatError);
-            },
-        };
-        let derived_public_key = SM2_CTX.pk_from_sk(&secret_key);
-        let signature =
-            SM2_CTX.sign(&msg_hash.as_ref(), &secret_key, &derived_public_key);
-        if signature == sm2Signature::default() {
-            return Err(WedprError::FormatError);
-        }
-        Ok(signature.bytes_encode().to_vec())
+        let key = checked_signing_key(private_key.as_ref())?;
+        sign_with_key(&key, msg_hash.as_ref())
     }
 
     fn verify<T: ?Sized + AsRef<[u8]>>(
@@ -71,31 +78,31 @@ impl Signature for WedprSm2p256v1 {
         msg_hash: &T,
         signature: &T,
     ) -> bool {
-        let public_key_point = match SM2_CTX.load_pubkey(&public_key.as_ref()) {
-            Ok(v) => v,
-            Err(_) => {
-                return false;
-            },
+        let key = match VerifyingKey::from_sec1_bytes(
+            SM2_STANDARD_ID,
+            public_key.as_ref(),
+        ) {
+            Ok(key) => key,
+            Err(_) => return false,
         };
-
-        let parsed_sig = match sm2Signature::bytes_decode(signature.as_ref()) {
-            Ok(v) => v,
-            Err(_) => {
-                return false;
-            },
+        let signature = match Sm2Signature::from_slice(signature.as_ref()) {
+            Ok(signature) => signature,
+            Err(_) => return false,
         };
-        if public_key_point.is_zero() {
-            return false;
-        }
-        SM2_CTX.verify(&msg_hash.as_ref(), &public_key_point, &parsed_sig)
+        key.verify(msg_hash.as_ref(), &signature).is_ok()
     }
 
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
         loop {
-            let (public_key, secret_key) = SM2_CTX.new_keypair();
-            let bytes = SM2_CTX.serialize_seckey(&secret_key);
-            if checked_secret_key(&bytes).is_ok() {
-                return (SM2_CTX.serialize_pubkey(&public_key, false), bytes);
+            let secret = SecretKey::random(&mut OsRng);
+            if let Ok(key) = checked_signing_key(&secret.to_bytes()) {
+                return (
+                    key.verifying_key()
+                        .to_encoded_point(false)
+                        .as_bytes()
+                        .to_vec(),
+                    key.to_bytes().to_vec(),
+                );
             }
         }
     }
@@ -109,31 +116,16 @@ impl WedprSm2p256v1 {
         public_key: &T,
         msg_hash: &T,
     ) -> Result<Vec<u8>, WedprError> {
-        let secret_key = match checked_secret_key(private_key.as_ref()) {
-            Ok(v) => v,
-            Err(_) => {
-                return Err(WedprError::FormatError);
-            },
-        };
-        let public_key_point = match SM2_CTX.load_pubkey(&public_key.as_ref()) {
-            Ok(v) => v,
-            Err(_) => {
-                return Err(WedprError::FormatError);
-            },
-        };
-        let derived_public_key = SM2_CTX.pk_from_sk(&secret_key);
-        if public_key_point.is_zero()
-            || SM2_CTX.serialize_pubkey(&public_key_point, false)
-                != SM2_CTX.serialize_pubkey(&derived_public_key, false)
+        let key = checked_signing_key(private_key.as_ref())?;
+        let provided =
+            VerifyingKey::from_sec1_bytes(SM2_STANDARD_ID, public_key.as_ref())
+                .map_err(|_| WedprError::FormatError)?;
+        if key.verifying_key().to_encoded_point(false)
+            != provided.to_encoded_point(false)
         {
             return Err(WedprError::FormatError);
         }
-        let signature =
-            SM2_CTX.sign(&msg_hash.as_ref(), &secret_key, &public_key_point);
-        if signature == sm2Signature::default() {
-            return Err(WedprError::FormatError);
-        }
-        Ok(signature.bytes_encode().to_vec())
+        sign_with_key(&key, msg_hash.as_ref())
     }
 
     /// Derives public key from private key.
@@ -141,17 +133,12 @@ impl WedprSm2p256v1 {
         &self,
         private_key: &T,
     ) -> Result<Vec<u8>, WedprError> {
-        let secret_key = match checked_secret_key(private_key.as_ref()) {
-            Ok(v) => v,
-            Err(_) => {
-                return Err(WedprError::FormatError);
-            },
-        };
-        let public_key = SM2_CTX.pk_from_sk(&secret_key);
-        if public_key.is_zero() {
-            return Err(WedprError::FormatError);
-        }
-        Ok(SM2_CTX.serialize_pubkey(&public_key, false))
+        let key = checked_signing_key(private_key.as_ref())?;
+        Ok(key
+            .verifying_key()
+            .to_encoded_point(false)
+            .as_bytes()
+            .to_vec())
     }
 
     /// Computes GM standard e value, which is the hash of message and ID, EC
@@ -167,6 +154,9 @@ impl WedprSm2p256v1 {
                 return Err(WedprError::FormatError);
             },
         };
+        if public_key_point.is_zero() {
+            return Err(WedprError::FormatError);
+        }
         Ok(SM2_CTX
             .hash(SM2_STANDARD_ID, &public_key_point, message.as_ref())
             .to_vec())
@@ -177,6 +167,80 @@ impl WedprSm2p256v1 {
 mod tests {
     use super::*;
     use wedpr_l_utils::constant::tests::BASE64_ENCODED_TEST_MESSAGE;
+
+    #[test]
+    fn interoperates_with_legacy_keys_signatures_and_message_hashing() {
+        use wedpr_l_libsm::sm2::signature::Signature as LegacySignature;
+        let signer = WedprSm2p256v1::default();
+        let mut largest = ORDER_MINUS_ONE.to_vec();
+        largest[31] -= 1;
+        let mut one = vec![0u8; 32];
+        one[31] = 1;
+        for secret in [one, vec![1u8; 32], largest] {
+            // The legacy private arithmetic is used only as an independent
+            // test oracle with public synthetic fixtures, not in production.
+            let old_secret = SM2_CTX.load_seckey(&secret).unwrap();
+            let old_public = SM2_CTX.pk_from_sk(&old_secret);
+            let public = signer.derive_public_key(&secret).unwrap();
+            assert_eq!(public, SM2_CTX.serialize_pubkey(&old_public, false));
+            for message in [
+                vec![],
+                vec![42u8; 32],
+                b"SM2 compatibility message".to_vec(),
+            ] {
+                let signature = signer.sign(&secret, &message).unwrap();
+                let parsed = LegacySignature::bytes_decode(&signature).unwrap();
+                assert!(SM2_CTX.verify(&message, &old_public, &parsed));
+                let old_signature = SM2_CTX
+                    .sign(&message, &old_secret, &old_public)
+                    .bytes_encode()
+                    .to_vec();
+                assert!(signer.verify(&public, &message, &old_signature));
+                let compressed = SM2_CTX.serialize_pubkey(&old_public, true);
+                let fast =
+                    signer.sign_fast(&secret, &compressed, &message).unwrap();
+                assert!(signer.verify(&compressed, &message, &fast));
+                assert_eq!(
+                    signer.compute_hash_e(&public, &message).unwrap(),
+                    SM2_CTX.hash(SM2_STANDARD_ID, &old_public, &message)
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn rejects_invalid_public_keys_and_signature_scalars() {
+        let signer = WedprSm2p256v1::default();
+        let secret = vec![1u8; 32];
+        let message = b"SM2 invalid input".to_vec();
+        let public = signer.derive_public_key(&secret).unwrap();
+        let signature = signer.sign(&secret, &message).unwrap();
+        for length in 0..64 {
+            assert!(!signer.verify(
+                &public,
+                &message,
+                &signature[..length].to_vec()
+            ));
+        }
+        for scalar in [vec![0u8; 32], vec![0xffu8; 32]] {
+            for offset in [0, 32] {
+                let mut changed = signature.clone();
+                changed[offset..offset + 32].copy_from_slice(&scalar);
+                assert!(!signer.verify(&public, &message, &changed));
+            }
+        }
+        for key in [
+            vec![],
+            vec![0u8],
+            vec![0u8; 33],
+            vec![0u8; 65],
+            vec![0xffu8; 65],
+        ] {
+            assert!(!signer.verify(&key, &message, &signature));
+            assert!(signer.sign_fast(&secret, &key, &message).is_err());
+            assert!(signer.compute_hash_e(&key, &message).is_err());
+        }
+    }
 
     #[test]
     fn rejects_invalid_private_key_boundaries_before_curve_operations() {
