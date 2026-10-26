@@ -2,8 +2,8 @@
 
 //! Tool to compile proto files to rust files.
 
-extern crate protoc_rust;
-use protoc_rust::{Codegen, Customize};
+extern crate protobuf_codegen;
+use protobuf_codegen::{Codegen, Customize};
 use std::env;
 
 /// Uses `cargo run` in this sub crate (wedpr_l_protos) to compile proto files
@@ -22,15 +22,15 @@ fn main() {
 /// Compiles proto files to rust files.
 #[cfg(not(tarpaulin_include))]
 fn generate_proto_for_all() {
+    let root = std::path::Path::new(env!("CARGO_MANIFEST_DIR"));
     Codegen::new()
-        .out_dir("./src/generated/")
-        .includes(&["."])
+        .pure()
+        .out_dir(root.join("src/generated"))
+        .include(root)
         // List all used proto files here.
         // You can remove any proto files that are not used by your project.
-        .inputs(&["crypto/zkp.proto", "crypto/common.proto", "crypto/ot.proto"])
-        .customize(Customize {
-            ..Default::default()
-        })
+        .input(root.join("crypto/common.proto"))
+        .customize(Customize::default().generate_accessors(true))
         .run()
         .expect("protoc should not fail");
 }

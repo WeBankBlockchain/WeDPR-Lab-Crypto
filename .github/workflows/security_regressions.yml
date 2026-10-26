@@ -22,21 +22,24 @@ jobs:
         with:
           distribution: temurin
           java-version: "17"
+      - name: Check legacy dependency features
+        run: python3 .github/scripts/check_dependency_features.py
       - name: ZKP utility encoding regressions
         run: cargo test --locked --manifest-path crypto/zkp/utils/Cargo.toml --lib
       - name: Legacy range-proof compatibility
-        # The legacy dependency requests the now-stable nll feature. Limit this
-        # compatibility setting to that crate, not the whole workspace.
-        env:
-          RUSTC_BOOTSTRAP: wedpr_l_bulletproofs
         run: cargo test --locked --lib -p wedpr_l_crypto_zkp_range_proof
       - name: Legacy scalar backends
         run: |
           cargo test --locked --manifest-path third_party/curve25519-dalek-legacy/Cargo.toml --lib --no-default-features --features std,u32_backend
           cargo test --locked --manifest-path third_party/curve25519-dalek-legacy/Cargo.toml --lib --no-default-features --features std,u64_backend,serde
+      - name: Legacy Bulletproofs compatibility
+        run: >-
+          cargo test --locked --manifest-path third_party/bulletproofs-legacy/Cargo.toml
+          --lib --test range_proof
       - name: Cryptographic and buffer regressions
         run: >-
           cargo test --locked --lib
+          -p wedpr_l_protos
           -p wedpr_l_crypto_signature_ed25519
           -p wedpr_l_common_coder_base64 -p wedpr_l_common_coder_hex
           -p wedpr_l_crypto_signature_secp256k1
@@ -59,6 +62,10 @@ jobs:
         run: >-
           cargo test --locked --lib -p wedpr_ffi_c_crypto --no-default-features
           --features wedpr_f_base64,wedpr_f_vrf_secp256k1,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
+      - name: Hex text boundaries
+        run: |
+          cargo test --locked --lib -p wedpr_ffi_c_crypto --no-default-features --features wedpr_f_hex,wedpr_f_vrf_secp256k1,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
+          cargo test --locked --lib -p wedpr_ffi_java_crypto --no-default-features --features wedpr_f_hex,wedpr_f_crypto_block_cipher_aes,wedpr_f_crypto_block_cipher_sm4
       - name: Text JNI cipher dependencies
         run: >-
           cargo test --locked --lib -p wedpr_ffi_java_crypto --no-default-features
@@ -76,3 +83,25 @@ jobs:
           python3 ffi/ffi_java/ffi_java_crypto_binary/tests/check_jni_failures.py
           --library target/debug/libffi_java_crypto_binary.so --java-home "$JAVA_HOME"
           --bytebuffer-library target/debug/libwedpr_jni_bytebuffer_test.so
+
+  dependency-advisories:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      RUSTUP_TOOLCHAIN: "1.94.1"
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
+        with:
+          toolchain: "1.94.1"
+      - name: Install locked audit tool
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      - name: Fetch current advisories
+        run: git clone --depth 1 https://github.com/RustSec/advisory-db.git "$RUNNER_TEMP/rustsec"
+      - name: Audit dependencies without suppressing warnings
+        run: |
+          for lockfile in Cargo.lock ffi/ffi_macros/tests/bytebuffer_jni/Cargo.lock third_party/curve25519-dalek-legacy/Cargo.lock third_party/bulletproofs-legacy/Cargo.lock; do
+            cargo audit --db "$RUNNER_TEMP/rustsec" --no-fetch --file "$lockfile"
+          done

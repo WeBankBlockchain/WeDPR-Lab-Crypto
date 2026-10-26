@@ -11,8 +11,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v1
-      - name: Nightly default
-        run: rustup default nightly
+      - name: Install pinned toolchain
+        run: rustup toolchain install 1.94.1 --profile minimal
       - name: Test Hex java features
         run: cd ffi/ffi_java/ffi_java_crypto/ && cargo build --features "wedpr_f_hex, wedpr_f_ecies_secp256k1, wedpr_f_signature_secp256k1, wedpr_f_hash_keccak256, wedpr_f_signature_sm2, wedpr_f_hash_sm3, wedpr_f_vrf_curve25519" --no-default-features
       - name: Test Hex C features

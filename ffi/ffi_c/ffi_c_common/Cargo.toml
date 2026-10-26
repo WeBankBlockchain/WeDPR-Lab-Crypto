@@ -12,5 +12,3 @@ description = "Library of WeDPR ffi c shared common utils."
 libc = "0.2.60"
 
 # This is required to generate C/C++ header files.
-[build-dependencies]
-cbindgen = "0.9.0"

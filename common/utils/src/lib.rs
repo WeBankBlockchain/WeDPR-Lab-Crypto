@@ -2,9 +2,6 @@
 
 //! Library of shared utilities.
 
-#[macro_use]
-extern crate failure;
-
 pub mod constant;
 pub mod error;
 pub mod tool;

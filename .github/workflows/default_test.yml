@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
-      RUSTUP_TOOLCHAIN: nightly-2025-04-11
+      RUSTUP_TOOLCHAIN: 1.94.1
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8
         with:
-          toolchain: nightly-2025-04-11
+          toolchain: 1.94.1
       - name: Build all workspace targets
         run: cargo build --locked --workspace --all-targets
       - name: Test all workspace targets

@@ -13,3 +13,6 @@ crate-type = ["cdylib"]
 jni = "0.13.0"
 wedpr_ffi_macros = { path = "../.." }
 wedpr_ffi_common = { path = "../../../ffi_common" }
+
+[patch.crates-io]
+wedpr_l_utils = { path = "../../../../common/utils" }

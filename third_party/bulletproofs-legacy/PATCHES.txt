@@ -1,0 +1,142 @@
+This directory vendors wedpr_l_bulletproofs 1.0.5 from crates.io.
+Original archive checksum recorded in Cargo.lock: 30a40bf29b5f1ee2526389295af5f65b0b273823dc4814782a7d54bfa9c0221e
+The original MIT LICENSE.txt and authors are retained.
+
+Production changes are limited to the error dependency/derives and removal of
+obsolete feature(nll). failure is replaced by thiserror and standard Error.
+Standalone tests use the adjacent patched legacy dalek source.
+Legacy fork test, benchmark and documentation imports are corrected to refer to
+wedpr_l_bulletproofs. Such files were verified to differ only in this import.
+README trailing whitespace is normalized; its text is unchanged.
+No proof equations, randomness, transcripts, generators or encodings change.
+The package version remains 1.0.5 to identify an explicit local backport.
+
+The workspace root patch must be carried into downstream workspace roots.
+Validation (stable Rust, no RUSTC_BOOTSTRAP):
+  cargo +1.94.1 test --manifest-path third_party/bulletproofs-legacy/Cargo.toml --lib --test range_proof
+
+Exact code/config diff against the original crate (zero context):
+
+--- upstream/Cargo.toml
++++ patched/Cargo.toml
+@@ -56,2 +56,2 @@
+-[dependencies.failure]
+-version = "0.1"
++[dependencies.thiserror]
++version = "1.0.69"
+@@ -89,0 +90,3 @@
++
++[patch.crates-io]
++curve25519-dalek = { path = "../curve25519-dalek-legacy" }
+--- upstream/benches/generators.rs
++++ patched/benches/generators.rs
+@@ -1 +1 @@
+-extern crate bulletproofs;
++extern crate wedpr_l_bulletproofs as bulletproofs;
+--- upstream/benches/r1cs.rs
++++ patched/benches/r1cs.rs
+@@ -16 +16 @@
+-extern crate bulletproofs;
++extern crate wedpr_l_bulletproofs as bulletproofs;
+--- upstream/benches/range_proof.rs
++++ patched/benches/range_proof.rs
+@@ -15 +15 @@
+-extern crate bulletproofs;
++extern crate wedpr_l_bulletproofs as bulletproofs;
+--- upstream/src/errors.rs
++++ patched/src/errors.rs
+@@ -4 +4 @@
+-#[derive(Fail, Clone, Debug, Eq, PartialEq)]
++#[derive(thiserror::Error, Clone, Debug, Eq, PartialEq)]
+@@ -7 +7 @@
+-    #[fail(display = "Proof verification failed.")]
++    #[error("Proof verification failed.")]
+@@ -10 +10 @@
+-    #[fail(display = "Proof data could not be parsed.")]
++    #[error("Proof data could not be parsed.")]
+@@ -14 +14 @@
+-    #[fail(display = "Wrong number of blinding factors supplied.")]
++    #[error("Wrong number of blinding factors supplied.")]
+@@ -18 +18 @@
+-    #[fail(display = "Invalid bitsize, must have n = 8,16,32,64.")]
++    #[error("Invalid bitsize, must have n = 8,16,32,64.")]
+@@ -22 +22 @@
+-    #[fail(display = "Invalid aggregation size, m must be a power of 2.")]
++    #[error("Invalid aggregation size, m must be a power of 2.")]
+@@ -25 +25 @@
+-    #[fail(display = "Invalid generators size, too few generators for proof")]
++    #[error("Invalid generators size, too few generators for proof")]
+@@ -33 +33 @@
+-    #[fail(display = "Internal error during proof creation: {}", _0)]
++    #[error("Internal error during proof creation: {0}")]
+@@ -55 +55 @@
+-#[derive(Fail, Clone, Debug, Eq, PartialEq)]
++#[derive(thiserror::Error, Clone, Debug, Eq, PartialEq)]
+@@ -59 +59 @@
+-    #[fail(display = "Dealer gave a malicious challenge value.")]
++    #[error("Dealer gave a malicious challenge value.")]
+@@ -63 +63 @@
+-    #[fail(display = "Invalid bitsize, must have n = 8,16,32,64")]
++    #[error("Invalid bitsize, must have n = 8,16,32,64")]
+@@ -67 +67 @@
+-    #[fail(display = "Invalid aggregation size, m must be a power of 2")]
++    #[error("Invalid aggregation size, m must be a power of 2")]
+@@ -70 +70 @@
+-    #[fail(display = "Invalid generators size, too few generators for proof")]
++    #[error("Invalid generators size, too few generators for proof")]
+@@ -74 +74 @@
+-    #[fail(display = "Wrong number of value commitments")]
++    #[error("Wrong number of value commitments")]
+@@ -78 +78 @@
+-    #[fail(display = "Wrong number of value commitments")]
++    #[error("Wrong number of value commitments")]
+@@ -82 +82 @@
+-    #[fail(display = "Wrong number of proof shares")]
++    #[error("Wrong number of proof shares")]
+@@ -86 +86 @@
+-    #[fail(display = "Malformed proof shares from parties {:?}", bad_shares)]
++    #[error("Malformed proof shares from parties {bad_shares:?}")]
+@@ -97 +97 @@
+-#[derive(Fail, Clone, Debug, Eq, PartialEq)]
++#[derive(thiserror::Error, Clone, Debug, Eq, PartialEq)]
+@@ -100 +100 @@
+-    #[fail(display = "Invalid generators size, too few generators for proof")]
++    #[error("Invalid generators size, too few generators for proof")]
+@@ -103 +103 @@
+-    #[fail(display = "Proof data could not be parsed.")]
++    #[error("Proof data could not be parsed.")]
+@@ -107 +107 @@
+-    #[fail(display = "R1CSProof did not verify correctly.")]
++    #[error("R1CSProof did not verify correctly.")]
+@@ -113 +113 @@
+-    #[fail(display = "Variable does not have a value assignment.")]
++    #[error("Variable does not have a value assignment.")]
+@@ -117 +117 @@
+-    #[fail(display = "Gadget error: {:?}", description)]
++    #[error("Gadget error: {description:?}")]
+--- upstream/src/lib.rs
++++ patched/src/lib.rs
+@@ -1 +0,0 @@
+-#![feature(nll)]
+@@ -23,2 +22 @@
+-#[macro_use]
+-extern crate failure;
++
+--- upstream/src/range_proof/mod.rs
++++ patched/src/range_proof/mod.rs
+@@ -87 +87 @@
+-    /// extern crate bulletproofs;
++    /// extern crate wedpr_l_bulletproofs as bulletproofs;
+@@ -154 +154 @@
+-    /// extern crate bulletproofs;
++    /// extern crate wedpr_l_bulletproofs as bulletproofs;
+--- upstream/tests/r1cs.rs
++++ patched/tests/r1cs.rs
+@@ -3 +3 @@
+-extern crate bulletproofs;
++extern crate wedpr_l_bulletproofs as bulletproofs;
+--- upstream/tests/range_proof.rs
++++ patched/tests/range_proof.rs
+@@ -14 +14 @@
+-extern crate bulletproofs;
++extern crate wedpr_l_bulletproofs as bulletproofs;

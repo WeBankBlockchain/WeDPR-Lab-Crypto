@@ -118,6 +118,14 @@ KV OT 的安全模型仍是半诚实参与方，公开选择数量和填充后�
 
 BN128 third-party crate **1.1.0** 使用固定版本 `substrate-bn 0.6.0`，移除 `sputnikvm` / `bn-plus` 的旧依赖链。接口仍按 [EIP-196](https://eips.ethereum.org/EIPS/eip-196) 对 ADD/MUL 短输入补零、忽略尾部，标量接受完整 256 位输入；按 [EIP-197](https://eips.ethereum.org/EIPS/eip-197) 严格检查配对长度、坐标范围、曲线方程及 G2 子群。已覆盖现有向量、独立整数运算向量、非平凡配对抵消、曲线上错误子群点及原生输出边界。
 
+Protobuf runtime/codegen 固定为 **3.7.2**，protos crate 升至 **2.0.0**，并重新生成 Rust 绑定。Keypair 的字段编号与线格式保持不变，Rust 生成类型及 trait 接口需要同步升级。递归消息及深层未知 group 的子进程测试会检查解析失败不会中止进程；浅层合法消息与历史 Keypair 编码仍能解析。生成器使用纯 Rust 后端，可从根目录运行 `cargo run -p wedpr_l_protos`。
+
+根工作区同时修复为 `wedpr_l_utils 1.1.1` 的标准 Rust 错误类型，并以 `third_party/bulletproofs-legacy` 替换旧范围证明依赖中的 `failure` 和过时编译开关；证明数学及编码保持不变，源码来源和精确差异见 `PATCHES.txt`。**下游工作区必须保留根 `Cargo.toml` 中全部 `[patch.crates-io]` 映射**，不能仅复制某个子 crate 或只更新锁文件。
+
+依赖审计已更新 OpenSSL、Keccak、Rand 与 Crossbeam 的兼容补丁，移除旧 Protobuf、`failure` 及未使用的 cbindgen 构建依赖。当前根工作区及三个独立测试锁文件的 RustSec 审计没有报告已知漏洞，但仍报告旧 AES、clear_on_drop、libsecp256k1、rand_os 的维护告警，以及 Rand 0.7 的条件性告警。当前 Rand 0.7 **未启用 `log` feature**，该告警所需配置条件不成立；CI 会阻止新增依赖通过 feature 合并开启它。独立第三方测试锁还保留旧 atty/ansi_term 测试工具的告警，未进入运行库。这些告警没有被忽略或隐藏，不能据此推断旧依赖已获得持续维护。
+
+标准范围证明覆盖 **`[0, 2^32)`，包含零**；“值非零”等业务要求需要额外约束，不能依赖此范围证明。自定义生成元应由可信协议确定，并满足所需的离散对数关系未知假设，不能直接采用证明提交方任意提供的参数。
+
 这些改动收紧了历史上会接受的无效输入。用于链上或其他共识验证时，应协调验证规则的激活及历史数据兼容策略，不能仅在部分节点替换动态库。
 
 本轮审查仍有明确边界：本地功能及互操作测试不构成完整密码学安全证明，新增 CI 的 Linux 运行结果需要以实际远端状态为准。
@@ -131,9 +139,9 @@ python3 ffi/ffi_java/ffi_java_crypto_binary/tests/check_jni_failures.py \
 
 ### 安装Rust环境
 
-本仓库固定使用 `nightly-2025-04-11`（Rust 1.88 nightly），以满足新版 Ed25519 至少 Rust 1.81 的要求，同时兼容旧范围证明依赖的 feature 声明；原 `nightly-2024-02-25` 不再满足要求。安全回归还在 Rust 1.94.1 上测试，旧范围证明在 stable 下需要仅对 `wedpr_l_bulletproofs` 设置 `RUSTC_BOOTSTRAP`；BN128 已移除阻塞构建的旧依赖链。可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。
+本仓库固定使用已验证的 **Rust 1.94.1 stable**，满足新版密码依赖的编译要求。旧范围证明依赖已移除过时的 `feature(nll)` 声明，不需要 `RUSTC_BOOTSTRAP`；BN128 也已移除阻塞构建的旧依赖链。可参考[Rust官方文档](https://www.rust-lang.org/zh-CN/tools/install)。
 ```bash
-rustup toolchain install nightly-2025-04-11
+rustup toolchain install 1.94.1 --profile minimal
 ```
 
 ### 下载WeDPR-Lab-Crypto源代码

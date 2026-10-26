@@ -2,16 +2,25 @@
 
 //! WeDPR errors definitions.
 
-#[derive(Fail, Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum WedprError {
-    #[fail(display = "Verification failed")]
     VerificationError,
-    #[fail(display = "Argument is invalid")]
     ArgumentError,
-    #[fail(display = "Data cannot be parsed")]
     FormatError,
-    #[fail(display = "Data cannot be decoded")]
     DecodeError,
-    #[fail(display = "Indy Crypto error")]
     IndyCryptoError,
 }
+
+impl std::fmt::Display for WedprError {
+    fn fmt(&self, formatter: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        formatter.write_str(match self {
+            Self::VerificationError => "Verification failed",
+            Self::ArgumentError => "Argument is invalid",
+            Self::FormatError => "Data cannot be parsed",
+            Self::DecodeError => "Data cannot be decoded",
+            Self::IndyCryptoError => "Indy Crypto error",
+        })
+    }
+}
+
+impl std::error::Error for WedprError {}

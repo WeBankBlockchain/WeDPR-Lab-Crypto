@@ -17,8 +17,8 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 5
-      - name: Nightly default
-        run: rustup default nightly
+      - name: Install pinned toolchain
+        run: rustup toolchain install 1.94.1 --profile minimal
       - name: install macOS dependencies
         if: runner.os == 'macOS'
         run: brew install ccache
@@ -109,7 +109,7 @@ jobs:
       - name: install rust language
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: nightly-2024-01-10
+          toolchain: "1.94.1"
           override: true
       - name: install CentOS dependencies
         run: |

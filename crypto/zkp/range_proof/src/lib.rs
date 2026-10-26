@@ -22,7 +22,7 @@ use wedpr_l_crypto_zkp_utils::{get_random_scalar, BASEPOINT_G2};
 const RANGE_SIZE_IN_BITS: usize = 32;
 const DEFAULT_BYTES_MESSAGE: &[u8] = b"WeDPR";
 
-/// Proves whether a value belongs to (0, 2^RANGE_SIZE_IN_BITS - 1], and create
+/// Proves whether a value belongs to [0, 2^RANGE_SIZE_IN_BITS), and create
 /// a commitment for the value with provided random blinding value and blinding
 /// basepoint. It returns:
 /// 1) the encoded string for the proof.
@@ -56,7 +56,7 @@ pub fn prove_value_range_with_blinding_and_blinding_basepoint(
     )
 }
 
-/// Proves whether a value belongs to (0, 2^RANGE_SIZE_IN_BITS - 1], and create
+/// Proves whether a value belongs to [0, 2^RANGE_SIZE_IN_BITS), and create
 /// a commitment for the value with provided random blinding value. It returns:
 /// 1) the encoded string for the proof.
 /// 2) the point representing the commitment created for the value.
@@ -75,7 +75,7 @@ pub fn prove_value_range_with_blinding(
     (proof, value_commitment_point)
 }
 
-/// Proves whether a value belongs to (0, 2^RANGE_SIZE_IN_BITS - 1], and create
+/// Proves whether a value belongs to [0, 2^RANGE_SIZE_IN_BITS), and create
 /// a commitment for the value. It returns:
 /// 1) the encoded string for the proof.
 /// 2) the point representing the commitment created for the value.
@@ -89,7 +89,7 @@ pub fn prove_value_range(value: u64) -> (Vec<u8>, RistrettoPoint, Scalar) {
 }
 
 /// Verifies whether a value embedded in the commentment belongs to
-/// (0, 2^RANGE_SIZE_IN_BITS - 1], and use provided blinding basepoint.
+/// [0, 2^RANGE_SIZE_IN_BITS), and use provided blinding basepoint.
 pub fn verify_value_range_with_blinding_basepoint(
     commitment: &RistrettoPoint,
     proof_bytes: &[u8],
@@ -120,7 +120,7 @@ pub fn verify_value_range_with_blinding_basepoint(
 }
 
 /// Verifies whether a value embedded in the commentment belongs to
-/// (0, 2^RANGE_SIZE_IN_BITS - 1].
+/// [0, 2^RANGE_SIZE_IN_BITS).
 pub fn verify_value_range(commitment: &RistrettoPoint, proof: &[u8]) -> bool {
     // Cannot use BASEPOINT_G1 which has already been used by commitment
     // generation.
@@ -128,7 +128,7 @@ pub fn verify_value_range(commitment: &RistrettoPoint, proof: &[u8]) -> bool {
 }
 
 /// Proves whether all values in the list belongs to
-/// (0, 2^RANGE_SIZE_IN_BITS - 1], and create commitments for them with provided
+/// [0, 2^RANGE_SIZE_IN_BITS), and create commitments for them with provided
 /// random blinding values and blinding basepoint.
 /// It returns:
 /// 1) the encoded string for the aggregated proof.
@@ -173,7 +173,7 @@ pub fn prove_value_range_in_batch(
 }
 
 /// Verifies whether all values embedded in the commentment list belongs to
-/// (0, 2^RANGE_SIZE_IN_BITS - 1].
+/// [0, 2^RANGE_SIZE_IN_BITS).
 pub fn verify_value_range_in_batch(
     commitments: &Vec<RistrettoPoint>,
     proof_bytes: &[u8],
@@ -210,6 +210,9 @@ mod tests {
 
     #[test]
     fn test_range_proof() {
+        // Standard Bulletproof range statements include zero.
+        let (zero_proof, zero_commitment, _) = prove_value_range(0);
+        assert!(verify_value_range(&zero_commitment, &zero_proof));
         // Range proof for a single value.
         let (proof_c1, c1_point, _) = prove_value_range(1);
         assert_eq!(true, verify_value_range(&c1_point, &proof_c1));
