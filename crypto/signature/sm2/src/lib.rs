@@ -10,13 +10,13 @@ extern crate lazy_static;
 
 use wedpr_l_utils::{error::WedprError, traits::Signature};
 
-use rand::rngs::OsRng;
+use rand::rngs::SysRng;
 use sm2::{
     dsa::{
         signature::{RandomizedSigner, Verifier},
         Signature as Sm2Signature, SigningKey, VerifyingKey,
     },
-    elliptic_curve::{sec1::ToEncodedPoint, subtle::ConstantTimeEq},
+    elliptic_curve::{sec1::ToSec1Point, subtle::ConstantTimeEq, Generate},
     SecretKey,
 };
 use wedpr_l_libsm::sm2::signature::SigCtx;
@@ -53,7 +53,7 @@ fn sign_with_key(
     // Mix fresh OS randomness into RFC6979. This also avoids deterministic
     // nonce reuse with another protocol if a caller incorrectly reuses a key.
     let signature: Sm2Signature = key
-        .try_sign_with_rng(&mut OsRng, message)
+        .try_sign_with_rng(&mut SysRng, message)
         .map_err(|_| WedprError::FormatError)?;
     Ok(signature.to_bytes().to_vec())
 }
@@ -94,11 +94,11 @@ impl Signature for WedprSm2p256v1 {
 
     fn generate_keypair(&self) -> (Vec<u8>, Vec<u8>) {
         loop {
-            let secret = SecretKey::random(&mut OsRng);
+            let secret = SecretKey::generate_from_rng(&mut rand::rng());
             if let Ok(key) = checked_signing_key(&secret.to_bytes()) {
                 return (
                     key.verifying_key()
-                        .to_encoded_point(false)
+                        .to_sec1_point(false)
                         .as_bytes()
                         .to_vec(),
                     key.to_bytes().to_vec(),
@@ -120,8 +120,8 @@ impl WedprSm2p256v1 {
         let provided =
             VerifyingKey::from_sec1_bytes(SM2_STANDARD_ID, public_key.as_ref())
                 .map_err(|_| WedprError::FormatError)?;
-        if key.verifying_key().to_encoded_point(false)
-            != provided.to_encoded_point(false)
+        if key.verifying_key().to_sec1_point(false)
+            != provided.to_sec1_point(false)
         {
             return Err(WedprError::FormatError);
         }
@@ -134,11 +134,7 @@ impl WedprSm2p256v1 {
         private_key: &T,
     ) -> Result<Vec<u8>, WedprError> {
         let key = checked_signing_key(private_key.as_ref())?;
-        Ok(key
-            .verifying_key()
-            .to_encoded_point(false)
-            .as_bytes()
-            .to_vec())
+        Ok(key.verifying_key().to_sec1_point(false).as_bytes().to_vec())
     }
 
     /// Computes GM standard e value, which is the hash of message and ID, EC

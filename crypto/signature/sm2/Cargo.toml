@@ -9,8 +9,10 @@ description = "Library of WeDPR shared Siganture Function implement by sm2."
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-sm2 = { version = "=0.13.3", default-features = false, features = ["dsa", "std"] }
-rand = "0.8"
+sm2 = { version = "=0.14.0", default-features = false, features = ["dsa", "std"] }
+# Require the upstream timing fixes even when integrated into another lockfile.
+crypto-bigint = { version = "0.7.6", default-features = false }
+rand = "0.10"
 lazy_static = "1.4.0"
 wedpr_l_libsm = "0.3.5"
 wedpr_l_macros = "1.0.0"

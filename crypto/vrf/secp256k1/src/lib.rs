@@ -9,7 +9,7 @@
 
 #![forbid(unsafe_code)]
 
-use k256::{elliptic_curve::sec1::ToEncodedPoint, PublicKey, SecretKey};
+use secp256k1::{PublicKey, Secp256k1, SecretKey};
 use wedpr_l_utils::{error::WedprError, traits::Vrf};
 
 /// Disabled legacy VRF. Public fields are retained for source compatibility;
@@ -26,7 +26,7 @@ fn parse_public_key(bytes: &[u8]) -> Result<PublicKey, WedprError> {
     if bytes.len() != 33 || !matches!(bytes[0], 2 | 3) {
         return Err(WedprError::FormatError);
     }
-    PublicKey::from_sec1_bytes(bytes).map_err(|_| WedprError::FormatError)
+    PublicKey::from_slice(bytes).map_err(|_| WedprError::FormatError)
 }
 
 fn parse_secret_key(bytes: &[u8]) -> Result<SecretKey, WedprError> {
@@ -70,7 +70,9 @@ impl Vrf for WedprSecp256k1Vrf {
     fn derive_public_key<T: ?Sized + AsRef<[u8]>>(private_key: &T) -> Vec<u8> {
         match parse_secret_key(private_key.as_ref()) {
             Ok(key) => {
-                key.public_key().to_encoded_point(true).as_bytes().to_vec()
+                PublicKey::from_secret_key(&Secp256k1::signing_only(), &key)
+                    .serialize()
+                    .to_vec()
             },
             Err(_) => Vec::new(),
         }
