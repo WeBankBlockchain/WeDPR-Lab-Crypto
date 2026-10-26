@@ -2,8 +2,5 @@
 
 //! Oblivious transfer (OT) functions.
 
-#[macro_use]
-extern crate lazy_static;
-
 pub mod ot_kv;
 pub mod ot_message;

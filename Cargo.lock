@@ -827,8 +827,8 @@ dependencies = [
  "wedpr_ffi_c_common 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_ffi_common 1.1.0",
  "wedpr_ffi_macros 1.1.0",
- "wedpr_l_crypto_block_cipher_aes 1.0.0",
- "wedpr_l_crypto_block_cipher_sm4 1.0.0",
+ "wedpr_l_crypto_block_cipher_aes",
+ "wedpr_l_crypto_block_cipher_sm4",
  "wedpr_l_crypto_ecies_secp256k1",
  "wedpr_l_crypto_hash_blake2b 1.0.0",
  "wedpr_l_crypto_hash_keccak256 1.1.0",
@@ -973,6 +973,15 @@ checksum = "01706d578d5c281058480e673ae4086a9f4710d8df1ad80a5b03e39ece5f886b"
 dependencies = [
  "digest 0.9.0",
  "hmac 0.11.0",
+]
+
+[[package]]
+name = "hkdf"
+version = "0.12.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b5f8eb2ad728638ea2c7d47a21db23b7b58a72ed6a38256b8a1849f15fbbdf7"
+dependencies = [
+ "hmac 0.12.1",
 ]
 
 [[package]]
@@ -2227,7 +2236,7 @@ version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "34253edfd20c35c2fa718091e99faa8dd0a001f5960a7e306eb8afc57987cc2b"
 dependencies = [
- "hkdf",
+ "hkdf 0.11.0",
  "libsecp256k1",
  "openssl",
  "rand 0.7.3",
@@ -2263,8 +2272,8 @@ dependencies = [
  "wedpr_ffi_c_common 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_ffi_common 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_ffi_macros 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_block_cipher_aes 1.0.0",
- "wedpr_l_crypto_block_cipher_sm4 1.0.0",
+ "wedpr_l_crypto_block_cipher_aes",
+ "wedpr_l_crypto_block_cipher_sm4",
  "wedpr_l_crypto_ecies_secp256k1",
  "wedpr_l_crypto_hash_blake2b 1.0.0",
  "wedpr_l_crypto_hash_keccak256 1.1.0",
@@ -2347,8 +2356,8 @@ dependencies = [
  "openssl-sys",
  "wedpr_ffi_common 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_ffi_macros 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_block_cipher_aes 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_block_cipher_sm4 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wedpr_l_crypto_block_cipher_aes",
+ "wedpr_l_crypto_block_cipher_sm4",
  "wedpr_l_crypto_ecies_secp256k1",
  "wedpr_l_crypto_hash_blake2b 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -2372,8 +2381,8 @@ dependencies = [
  "openssl-sys",
  "wedpr_ffi_common 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_ffi_macros 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_crypto_block_cipher_aes 1.0.0",
- "wedpr_l_crypto_block_cipher_sm4 1.0.0",
+ "wedpr_l_crypto_block_cipher_aes",
+ "wedpr_l_crypto_block_cipher_sm4",
  "wedpr_l_crypto_ecies_secp256k1",
  "wedpr_l_crypto_hash_blake2b 1.0.0",
  "wedpr_l_crypto_hash_keccak256 1.1.0",
@@ -2468,49 +2477,37 @@ dependencies = [
 ]
 
 [[package]]
-name = "wedpr_l_crypto_block_cipher_aes"
+name = "wedpr_l_crypto_authenticated_cbc"
 version = "1.0.0"
 dependencies = [
- "aes",
  "block-modes",
- "rand 0.8.5",
- "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "hkdf 0.12.4",
+ "hmac 0.12.1",
+ "sha2 0.10.8",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "zeroize",
 ]
 
 [[package]]
 name = "wedpr_l_crypto_block_cipher_aes"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a95a60c1f481a6d8303dd052437738720676de98c3771691df67d07e2c1115f2"
+version = "2.0.0"
 dependencies = [
  "aes",
  "block-modes",
  "rand 0.8.5",
+ "wedpr_l_crypto_authenticated_cbc",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
 name = "wedpr_l_crypto_block_cipher_sm4"
-version = "1.0.0"
+version = "2.0.0"
 dependencies = [
  "block-modes",
  "rand 0.8.5",
  "sm4",
- "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
-name = "wedpr_l_crypto_block_cipher_sm4"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b2cb1235aa887c4f65d160d33fab200382edfd596732b86b50334ebe444abdbd"
-dependencies = [
- "block-modes",
- "rand 0.8.5",
- "sm4",
+ "wedpr_l_crypto_authenticated_cbc",
  "wedpr_l_macros 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -2635,17 +2632,18 @@ dependencies = [
 
 [[package]]
 name = "wedpr_l_crypto_ot_base_ot"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "criterion",
  "curve25519-dalek 1.2.6",
- "lazy_static 1.5.0",
  "rand 0.6.5",
  "rand_core 0.5.1",
  "sha3 0.8.2",
+ "wedpr_l_crypto_block_cipher_aes",
  "wedpr_l_crypto_hash_sha3 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wedpr_l_crypto_zkp_utils 1.3.0",
  "wedpr_l_utils 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "zeroize",
 ]
 
 [[package]]

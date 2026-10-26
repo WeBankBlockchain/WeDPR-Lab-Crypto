@@ -1,6 +1,6 @@
 [package]
 name = "wedpr_l_crypto_block_cipher_aes"
-version = "1.0.0"
+version = "2.0.0"
 authors = [ "WeDPR <wedpr@webank.com>" ]
 edition = "2018"
 license = "Apache-2.0"
@@ -11,6 +11,7 @@ description = "Library of WeDPR shared Block Cipher Function implement by AES."
 [dependencies]
 aes = "0.6.0"
 block-modes = "0.7.0"
+wedpr_l_crypto_authenticated_cbc = { version = "1.0.0", path = "../authenticated_cbc" }
 rand = "0.8.3"
 wedpr_l_macros = "1.0.0"
 wedpr_l_utils = "1.1.0"

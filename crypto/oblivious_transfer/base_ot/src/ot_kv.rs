@@ -1,246 +1,266 @@
 // Copyright 2020 WeDPR Lab Project Authors. Licensed under Apache-2.0.
 
-//! KV oblivious transfer (OT) functions.
+//! Version 2 KV OT: independent queries and authenticated encrypted messages.
+//! This composes independent semi-honest 1-out-of-n queries; it does not claim
+//! malicious-party security. Choice count and padded message lengths are public.
+//! The sender must enforce application query limits.
 
-use curve25519_dalek::{
-    ristretto::RistrettoPoint, scalar::Scalar, traits::MultiscalarMul,
-};
+use curve25519_dalek::{ristretto::RistrettoPoint, scalar::Scalar};
 use sha3::Sha3_512;
+use std::collections::HashSet;
+use wedpr_l_crypto_block_cipher_aes::WedprBlockCipherAes256;
 use wedpr_l_crypto_hash_sha3::WedprSha3_256;
 use wedpr_l_crypto_zkp_utils::{
     get_random_scalar, point_to_bytes, BASEPOINT_G1,
 };
-use wedpr_l_utils::{error::WedprError, traits::Hash};
+use wedpr_l_utils::{
+    error::WedprError,
+    traits::{BlockCipher, Hash},
+};
+use zeroize::Zeroizing;
 
-lazy_static! {
-    static ref HASH_SHA3_256: WedprSha3_256 = WedprSha3_256::default();
-}
+/// Protocol version. Version 1 queries and responses must not be accepted.
+pub const OT_KV_VERSION: u8 = 2;
 
-// Receiver's secret to decrypt the chosen messages during k-out-of-n OT.
-#[derive(Default, Debug, Clone)]
+/// Private receiver state. Never send it to the sender or log it.
+#[derive(Default, Clone)]
 pub struct ReceiverSecretKOutOfN {
-    pub blinding_b: Scalar,
+    blinding_b: Vec<Scalar>,
+    commitment: ReceiverCommitmentKOutOfN,
 }
 
-// Receiver's commitment for the chosen messages during k-out-of-n OT.
+/// One independently masked choice.
 #[derive(Default, Debug, Clone)]
-pub struct ReceiverCommitmentKOutOfN {
+pub struct ReceiverChoiceCommitment {
     pub point_x: RistrettoPoint,
     pub point_y: RistrettoPoint,
-    pub point_z: Vec<RistrettoPoint>,
+    pub point_z: RistrettoPoint,
 }
 
-// Sender's ciphertext item for a single encrypted message of k-out-of-n OT.
+/// Public query. Version 2 replaces the old shared-mask query layout.
+#[derive(Default, Debug, Clone)]
+pub struct ReceiverCommitmentKOutOfN {
+    pub version: u8,
+    pub choices: Vec<ReceiverChoiceCommitment>,
+}
+
+/// Authenticated encryption of a message for one receiver choice.
+#[derive(Default, Debug, Clone)]
+pub struct OtCiphertextChoice {
+    pub key_basepoint: RistrettoPoint,
+    pub iv: Vec<u8>,
+    pub encrypted_message: Vec<u8>,
+}
+
+/// One database row. Contains no public hash or verifier of its plaintext.
 #[derive(Default, Debug, Clone)]
 pub struct OtCiphertextItemKOutOfN {
-    pub fingerprint: Vec<u8>,
-    pub key_basepoint: RistrettoPoint,
-    pub encrypted_message: Vec<Vec<u8>>,
+    pub version: u8,
+    pub encrypted_choices: Vec<OtCiphertextChoice>,
 }
 
-/// Implements a k-out-of-n KV OT instance.
-/// Sender has n KV pairs, where each pair is (id, message),
-/// k-out-of-n KV OT can help receiver to get exactly k messages from k matching
-/// ids without disclosing receiver's actual choice and the rest of sender's
-/// messages.
+/// k-out-of-n KV OT for unique sender IDs.
 #[derive(Default, Debug, Clone)]
 pub struct OtKvKOutOfN {}
 
+fn nonzero_scalar() -> Scalar {
+    loop {
+        let scalar = get_random_scalar();
+        if scalar != Scalar::zero() {
+            return scalar;
+        }
+    }
+}
+
+// Hash the secret DH point with a fixed-length public transcript.
+// Indices prevent reordering, copying rows and swapping choice slots.
+fn message_key(
+    shared: &RistrettoPoint,
+    choice: &ReceiverChoiceCommitment,
+    key_basepoint: &RistrettoPoint,
+    item_index: usize,
+    choice_index: usize,
+) -> Zeroizing<Vec<u8>> {
+    let mut input = Zeroizing::new(Vec::new());
+    input.extend_from_slice(b"WeDPR/KV-OT/v2/message-key");
+    input.extend_from_slice(&(item_index as u64).to_be_bytes());
+    input.extend_from_slice(&(choice_index as u64).to_be_bytes());
+    for point in &[
+        choice.point_x,
+        choice.point_y,
+        choice.point_z,
+        *key_basepoint,
+        *shared,
+    ] {
+        input.extend_from_slice(&point_to_bytes(point));
+    }
+    Zeroizing::new(WedprSha3_256::default().hash(&input[..]))
+}
+
 impl OtKvKOutOfN {
-    /// Generates an OT query based on receiver's choice of ids from
-    /// choice_list. It returns ReceiverSecret and ReceiverCommitment.
-    /// ReceiverSecret will be later used to decrypt the chosen message
-    /// which should by kept secretly by receiver. ReceiverCommitment is the
-    /// actual query to be sent to sender for generating OT response.
+    /// Generate independent a and b for EVERY choice. Reusing a*b exposed
+    /// H(id_j)-H(id_i) through public point differences.
     pub fn receiver_init(
         &self,
         choice_list: &Vec<Vec<u8>>,
     ) -> (ReceiverSecretKOutOfN, ReceiverCommitmentKOutOfN) {
-        let blinding_a = get_random_scalar();
-        let blinding_b = get_random_scalar();
-        let c_id = blinding_a * blinding_b;
-        let point_x =
-            RistrettoPoint::multiscalar_mul(&[blinding_a], &[*BASEPOINT_G1]);
-        let point_y =
-            RistrettoPoint::multiscalar_mul(&[blinding_b], &[*BASEPOINT_G1]);
-        let mut point_z_list = Vec::new();
+        let mut blindings = Vec::with_capacity(choice_list.len());
+        let mut choices = Vec::with_capacity(choice_list.len());
         for id in choice_list {
+            let blinding_a = nonzero_scalar();
+            let blinding_b = nonzero_scalar();
             let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
-            point_z_list
-                .push(RistrettoPoint::multiscalar_mul(&[c_id - id_scalar], &[
-                    *BASEPOINT_G1,
-                ]));
+            blindings.push(blinding_b);
+            choices.push(ReceiverChoiceCommitment {
+                point_x: *BASEPOINT_G1 * blinding_a,
+                point_y: *BASEPOINT_G1 * blinding_b,
+                point_z: *BASEPOINT_G1 * (blinding_a * blinding_b - id_scalar),
+            });
         }
+        let commitment = ReceiverCommitmentKOutOfN {
+            version: OT_KV_VERSION,
+            choices,
+        };
         (
             ReceiverSecretKOutOfN {
-                blinding_b: blinding_b,
+                blinding_b: blindings,
+                commitment: commitment.clone(),
             },
-            ReceiverCommitmentKOutOfN {
-                point_x: point_x,
-                point_y: point_y,
-                point_z: point_z_list,
-            },
+            commitment,
         )
     }
 
-    /// Computes OT ciphertexts based on the ReceiverCommitment from receiver.
-    /// It returns ciphertext OT response for all available KV pairs. It will
-    /// raise error if a plaintext message is too long.
+    /// Encrypt each row independently for each query choice. Reject malformed
+    /// queries before accessing rows or producing any outputs.
     pub fn sender_init(
         &self,
         id_list: &Vec<Vec<u8>>,
         message_list: &Vec<Vec<u8>>,
         receiver_commitment: &ReceiverCommitmentKOutOfN,
     ) -> Result<Vec<OtCiphertextItemKOutOfN>, WedprError> {
-        let mut sender_ciphertexts = Vec::new();
-        let mut i = 0;
-        for id in id_list {
-            let blinding_r = get_random_scalar();
-            let blinding_s = get_random_scalar();
-            let key_basepoint =
-                RistrettoPoint::multiscalar_mul(&[blinding_s, blinding_r], &[
-                    receiver_commitment.point_x,
-                    *BASEPOINT_G1,
-                ]);
-            let message = &message_list[i];
-            let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
-            i += 1;
-            let mut ciphertext = OtCiphertextItemKOutOfN {
-                fingerprint: Vec::new(),
-                key_basepoint: RistrettoPoint::default(),
-                encrypted_message: Vec::new(),
-            };
-            ciphertext.fingerprint = HASH_SHA3_256.hash(&message);
-            ciphertext.key_basepoint = key_basepoint;
-
-            for k_point_z in &receiver_commitment.point_z {
-                // TODO: Extract common OT computation to utility.
-                let base_key_point = &RistrettoPoint::multiscalar_mul(
-                    &[blinding_s, blinding_s * id_scalar, blinding_r],
-                    &[*k_point_z, *BASEPOINT_G1, receiver_commitment.point_y],
-                );
-                let bytes_key = point_to_bytes(&base_key_point);
-                // TODO: Add KDF function to extend the key size for long
-                // message.
-                if bytes_key.len() < message.len() {
-                    return Err(WedprError::ArgumentError);
-                }
-                let encrypted_message: Vec<u8> = message
-                    .iter()
-                    .zip(bytes_key.iter())
-                    .map(|(&x1, &x2)| x1 ^ x2)
-                    .collect();
-                ciphertext.encrypted_message.push(encrypted_message);
-            }
-            sender_ciphertexts.push(ciphertext)
+        let choices = &receiver_commitment.choices;
+        let identity = RistrettoPoint::default();
+        if receiver_commitment.version != OT_KV_VERSION
+            || id_list.is_empty()
+            || id_list.len() != message_list.len()
+            || choices.is_empty()
+            || choices.len() > id_list.len()
+            || id_list.iter().collect::<HashSet<_>>().len() != id_list.len()
+            || choices.iter().any(|c| {
+                c.point_x == identity
+                    || c.point_y == identity
+                    || c.point_z == identity
+            })
+        {
+            return Err(WedprError::ArgumentError);
         }
-        Ok(sender_ciphertexts)
+        let aes = WedprBlockCipherAes256::default();
+        let mut result = Vec::with_capacity(id_list.len());
+        for (item_index, (id, message)) in
+            id_list.iter().zip(message_list).enumerate()
+        {
+            let id_scalar = Scalar::hash_from_bytes::<Sha3_512>(id);
+            let mut encrypted_choices = Vec::with_capacity(choices.len());
+            for (choice_index, choice) in choices.iter().enumerate() {
+                let (key_basepoint, shared) = loop {
+                    let r = nonzero_scalar();
+                    let s = nonzero_scalar();
+                    let key_basepoint = choice.point_x * s + *BASEPOINT_G1 * r;
+                    let shared = (choice.point_z + *BASEPOINT_G1 * id_scalar)
+                        * s
+                        + choice.point_y * r;
+                    if key_basepoint != identity && shared != identity {
+                        break (key_basepoint, shared);
+                    }
+                };
+                let key = message_key(
+                    &shared,
+                    choice,
+                    &key_basepoint,
+                    item_index,
+                    choice_index,
+                );
+                let iv = aes.generate_iv();
+                let encrypted_message =
+                    aes.encrypt(message.as_slice(), &key[..], iv.as_slice())?;
+                encrypted_choices.push(OtCiphertextChoice {
+                    key_basepoint,
+                    iv,
+                    encrypted_message,
+                });
+            }
+            result.push(OtCiphertextItemKOutOfN {
+                version: OT_KV_VERSION,
+                encrypted_choices,
+            });
+        }
+        Ok(result)
     }
 
-    /// Decrypts the ciphertext OT response based on receiver's choice and
-    /// ReceiverSecret. Receiver can only decrypt exactly choice_count OT
-    /// messages. It returns the list of decrypted message bytes.
+    /// Recover ALL choices in database order. Only a valid keyed tag identifies
+    /// a chosen message. Keep failures local to avoid selective-failure signals.
     pub fn receiver_decrypt(
         &self,
         receiver_secret: &ReceiverSecretKOutOfN,
         sender_ciphertexts: &Vec<OtCiphertextItemKOutOfN>,
         choice_count: usize,
     ) -> Result<Vec<Vec<u8>>, WedprError> {
-        let mut result: Vec<Vec<u8>> = vec![];
-        for ciphertext in sender_ciphertexts {
-            // Get all messages already.
-            if result.len() == choice_count {
-                break;
-            }
-            let bytes_key = point_to_bytes(&RistrettoPoint::multiscalar_mul(
-                &[receiver_secret.blinding_b],
-                &[ciphertext.key_basepoint],
-            ));
-            // TODO: Add KDF function to extend the key size for long message.
-            for encrypted_message in &ciphertext.encrypted_message {
-                let decrypted_message: Vec<u8> = encrypted_message
-                    .iter()
-                    .zip(bytes_key.iter())
-                    .map(|(&x1, &x2)| x1 ^ x2)
-                    .collect();
-                if &HASH_SHA3_256.hash(&decrypted_message)
-                    == &ciphertext.fingerprint
-                {
-                    result.push(decrypted_message);
-                    break;
+        let choices = &receiver_secret.commitment.choices;
+        if receiver_secret.commitment.version != OT_KV_VERSION
+            || choice_count == 0
+            || choice_count != choices.len()
+            || choice_count != receiver_secret.blinding_b.len()
+            || sender_ciphertexts.len() < choice_count
+            || sender_ciphertexts.iter().any(|item| {
+                item.version != OT_KV_VERSION
+                    || item.encrypted_choices.len() != choice_count
+                    || item.encrypted_choices.iter().any(|entry| {
+                        entry.key_basepoint == RistrettoPoint::default()
+                            || entry.iv.len() != 16
+                    })
+            })
+        {
+            return Err(WedprError::ArgumentError);
+        }
+        let aes = WedprBlockCipherAes256::default();
+        let mut result = Vec::new();
+        let mut recovered = vec![false; choice_count];
+        for (item_index, item) in sender_ciphertexts.iter().enumerate() {
+            let mut plaintext = None;
+            for (choice_index, entry) in
+                item.encrypted_choices.iter().enumerate()
+            {
+                let shared = entry.key_basepoint
+                    * receiver_secret.blinding_b[choice_index];
+                let key = message_key(
+                    &shared,
+                    &choices[choice_index],
+                    &entry.key_basepoint,
+                    item_index,
+                    choice_index,
+                );
+                if let Ok(message) = aes.decrypt(
+                    entry.encrypted_message.as_slice(),
+                    &key[..],
+                    entry.iv.as_slice(),
+                ) {
+                    if recovered[choice_index] {
+                        return Err(WedprError::FormatError);
+                    }
+                    recovered[choice_index] = true;
+                    plaintext = Some(message);
                 }
             }
+            if let Some(message) = plaintext {
+                result.push(message);
+            }
+        }
+        if result.len() != choice_count || recovered.iter().any(|done| !done) {
+            return Err(WedprError::FormatError);
         }
         Ok(result)
     }
 }
 
 #[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_ot_kv_k_out_of_n() {
-        let id0 = "10-11";
-        let id1 = "10#12";
-        let id2 = "20-x3";
-        let id3 = "30-w*";
-
-        let message0 = "wedpr test 0";
-        let message1 = "wedpr test 1";
-        let message2 = "wedpr test 2";
-        let message3 = "wedpr test 3";
-
-        // Pick values of id0 and id2.
-        let choice_list =
-            vec![id0.as_bytes().to_vec(), id2.as_bytes().to_vec()];
-        let id_list = vec![
-            id0.as_bytes().to_vec(),
-            id1.as_bytes().to_vec(),
-            id2.as_bytes().to_vec(),
-            id3.as_bytes().to_vec(),
-        ];
-        let message_list = vec![
-            message0.as_bytes().to_vec(),
-            message1.as_bytes().to_vec(),
-            message2.as_bytes().to_vec(),
-            message3.as_bytes().to_vec(),
-        ];
-        let ot = OtKvKOutOfN::default();
-
-        let (receiver_secret, receiver_commitment) =
-            ot.receiver_init(&choice_list);
-        let sender_ciphertexts = ot
-            .sender_init(&id_list, &message_list, &receiver_commitment)
-            .unwrap();
-        let message = ot
-            .receiver_decrypt(
-                &receiver_secret,
-                &sender_ciphertexts,
-                choice_list.len(),
-            )
-            .unwrap();
-        assert_eq!(
-            vec![message0.as_bytes().to_vec(), message2.as_bytes().to_vec()],
-            message
-        );
-
-        // Test error condition when an input message is too long.
-        let too_long_message = "message123message123message123message123message123message123message123message123";
-        let too_long_data_id_list =
-            vec![id0.as_bytes().to_vec(), id1.as_bytes().to_vec()];
-        let tool_long_data_message_list = vec![
-            message0.as_bytes().to_vec(),
-            too_long_message.as_bytes().to_vec(),
-        ];
-        assert_eq!(
-            ot.sender_init(
-                &too_long_data_id_list,
-                &tool_long_data_message_list,
-                &receiver_commitment
-            )
-            .unwrap_err(),
-            WedprError::ArgumentError
-        );
-    }
-}
+mod tests;
