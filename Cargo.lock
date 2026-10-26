@@ -2925,6 +2925,7 @@ version = "1.4.0"
 dependencies = [
  "k256",
  "rand 0.6.5",
+ "rfc6979",
  "serde",
  "sha2 0.10.8",
  "wedpr_l_crypto_hash_keccak256 1.1.0 (registry+https://github.com/rust-lang/crates.io-index)",
